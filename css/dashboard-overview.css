@@ -1,0 +1,992 @@
+/* =====================================================
+   GymLog — Dashboard Overview styles (prefix: dv-)
+   Mobile-first، RTL، رنگ فقط برای وضعیت (سبز: سقف هدف،
+   آبی: داخل محدوده، کهربایی: پایین‌تر/ناقص)
+===================================================== */
+
+.dv-root {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dv-slot {
+    min-width: 0;
+}
+
+.dv-split,
+.dv-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dv-split > .dv-slot,
+.dv-stack > .dv-slot {
+    width: 100%;
+}
+
+@media (min-width: 1024px) {
+    .dv-split {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr;
+        align-items: start;
+    }
+}
+
+/* ---------- Card ---------- */
+.dv-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.dv-card-head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.dv-card-head p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.7;
+}
+
+.dv-card-head {
+    margin-bottom: 14px;
+}
+
+.dv-empty {
+    padding: 22px 10px;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+
+.dv-note {
+    margin: 10px 0 0;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #9ca3af;
+}
+
+.dv-num {
+    direction: ltr;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+}
+
+.dv-muted {
+    color: #9ca3af;
+}
+
+/* ---------- KPIs ---------- */
+.dv-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 900px) {
+    .dv-kpis {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+}
+
+.dv-kpi {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.dv-kpi-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dv-kpi-val {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #111827;
+}
+
+.dv-kpi-val-sm {
+    font-size: 20px;
+    padding: 3px 0;
+}
+
+.dv-kpi-sub {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+
+/* ---------- Progression ---------- */
+.dv-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.dv-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #6b7280;
+    min-width: 0;
+}
+
+.dv-filters .dv-filter-grow {
+    grid-column: 1 / -1;
+}
+
+.dv-filters select {
+    height: 40px;
+    font-size: 13px;
+}
+
+@media (min-width: 900px) {
+    .dv-filters {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .dv-filters label {
+        flex: 0 0 auto;
+        min-width: 140px;
+    }
+
+    .dv-filters .dv-filter-grow {
+        flex: 1 1 260px;
+    }
+}
+
+.dv-chart {
+    position: relative;
+    color: #374151;
+}
+
+.dv-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    direction: ltr;
+    overflow: visible;
+}
+
+.dv-dot {
+    cursor: pointer;
+    outline: none;
+}
+
+.dv-dot:focus-visible {
+    stroke: #111827;
+}
+
+.dv-tip {
+    position: absolute;
+    z-index: 5;
+    transform: translate(-50%, calc(-100% - 12px));
+    min-width: 190px;
+    max-width: 260px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 11.5px;
+    line-height: 1.8;
+    white-space: pre-line;
+    text-align: right;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.dv-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 6px 0 12px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.dv-legend i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 5px;
+    border-radius: 50%;
+}
+
+.dv-observed-title {
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+}
+
+.dv-observed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.dv-observed > div {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+}
+
+.dv-observed dt {
+    font-size: 10.5px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+}
+
+.dv-observed dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dv-interp {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 12.5px;
+    line-height: 2;
+}
+
+.dv-interp b {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    font-size: 10.5px;
+    line-height: 1.8;
+}
+
+.dv-interp-none,
+.dv-interp-limited {
+    background: #f9fafb;
+    color: #4b5563;
+}
+
+.dv-interp-none b,
+.dv-interp-limited b {
+    background: #e5e7eb;
+}
+
+/* ---------- Compare ---------- */
+.dv-summary {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.dv-cmp-list,
+.dv-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.dv-cmp-row,
+.dv-list li {
+    padding: 11px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dv-cmp-row:last-child,
+.dv-list li:last-child {
+    border-bottom: none;
+}
+
+.dv-cmp-top,
+.dv-list-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dv-cmp-top strong,
+.dv-list-main strong {
+    font-size: 13.5px;
+    color: #1f2937;
+}
+
+.dv-cmp-vals {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    margin-top: 5px;
+}
+
+.dv-cmp-prev {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.dv-arrow {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.dv-cmp-cur {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.dv-cmp-meta,
+.dv-list-sub {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.8;
+}
+
+.dv-list-sub {
+    margin-top: 3px;
+}
+
+.dv-caveat {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #b45309;
+}
+
+.dv-chip,
+.dv-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.dv-chip-up,
+.dv-badge-ok,
+.dv-badge-ceiling {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dv-chip-same {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.dv-chip-mixed,
+.dv-chip-lower {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.dv-badge-load {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.dv-badge-rep {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+/* ---------- Dark mode ---------- */
+body.dark-mode .dv-card,
+body.dark-mode .dv-kpi {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .dv-card-head h3,
+body.dark-mode .dv-kpi-val,
+body.dark-mode .dv-observed dd,
+body.dark-mode .dv-cmp-cur,
+body.dark-mode .dv-cmp-top strong,
+body.dark-mode .dv-list-main strong {
+    color: #f8fafc;
+}
+
+body.dark-mode .dv-card-head p,
+body.dark-mode .dv-kpi-label,
+body.dark-mode .dv-filters label,
+body.dark-mode .dv-legend,
+body.dark-mode .dv-summary,
+body.dark-mode .dv-observed-title {
+    color: #94a3b8;
+}
+
+body.dark-mode .dv-chart {
+    color: #e2e8f0;
+}
+
+body.dark-mode .dv-empty,
+body.dark-mode .dv-observed > div,
+body.dark-mode .dv-interp-none,
+body.dark-mode .dv-interp-limited {
+    background: #0f172a;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .dv-interp {
+    background: #172554;
+    color: #bfdbfe;
+}
+
+body.dark-mode .dv-interp b {
+    background: #1e3a8a;
+}
+
+body.dark-mode .dv-cmp-row,
+body.dark-mode .dv-list li {
+    border-color: #334155;
+}
+
+body.dark-mode .dv-chip-up,
+body.dark-mode .dv-badge-ok,
+body.dark-mode .dv-badge-ceiling {
+    background: #052e16;
+    color: #86efac;
+}
+
+body.dark-mode .dv-chip-same {
+    background: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .dv-chip-mixed,
+body.dark-mode .dv-chip-lower {
+    background: #451a03;
+    color: #fde68a;
+}
+
+body.dark-mode .dv-badge-load,
+body.dark-mode .dv-badge-rep {
+    background: #172554;
+    color: #bfdbfe;
+}
+
+body.dark-mode .dv-tip {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+
+/* =====================================================
+   صفحه‌ی خوش‌آمدگویی (داشبورد بدون برنامه)
+   موبایل = ظاهر قبلی، دسکتاپ = طرح دو ستونه
+===================================================== */
+.dv-welcome {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 16px;
+}
+
+.dv-welcome-hero {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.dv-welcome-hero h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #111827;
+}
+
+.dv-welcome-hero p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #6b7280;
+}
+
+.dv-welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.dv-welcome-actions .primary-btn,
+.dv-welcome-actions .secondary-btn {
+    width: 100%;
+}
+
+.dv-welcome-default {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.dv-welcome-default small {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+
+.dv-welcome-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dv-welcome-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+
+.dv-welcome-icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eff6ff;
+    font-size: 18px;
+}
+
+.dv-welcome-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.dv-welcome-step strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+
+.dv-welcome-desc {
+    display: block;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+
+/* دسکتاپ: ستون راست = معرفی و اقدام، ستون چپ = مسیر سه‌مرحله‌ای */
+@media (min-width: 1024px) {
+    .dv-welcome {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 0;
+        padding: 0;
+        min-height: 460px;
+        overflow: hidden;
+    }
+
+    .dv-welcome-hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: right;
+        margin: 0;
+        padding: 56px 56px;
+        background: #eff6ff;
+        border-left: 1px solid #dbeafe;
+    }
+
+    .dv-welcome-hero h2 {
+        font-size: 34px;
+        line-height: 1.4;
+        font-weight: 800;
+        color: #1e3a8a;
+    }
+
+    .dv-welcome-hero p {
+        max-width: 420px;
+        margin-top: 4px;
+        font-size: 15px;
+        line-height: 2;
+        color: #475569;
+    }
+
+    .dv-welcome-actions {
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 28px;
+    }
+
+    .dv-welcome-actions .primary-btn,
+    .dv-welcome-actions .secondary-btn {
+        width: auto;
+        min-width: 210px;
+        min-height: 50px;
+        font-size: 14.5px;
+    }
+
+    .dv-welcome-default {
+        align-items: flex-start;
+        text-align: right;
+        max-width: 240px;
+    }
+
+    .dv-welcome-steps {
+        justify-content: center;
+        gap: 0;
+        padding: 40px 48px;
+        position: relative;
+    }
+
+    .dv-welcome-step {
+        position: relative;
+        padding: 0 0 34px;
+        gap: 18px;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .dv-welcome-step:last-child {
+        padding-bottom: 0;
+    }
+
+    /* خط اتصال بین مراحل: این محتوا واقعاً یک ترتیب است */
+    .dv-welcome-step:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        right: 25px;
+        top: 52px;
+        bottom: 2px;
+        width: 2px;
+        background: #dbeafe;
+    }
+
+    .dv-welcome-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        border: 2px solid #bfdbfe;
+        background: #ffffff;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dv-welcome-label {
+        font-size: 12px;
+    }
+
+    .dv-welcome-step strong {
+        font-size: 16px;
+    }
+
+    .dv-welcome-desc {
+        font-size: 13px;
+        max-width: 340px;
+    }
+}
+
+body.dark-mode .dv-welcome {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .dv-welcome-hero h2,
+body.dark-mode .dv-welcome-step strong {
+    color: #f8fafc;
+}
+
+body.dark-mode .dv-welcome-hero p,
+body.dark-mode .dv-welcome-desc {
+    color: #94a3b8;
+}
+
+body.dark-mode .dv-welcome-default small {
+    color: #64748b;
+}
+
+body.dark-mode .dv-welcome-step {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .dv-welcome-icon {
+    background: #172554;
+}
+
+body.dark-mode .dv-welcome-label {
+    color: #93c5fd;
+}
+
+@media (min-width: 1024px) {
+    body.dark-mode .dv-welcome-hero {
+        background: #0f1b3d;
+        border-color: #1e3a8a;
+    }
+
+    body.dark-mode .dv-welcome-hero h2 {
+        color: #bfdbfe;
+    }
+
+    body.dark-mode .dv-welcome-step {
+        background: transparent;
+    }
+
+    body.dark-mode .dv-welcome-step:not(:last-child)::before {
+        background: #1e3a8a;
+    }
+
+    body.dark-mode .dv-welcome-icon {
+        background: #0f172a;
+        border-color: #1d4ed8;
+    }
+}
+
+/* =====================================================
+   بانک حرکات (نسخه دسکتاپ) — بدون رنگ inline، سازگار با دارک
+===================================================== */
+.dv-bank {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dv-bank-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dv-bank-group {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dv-bank-group h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.dv-bank-group h4 span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.dv-bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.dv-bank-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-height: 0;
+    padding: 12px;
+    text-align: right;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.dv-bank-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.dv-bank-item strong {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+
+.dv-bank-item span {
+    font-size: 11px;
+    color: #6b7280;
+    direction: ltr;
+}
+
+body.dark-mode .dv-bank-title {
+    color: #f8fafc;
+}
+
+body.dark-mode .dv-bank-group {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .dv-bank-group h4 {
+    color: #60a5fa;
+}
+
+body.dark-mode .dv-bank-group h4 span {
+    color: #94a3b8;
+}
+
+body.dark-mode .dv-bank-item {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .dv-bank-item:hover {
+    background: #172554;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .dv-bank-item strong {
+    color: #f1f5f9;
+}
+
+body.dark-mode .dv-bank-item span {
+    color: #94a3b8;
+}
+
+/* =====================================================
+   تاریخچه: جزئیات تمرین و نشان «آغاز دوره»
+===================================================== */
+.dv-start-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.dv-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.dv-detail-meta strong {
+    color: #111827;
+}
+
+.dv-detail-body {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.dv-detail-ex {
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.dv-detail-ex h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dv-detail-sets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px;
+}
+
+.dv-detail-set {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.dv-detail-set strong {
+    direction: ltr;
+    color: #111827;
+}
+
+body.dark-mode .dv-start-badge {
+    border-color: #1d4ed8;
+    background: #1e3a8a;
+    color: #bfdbfe;
+}
+
+body.dark-mode .dv-detail-meta {
+    color: #94a3b8;
+}
+
+body.dark-mode .dv-detail-meta strong,
+body.dark-mode .dv-detail-ex h4,
+body.dark-mode .dv-detail-set strong {
+    color: #f8fafc;
+}
+
+body.dark-mode .dv-detail-ex {
+    border-color: #334155;
+}
+
+body.dark-mode .dv-detail-set {
+    background: #0f172a;
+    color: #cbd5e1;
+}
+
+body.dark-mode .dash-detail-modal-overlay {
+    background: rgba(2, 6, 23, 0.75);
+}

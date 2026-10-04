@@ -12,6 +12,7 @@
     <meta property="og:type" content="website" />
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/dashboard-overview.css">
     <link rel="stylesheet" href="./css/report.css">
 </head>
 
@@ -128,48 +129,13 @@
                 <!-- Empty state -->
                 <section id="emptyProgramState" class="card onboarding" style="display: none;">
                     <div class="onboarding-hero">
-                        <h2>به GymLog خوش آمدید</h2>
-                        <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده.</p>
+                        <h2>هنوز برنامه‌ای بارگذاری نشده</h2>
+                        <p>برای شروع، برنامه‌ی تمرینی را از صفحه‌ی داشبورد بارگذاری کن.</p>
                     </div>
-
-                    <ol class="onboarding-steps">
-                        <li class="onboarding-step">
-                            <span class="onboarding-step-icon" aria-hidden="true">📋</span>
-                            <div class="onboarding-step-text">
-                                <span class="onboarding-step-label">۱ · برنامه تمرینی</span>
-                                <strong>برنامه تمرینی خودت را وارد کن</strong>
-                                <span class="onboarding-step-desc">برنامه‌ای که شامل جلسات و حرکات تمرینی است را در GymLog بارگذاری کن.</span>
-                            </div>
-                        </li>
-                        <li class="onboarding-step">
-                            <span class="onboarding-step-icon" aria-hidden="true">✍️</span>
-                            <div class="onboarding-step-text">
-                                <span class="onboarding-step-label">۲ · ثبت تمرین</span>
-                                <strong>هر ست را ثبت کن</strong>
-                                <span class="onboarding-step-desc">وزنه، تعداد تکرار و عملکردت را بعد از هر ست ثبت کن.</span>
-                            </div>
-                        </li>
-                        <li class="onboarding-step">
-                            <span class="onboarding-step-icon" aria-hidden="true">📈</span>
-                            <div class="onboarding-step-text">
-                                <span class="onboarding-step-label">۳ · مشاهده پیشرفت</span>
-                                <strong>پیشرفتت را دنبال کن</strong>
-                                <span class="onboarding-step-desc">عملکرد جلسات قبلی را ببین و تغییرات تمرینی خودت را دنبال کن.</span>
-                            </div>
-                        </li>
-                    </ol>
-
                     <div class="onboarding-actions">
-                        <button type="button" id="onboardingUploadBtn" class="primary-btn">
-                            بارگذاری برنامه تمرینی
+                        <button type="button" class="primary-btn" onclick="switchView('dashboard')">
+                            رفتن به داشبورد
                         </button>
-
-                        <div id="defaultProgramSuggestion" class="default-program-suggestion" style="display: none;">
-                            <button type="button" id="loadDefaultProgramBtn" class="secondary-btn">
-                                شروع با برنامه‌ی پیش‌فرض
-                            </button>
-                            <small>برای آشنایی سریع با محیط برنامه؛ بعداً می‌توانی برنامه‌ی خودت را اضافه کنی.</small>
-                        </div>
                     </div>
                 </section>
 
@@ -361,18 +327,6 @@
                     مشاهده
                 </button>
             </div>
-
-            <!-- Muscle group report -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>گزارش گروه‌های عضلانی</strong>
-                    <span>تحلیل حجم تمرین، تعادل عضلات و نمودار عنکبوتی (مستقیماً در داشبورد).</span>
-                </div>
-                <button type="button" class="secondary-btn setting-btn" onclick="closeSettingsPage(); switchView('dashboard'); setTimeout(() => { const el = document.getElementById('dashReportSection'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 150);">
-                    مشاهده در داشبورد
-                </button>
-            </div>
-
             <!-- App update -->
             <div class="setting-row">
                 <div class="setting-info">
@@ -448,6 +402,8 @@
 <script src="./js/storage.js"></script>
 <script src="./js/app.js"></script>
 <script src="./js/dashboard.js"></script>
+<script src="./js/dashboard-analytics.js"></script>
+<script src="./js/dashboard-overview.js"></script>
 
 <script>
     (function () {
