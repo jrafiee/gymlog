@@ -1,0 +1,1837 @@
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    margin: 0;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #f2f4f7;
+    color: #1f2937;
+    direction: rtl;
+}
+
+/* =========================
+   Container
+========================= */
+.container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 12px 12px 40px;
+}
+
+/* =========================
+   Header
+========================= */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+.page-header p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.settings-icon-btn {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.settings-icon-btn:hover {
+    background: #e5e7eb;
+}
+
+/* =========================
+   Buttons
+========================= */
+button,
+.secondary-btn {
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.primary-btn {
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+}
+
+.secondary-btn {
+    background: white;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.danger-btn {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* =========================
+   Cards
+========================= */
+.card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+/* =========================
+   Session selector
+========================= */
+.session-selector {
+    padding: 10px;
+}
+
+.selector-title {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 2px 4px 8px;
+}
+
+.session-buttons {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+}
+
+.session-buttons::-webkit-scrollbar {
+    height: 3px;
+}
+
+.session-btn {
+    flex: 1 0 96px;
+    scroll-snap-align: center;
+    min-height: 62px;
+    padding: 7px 4px;
+    border-radius: 9px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.session-btn strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.session-btn span {
+    display: block;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #6b7280;
+}
+
+.session-btn.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #1d4ed8;
+}
+
+.session-btn.active span {
+    color: #2563eb;
+}
+
+/* =========================
+   Session info
+========================= */
+.session-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.field label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+input,
+select {
+    width: 100%;
+    height: 44px;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    font-family: inherit;
+    font-size: 16px;
+    color: #1f2937;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.session-note {
+    grid-column: 1 / -1;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* =========================
+   Backup warning banner
+========================= */
+.backup-warning-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.backup-warning-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.backup-warning-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+
+.backup-warning-text strong {
+    font-size: 13px;
+    color: #92400e;
+}
+
+.backup-warning-text span {
+    font-size: 11px;
+    color: #b45309;
+    line-height: 1.6;
+}
+
+.backup-warning-banner .secondary-btn {
+    flex-shrink: 0;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+/* =========================
+   Default program suggestion
+========================= */
+.default-program-suggestion p {
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.8;
+    margin: 8px 0 12px;
+}
+
+.default-program-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* =========================
+   Date picker trigger button
+========================= */
+.date-picker-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.date-picker-btn:hover {
+    border-color: #9ca3af;
+}
+
+.date-picker-icon {
+    font-size: 16px;
+}
+
+/* =========================
+   Date picker calendar (modal)
+========================= */
+.date-picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(17, 24, 39, 0.5);
+}
+
+.date-picker-modal {
+    width: 100%;
+    max-width: 340px;
+    padding: 16px;
+    border-radius: 16px;
+    background: white;
+}
+
+.date-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.date-picker-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.date-picker-nav {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: #f3f4f6;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.date-picker-nav:hover {
+    background: #e5e7eb;
+}
+
+.date-picker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    direction: ltr;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #9ca3af;
+    text-align: center;
+}
+
+.date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    direction: ltr;
+    gap: 4px;
+}
+
+.date-picker-day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.date-picker-day.empty {
+    cursor: default;
+}
+
+.date-picker-day:not(.empty):hover {
+    background: #f3f4f6;
+}
+
+.date-picker-day.today {
+    box-shadow: inset 0 0 0 1px #2563eb;
+}
+
+.date-picker-day.selected {
+    background: #2563eb;
+    color: white;
+}
+
+.date-picker-day-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+}
+
+.date-picker-day.has-workout .date-picker-day-circle {
+    border-color: #16a34a;
+}
+
+.date-picker-day.selected.has-workout .date-picker-day-circle {
+    border-color: white;
+}
+
+.date-picker-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.date-picker-legend-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #16a34a;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.date-picker-close {
+    width: 100%;
+}
+
+/* =========================
+   Exercise card
+========================= */
+.exercise-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.exercise-header {
+    padding: 12px;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.exercise-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.exercise-number {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.exercise-header h2 {
+    margin: 0 0 5px;
+    font-size: 19px;
+    line-height: 1.45;
+    font-weight: 700;
+}
+
+.exercise-meta {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+
+/* =========================
+   Exercise action buttons
+========================= */
+.exercise-help-btn,
+.exercise-history-btn {
+    margin-top: 8px;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.exercise-help-btn:active,
+.exercise-history-btn:active {
+    background: #eff6ff;
+}
+
+/* =========================
+   Sets
+========================= */
+.sets-container {
+    padding: 10px;
+}
+
+.set-row {
+    display: grid;
+    grid-template-columns: 58px 1fr 1fr;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 7px;
+}
+
+.set-label {
+    font-size: 14px;
+    color: #4b5563;
+    text-align: center;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.set-row input {
+    height: 44px;
+    text-align: center;
+    font-size: 16px;
+    direction: ltr;
+}
+
+.set-difference {
+    grid-column: 2 / 4;
+    padding: 2px 5px;
+    min-height: 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: right;
+    direction: rtl;
+}
+
+.set-difference:empty {
+    display: none;
+}
+
+/* =========================
+   Workout summary
+========================= */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 16px 0 12px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 11px;
+    text-align: center;
+}
+
+.summary-card span {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.summary-card strong {
+    font-size: 19px;
+}
+
+.summary-card small {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    color: #9ca3af;
+}
+
+/* =========================
+   Save workout
+========================= */
+.save-workout-section {
+    margin: 4px 0 18px;
+}
+
+/* =========================
+   History
+========================= */
+.history-section {
+    margin-top: 16px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.section-title p {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.history-table-wrapper {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.history-table th,
+.history-table td {
+    padding: 9px 5px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.history-table th {
+    color: #6b7280;
+    background: #f9fafb;
+    font-weight: normal;
+}
+
+.history-empty {
+    padding: 25px 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* =========================
+   Exercise History Modal
+========================= */
+.exercise-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.exercise-history-item {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+
+.exercise-history-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.exercise-history-info strong {
+    color: #1f2937;
+}
+
+.exercise-history-info span {
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.exercise-history-sets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.history-set {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 6px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-weight: bold;
+    color: #1f2937;
+    direction: ltr;
+}
+
+/* =========================
+   Settings (full page)
+========================= */
+.settings-page-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+}
+
+.settings-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+@media (min-width: 900px) {
+    .settings-page-overlay {
+        display: flex;
+        justify-content: center;
+        background: #f2f4f7;
+    }
+
+    .settings-page {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+
+.settings-page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.settings-page-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.settings-content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.setting-info strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.setting-info span {
+    display: block;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+
+.setting-row .secondary-btn,
+.setting-row .danger-btn {
+    flex: 0 0 auto;
+    min-height: 42px;
+    font-size: 12px;
+}
+
+.backup-setting,
+.program-setting {
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.backup-setting .setting-info,
+.program-setting .setting-info {
+    width: 100%;
+}
+
+.backup-actions,
+.program-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.program-actions {
+    grid-template-columns: 1fr;
+}
+
+.file-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+}
+
+.danger-setting .setting-info strong {
+    color: #991b1b;
+}
+
+/* =========================
+   My Programs (full page)
+========================= */
+.my-programs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+}
+
+.my-programs-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+@media (min-width: 900px) {
+    .my-programs-overlay {
+        display: flex;
+        justify-content: center;
+        background: #f2f4f7;
+    }
+
+    .my-programs-page {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+
+.my-programs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.my-programs-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.my-programs-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.my-programs-empty {
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.my-program-card {
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+
+.my-program-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.my-program-summary-info h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #374151;
+}
+
+.my-program-current-badge {
+    margin-right: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 10px;
+}
+
+.my-program-dates {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.my-program-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.my-program-session {
+    margin-bottom: 10px;
+}
+
+.my-program-session h4 {
+    margin: 0 0 4px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.my-program-exercise-list {
+    margin: 0;
+    padding-right: 16px;
+    list-style: disc;
+}
+
+.my-program-exercise-list li {
+    margin-bottom: 4px;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+.my-program-exercise-name {
+    display: block;
+    color: #374151;
+}
+
+.my-program-exercise-meta {
+    display: block;
+    color: #9ca3af;
+    font-size: 10px;
+}
+
+/* =========================
+   Exercise Guide Modal
+========================= */
+.exercise-guide-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+}
+
+.exercise-guide-modal {
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 18px 18px 0 0;
+    padding: 16px;
+}
+
+.exercise-guide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.exercise-guide-header h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.5;
+}
+
+.exercise-guide-close {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.exercise-guide-images {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.exercise-guide-image,
+.exercise-guide-video {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    max-height: 60vh;
+    margin: 0 auto 20px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.exercise-guide-no-image {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.exercise-guide-instructions {
+    margin: 18px 0;
+    padding-right: 26px;
+    font-size: 16px;
+    line-height: 2;
+    color: #374151;
+}
+
+.exercise-guide-done {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* =========================
+   Exercise Bank Page
+========================= */
+.exercise-bank-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+}
+
+.exercise-bank-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+@media (min-width: 900px) {
+    .exercise-bank-overlay {
+        display: flex;
+        justify-content: center;
+        background: #f2f4f7;
+    }
+
+    .exercise-bank-page {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+
+.exercise-bank-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.exercise-bank-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.exercise-bank-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.exercise-bank-category-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.exercise-bank-category-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f3f4f6;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.exercise-bank-category-header:hover {
+    background: #e5e7eb;
+}
+
+.exercise-bank-category-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exercise-bank-category-badge {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.exercise-bank-category-count {
+    font-size: 11px;
+    color: #6b7280;
+    background: #ffffff;
+    padding: 2px 7px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.exercise-bank-category-arrow {
+    font-size: 14px;
+    color: #6b7280;
+    transition: transform 0.2s ease;
+}
+
+.exercise-bank-category-group.collapsed .exercise-bank-category-arrow {
+    transform: rotate(-90deg);
+}
+
+.exercise-bank-category-group.collapsed .exercise-bank-category-items {
+    display: none;
+}
+
+.exercise-bank-category-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px 4px;
+}
+
+.exercise-bank-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.exercise-bank-item:active {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.exercise-bank-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.exercise-bank-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.exercise-bank-thumb-placeholder {
+    font-size: 24px;
+}
+
+.exercise-bank-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.exercise-bank-name {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #1f2937;
+}
+
+.exercise-bank-id {
+    margin: 0;
+    font-size: 12px;
+    color: #6b7280;
+    direction: ltr;
+    text-align: right;
+    font-family: monospace, Arial, sans-serif;
+}
+
+/* =========================
+   Dark Mode
+========================= */
+body.dark-mode {
+    background: #111827;
+    color: #f3f4f6;
+}
+
+body.dark-mode .card,
+body.dark-mode .summary-card,
+body.dark-mode .exercise-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+body.dark-mode .page-header p,
+body.dark-mode .selector-title,
+body.dark-mode .field label,
+body.dark-mode .exercise-meta,
+body.dark-mode .section-title p {
+    color: #9ca3af;
+}
+
+body.dark-mode .session-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
+body.dark-mode .session-btn span {
+    color: #9ca3af;
+}
+
+body.dark-mode .session-btn.active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
+
+body.dark-mode .session-btn.active span {
+    color: #bfdbfe;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
+body.dark-mode input:focus,
+body.dark-mode select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.15);
+}
+
+body.dark-mode .date-picker-btn {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
+body.dark-mode .date-picker-modal {
+    background: #1f2937;
+}
+
+body.dark-mode .date-picker-header h3 {
+    color: #f3f4f6;
+}
+
+body.dark-mode .date-picker-nav {
+    background: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .date-picker-nav:hover {
+    background: #4b5563;
+}
+
+body.dark-mode .date-picker-day {
+    color: #e5e7eb;
+}
+
+body.dark-mode .date-picker-day:not(.empty):hover {
+    background: #374151;
+}
+
+body.dark-mode .date-picker-legend {
+    color: #9ca3af;
+}
+
+body.dark-mode .backup-warning-banner {
+    background: #451a03;
+    border-color: #92400e;
+}
+
+body.dark-mode .backup-warning-text strong {
+    color: #fde68a;
+}
+
+body.dark-mode .backup-warning-text span {
+    color: #fcd34d;
+}
+
+body.dark-mode .default-program-suggestion p {
+    color: #d1d5db;
+}
+
+body.dark-mode .session-note {
+    background: #172554;
+    color: #bfdbfe;
+}
+
+body.dark-mode .summary-card span {
+    color: #9ca3af;
+}
+
+body.dark-mode .summary-card small {
+    color: #6b7280;
+}
+
+body.dark-mode .exercise-header {
+    background: #18212f;
+    border-color: #374151;
+}
+
+body.dark-mode .set-label {
+    color: #d1d5db;
+}
+
+body.dark-mode .set-difference {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+body.dark-mode .secondary-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+
+body.dark-mode .secondary-btn:active {
+    background: #374151;
+}
+
+body.dark-mode .exercise-help-btn,
+body.dark-mode .exercise-history-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #93c5fd;
+}
+
+body.dark-mode .exercise-help-btn:active,
+body.dark-mode .exercise-history-btn:active {
+    background: #172554;
+}
+
+body.dark-mode .history-table th {
+    background: #111827;
+    color: #9ca3af;
+}
+
+body.dark-mode .history-table th,
+body.dark-mode .history-table td {
+    border-color: #374151;
+}
+
+body.dark-mode .history-empty {
+    color: #6b7280;
+}
+
+body.dark-mode .exercise-history-item {
+    background: #18212f;
+    border-color: #374151;
+}
+
+body.dark-mode .exercise-history-info {
+    border-color: #374151;
+}
+
+body.dark-mode .exercise-history-info strong {
+    color: #f3f4f6;
+}
+
+body.dark-mode .exercise-history-info span {
+    color: #9ca3af;
+}
+
+body.dark-mode .history-set {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .settings-icon-btn {
+    background: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .settings-icon-btn:hover {
+    background: #4b5563;
+}
+
+body.dark-mode .settings-page-overlay {
+    background: #111827;
+}
+
+@media (min-width: 900px) {
+    body.dark-mode .settings-page-overlay {
+        background: #0b0f17;
+    }
+
+    body.dark-mode .settings-page {
+        background: #111827;
+        box-shadow: 0 0 0 1px #374151;
+    }
+}
+
+body.dark-mode .settings-page-header {
+    border-color: #374151;
+}
+
+body.dark-mode .settings-page-header h2 {
+    color: #f3f4f6;
+}
+
+body.dark-mode .settings-content {
+    border-color: #374151;
+}
+
+body.dark-mode .setting-row {
+    border-color: #374151;
+}
+
+body.dark-mode .setting-info strong {
+    color: #f3f4f6;
+}
+
+body.dark-mode .setting-info span {
+    color: #9ca3af;
+}
+
+body.dark-mode .danger-setting .setting-info strong {
+    color: #fecaca;
+}
+
+body.dark-mode .my-programs-overlay {
+    background: #111827;
+}
+
+@media (min-width: 900px) {
+    body.dark-mode .my-programs-overlay {
+        background: #0b0f17;
+    }
+
+    body.dark-mode .my-programs-page {
+        background: #111827;
+        box-shadow: 0 0 0 1px #374151;
+    }
+}
+
+body.dark-mode .my-programs-header {
+    border-color: #374151;
+}
+
+body.dark-mode .my-programs-header h2 {
+    color: #f3f4f6;
+}
+
+body.dark-mode .my-program-card {
+    background: #1f2937;
+}
+
+body.dark-mode .my-program-summary-info h3 {
+    color: #f3f4f6;
+}
+
+body.dark-mode .my-program-details {
+    border-color: #374151;
+}
+
+body.dark-mode .my-program-session h4 {
+    color: #d1d5db;
+}
+
+body.dark-mode .my-program-exercise-name {
+    color: #e5e7eb;
+}
+
+body.dark-mode .exercise-guide-modal {
+    background: #1f2937;
+    color: #f3f4f6;
+}
+
+body.dark-mode .exercise-guide-close {
+    background: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .exercise-guide-instructions {
+    color: #d1d5db;
+}
+
+body.dark-mode .exercise-guide-no-image {
+    background: #111827;
+    color: #6b7280;
+}
+
+body.dark-mode .danger-btn {
+    background: #450a0a;
+    border-color: #7f1d1d;
+    color: #fecaca;
+}
+
+/* Dark mode for Exercise Bank */
+body.dark-mode .exercise-bank-overlay {
+    background: #111827;
+}
+
+@media (min-width: 900px) {
+    body.dark-mode .exercise-bank-overlay {
+        background: #0b0f17;
+    }
+
+    body.dark-mode .exercise-bank-page {
+        background: #111827;
+        box-shadow: 0 0 0 1px #374151;
+    }
+}
+
+body.dark-mode .exercise-bank-header {
+    border-color: #374151;
+}
+
+body.dark-mode .exercise-bank-header h2 {
+    color: #f3f4f6;
+}
+
+body.dark-mode .exercise-bank-category-header {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+body.dark-mode .exercise-bank-category-header:hover {
+    background: #374151;
+}
+
+body.dark-mode .exercise-bank-category-arrow {
+    color: #9ca3af;
+}
+
+body.dark-mode .exercise-bank-category-badge {
+    color: #60a5fa;
+}
+
+body.dark-mode .exercise-bank-category-count {
+    background: #111827;
+    border-color: #374151;
+    color: #9ca3af;
+}
+
+body.dark-mode .exercise-bank-item {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+body.dark-mode .exercise-bank-item:active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .exercise-bank-thumb {
+    background: #374151;
+}
+
+body.dark-mode .exercise-bank-name {
+    color: #f3f4f6;
+}
+
+body.dark-mode .exercise-bank-id {
+    color: #9ca3af;
+}
+
+/* =========================
+   Settings: uniform buttons + update button
+========================= */
+.setting-row .setting-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    min-height: 42px;
+    padding: 8px 10px;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+#updateAppBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+#updateAppBtn.update-ready {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+    font-weight: bold;
+}
+
+/* =========================
+   Onboarding (empty program state)
+========================= */
+.onboarding {
+    padding: 20px 16px;
+}
+
+.onboarding-hero {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.onboarding-hero h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.onboarding-hero p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #6b7280;
+}
+
+.onboarding-steps {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.onboarding-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+
+.onboarding-step-icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eff6ff;
+    font-size: 18px;
+}
+
+.onboarding-step-text {
+    min-width: 0;
+}
+
+.onboarding-step-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.onboarding-step-text strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+
+.onboarding-step-desc {
+    display: block;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+
+.onboarding-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.onboarding-actions .primary-btn,
+.onboarding-actions .secondary-btn {
+    width: 100%;
+}
+
+.onboarding-actions .default-program-suggestion {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.onboarding-actions .default-program-suggestion small {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+
+body.dark-mode .onboarding-hero p,
+body.dark-mode .onboarding-step-desc {
+    color: #9ca3af;
+}
+
+body.dark-mode .onboarding-step {
+    background: #18212f;
+    border-color: #374151;
+}
+
+body.dark-mode .onboarding-step-icon {
+    background: #172554;
+}
+
+body.dark-mode .onboarding-step-label {
+    color: #93c5fd;
+}
+
+body.dark-mode .onboarding-step-text strong {
+    color: #f3f4f6;
+}
+
+body.dark-mode .onboarding-actions .default-program-suggestion small {
+    color: #6b7280;
+}
+
+/* =========================
+   Toast (end-of-session message)
+========================= */
+.app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 2000;
+    max-width: calc(100% - 32px);
+    padding: 11px 16px;
+    border-radius: 10px;
+    background: #111827;
+    color: white;
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
+
+.app-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.app-toast.warning {
+    background: #92400e;
+}
+
+.app-toast.info {
+    background: #1e3a8a;
+}
+
+body.dark-mode .app-toast {
+    background: #374151;
+}
+
+body.dark-mode .app-toast.warning {
+    background: #b45309;
+}
+
+body.dark-mode .app-toast.info {
+    background: #1d4ed8;
+}

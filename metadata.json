@@ -1,0 +1,6 @@
+{
+  "name": "GymLog",
+  "description": "ثبت و پیگیری تمرین‌های بدنسازی و روند پیشرفت ورزشی با پشتیبانی از IndexedDB",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

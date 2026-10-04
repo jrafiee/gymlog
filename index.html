@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <title>GymLog</title>
+    <meta name="description" content="ثبت و پیگیری تمرین‌های بدنسازی و روند پیشرفت ورزشی با پشتیبانی از IndexedDB" />
+    <meta property="og:title" content="GymLog" />
+    <meta property="og:description" content="ثبت و پیگیری تمرین‌های بدنسازی و روند پیشرفت ورزشی با پشتیبانی از IndexedDB" />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/report.css">
+</head>
+
+<body>
+
+<div class="app-shell">
+
+    <!-- =========================
+         Desktop Sidebar (>= 1024px)
+    ========================= -->
+    <aside class="app-sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">GL</div>
+            <div class="sidebar-title">
+                <h1>GymLog</h1>
+                <span>مرکز مدیریت و تحلیل تمرین</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button type="button" class="sidebar-nav-item active" data-nav="dashboard">
+                <span class="sidebar-nav-icon">📊</span>
+                داشبورد
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="workout">
+                <span class="sidebar-nav-icon">🏋️‍♂️</span>
+                تمرین امروز
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="programs">
+                <span class="sidebar-nav-icon">📋</span>
+                برنامه‌های تمرینی
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="history">
+                <span class="sidebar-nav-icon">🕒</span>
+                تاریخچه تمرینات
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="bank">
+                <span class="sidebar-nav-icon">📚</span>
+                بانک حرکات
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="calendar">
+                <span class="sidebar-nav-icon">📅</span>
+                تقویم تمرین
+            </button>
+
+            <div class="sidebar-divider"></div>
+
+            <button type="button" class="sidebar-nav-item" data-nav="backup">
+                <span class="sidebar-nav-icon">💾</span>
+                پشتیبان‌گیری
+            </button>
+            <button type="button" class="sidebar-nav-item" data-nav="settings">
+                <span class="sidebar-nav-icon">⚙️</span>
+                تنظیمات
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span class="sidebar-status">پایگاه‌داده امن IndexedDB فعال است</span>
+        </div>
+    </aside>
+
+    <!-- =========================
+         App Body (Main Content)
+    ========================= -->
+    <div class="app-body">
+
+        <!-- Desktop Topbar -->
+        <header class="desktop-topbar">
+            <div class="desktop-topbar-title" id="desktopTopbarTitle">
+                داشبورد مدیریت و تحلیل تمرین
+            </div>
+            <div class="desktop-topbar-actions">
+                <button type="button" class="desktop-theme-icon-btn" id="desktopThemeIconBtn" aria-label="تغییر حالت تیره/روشن" title="تغییر ظاهر برنامه (تیره / روشن)">
+                    🌙
+                </button>
+            </div>
+        </header>
+
+        <!-- Mobile Top Switcher (< 1024px) -->
+        <div class="mobile-nav-bar">
+            <span class="mobile-nav-brand">GymLog</span>
+            <div class="mobile-tab-switch">
+                <button type="button" class="mobile-tab-btn active" data-nav="workout">ثبت تمرین</button>
+                <button type="button" class="mobile-tab-btn" data-nav="dashboard">داشبورد</button>
+            </div>
+            <button type="button" id="openSettingsBtn" class="settings-icon-btn" aria-label="تنظیمات">
+                ☰
+            </button>
+        </div>
+
+        <!-- =========================
+             View 1: Desktop Dashboard
+        ========================= -->
+        <div id="viewDashboard" class="app-view">
+            <div class="dashboard-content" id="dashboardOverviewContainer">
+                <!-- Populated dynamically by dashboard.js with real data -->
+            </div>
+        </div>
+
+        <!-- =========================
+             View 2: Workout Recording (The Gym Log)
+        ========================= -->
+        <div id="viewWorkout" class="app-view active">
+            <div class="container">
+
+                <!-- Header for mobile -->
+                <header class="page-header" style="display: flex;">
+                    <div>
+                        <h1>ثبت جلسه تمرینی</h1>
+                    </div>
+                </header>
+
+                <!-- Empty state -->
+                <section id="emptyProgramState" class="card onboarding" style="display: none;">
+                    <div class="onboarding-hero">
+                        <h2>به GymLog خوش آمدید</h2>
+                        <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده.</p>
+                    </div>
+
+                    <ol class="onboarding-steps">
+                        <li class="onboarding-step">
+                            <span class="onboarding-step-icon" aria-hidden="true">📋</span>
+                            <div class="onboarding-step-text">
+                                <span class="onboarding-step-label">۱ · برنامه تمرینی</span>
+                                <strong>برنامه تمرینی خودت را وارد کن</strong>
+                                <span class="onboarding-step-desc">برنامه‌ای که شامل جلسات و حرکات تمرینی است را در GymLog بارگذاری کن.</span>
+                            </div>
+                        </li>
+                        <li class="onboarding-step">
+                            <span class="onboarding-step-icon" aria-hidden="true">✍️</span>
+                            <div class="onboarding-step-text">
+                                <span class="onboarding-step-label">۲ · ثبت تمرین</span>
+                                <strong>هر ست را ثبت کن</strong>
+                                <span class="onboarding-step-desc">وزنه، تعداد تکرار و عملکردت را بعد از هر ست ثبت کن.</span>
+                            </div>
+                        </li>
+                        <li class="onboarding-step">
+                            <span class="onboarding-step-icon" aria-hidden="true">📈</span>
+                            <div class="onboarding-step-text">
+                                <span class="onboarding-step-label">۳ · مشاهده پیشرفت</span>
+                                <strong>پیشرفتت را دنبال کن</strong>
+                                <span class="onboarding-step-desc">عملکرد جلسات قبلی را ببین و تغییرات تمرینی خودت را دنبال کن.</span>
+                            </div>
+                        </li>
+                    </ol>
+
+                    <div class="onboarding-actions">
+                        <button type="button" id="onboardingUploadBtn" class="primary-btn">
+                            بارگذاری برنامه تمرینی
+                        </button>
+
+                        <div id="defaultProgramSuggestion" class="default-program-suggestion" style="display: none;">
+                            <button type="button" id="loadDefaultProgramBtn" class="secondary-btn">
+                                شروع با برنامه‌ی پیش‌فرض
+                            </button>
+                            <small>برای آشنایی سریع با محیط برنامه؛ بعداً می‌توانی برنامه‌ی خودت را اضافه کنی.</small>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="programContent">
+
+                    <!-- Backup warning -->
+                    <section id="backupWarningBanner" class="backup-warning-banner card" style="display: none;">
+                        <span class="backup-warning-icon">⚠️</span>
+                        <div class="backup-warning-text">
+                            <strong>زمان پشتیبان‌گیری رسیده</strong>
+                            <span id="backupWarningDetail">مدتی از آخرین پشتیبان‌گیری گذشته.</span>
+                        </div>
+                        <button type="button" id="backupWarningBtn" class="secondary-btn">دریافت پشتیبان</button>
+                    </section>
+
+                    <!-- Session selector -->
+                    <section class="session-selector card">
+                        <div class="selector-title">جلسه تمرینی</div>
+                        <div id="sessionButtons" class="session-buttons"></div>
+                    </section>
+
+                    <!-- Session info -->
+                    <section class="session-info card">
+                        <div class="field">
+                            <input type="hidden" id="workoutDate">
+                            <button type="button" id="workoutDateBtn" class="date-picker-btn" aria-label="تاریخ تمرین">
+                                <span id="persianWorkoutDate" class="persian-date-display"></span>
+                                <span class="date-picker-icon">📅</span>
+                            </button>
+                        </div>
+
+                        <div class="field">
+                            <select id="weekNumber" aria-label="شماره هفته">
+                                <option value="1">هفته ۱</option>
+                                <option value="2">هفته ۲</option>
+                                <option value="3">هفته ۳</option>
+                                <option value="4">هفته ۴</option>
+                            </select>
+                        </div>
+
+                        <div class="session-note">
+                            <strong>قانون تمرین:</strong> بیشتر ست‌ها را با حدود <strong>RIR 2</strong> انجام بده.
+                        </div>
+                    </section>
+
+                    <!-- Exercises -->
+                    <main id="exerciseList"></main>
+
+                    <!-- Workout summary -->
+                    <section class="summary-grid">
+                        <div class="summary-card">
+                            <span>حجم تمرین</span>
+                            <strong id="totalVolume">0</strong>
+                            <small>kg × reps</small>
+                        </div>
+
+                        <div class="summary-card">
+                            <span>تغییر نسبت به جلسه قبل</span>
+                            <strong id="volumeChange">—</strong>
+                        </div>
+                    </section>
+
+                    <!-- Save workout -->
+                    <section class="save-workout-section">
+                        <button type="button" id="finishWorkoutBtn" class="primary-btn">
+                            ✓ پایان جلسه و رفتن به تمرین بعدی
+                        </button>
+                    </section>
+
+                    <!-- History -->
+                    <section class="history-section card">
+                        <div class="section-title">
+                            <div>
+                                <h2>روند پیشرفت</h2>
+                                <p>سابقه همین جلسه تمرینی</p>
+                            </div>
+                        </div>
+                        <div id="historyContainer"></div>
+                    </section>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             View 3: Programs
+        ========================= -->
+        <div id="viewPrograms" class="app-view">
+            <div id="viewProgramsContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
+             View 4: History
+        ========================= -->
+        <div id="viewHistory" class="app-view">
+            <div id="viewHistoryContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
+             View 5: Bank
+        ========================= -->
+        <div id="viewBank" class="app-view">
+            <div id="viewBankContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
+             View 6: Calendar
+        ========================= -->
+        <div id="viewCalendar" class="app-view">
+            <div id="viewCalendarContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
+             View 8: Backup
+        ========================= -->
+        <div id="viewBackup" class="app-view">
+            <div id="viewBackupContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
+             View 9: Settings
+        ========================= -->
+        <div id="viewSettings" class="app-view">
+            <div id="viewSettingsContainer" style="padding: 24px;"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================
+     Settings Modal (Mobile Drawer)
+========================= -->
+<div id="settingsPage" class="settings-page-overlay" style="display: none;">
+    <div class="settings-page">
+        <div class="settings-page-header">
+            <button
+                type="button"
+                id="closeSettingsBtn"
+                class="exercise-guide-close"
+                aria-label="بازگشت"
+            >
+                ×
+            </button>
+            <h2>تنظیمات و امکانات</h2>
+        </div>
+
+        <div class="settings-content">
+            <!-- Dashboard Quick Link -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>داشبورد تحلیلی تمرین</strong>
+                    <span>مشاهده آمار کامل دوره، نمودارهای حجم و وضعیت جلسات</span>
+                </div>
+                <button class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(); switchView('dashboard');">
+                    مشاهده داشبورد
+                </button>
+            </div>
+
+            <!-- Appearance -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>ظاهر برنامه</strong>
+                    <span>تغییر بین حالت روشن و تاریک</span>
+                </div>
+                <button id="themeToggleBtn" class="secondary-btn setting-btn" type="button">
+                    🌙 حالت تاریک
+                </button>
+            </div>
+
+            <!-- Exercise Bank -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>بانک حرکات</strong>
+                    <span>فهرست کامل حرکات ورزشی کاتالوگ با تصویر و نحوه اجرا</span>
+                </div>
+                <button id="openExerciseBankBtn" class="secondary-btn setting-btn" type="button">
+                    نمایش بانک حرکات
+                </button>
+            </div>
+
+            <!-- My programs -->
+            <div class="setting-row my-programs-setting">
+                <div class="setting-info">
+                    <strong>برنامه‌های من</strong>
+                    <span>فهرست برنامه‌های ماهانه و جزئیات جلسات.</span>
+                </div>
+                <button id="openMyProgramsBtn" class="secondary-btn setting-btn" type="button">
+                    مشاهده
+                </button>
+            </div>
+
+            <!-- Muscle group report -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>گزارش گروه‌های عضلانی</strong>
+                    <span>تحلیل حجم تمرین، تعادل عضلات و نمودار عنکبوتی (مستقیماً در داشبورد).</span>
+                </div>
+                <button type="button" class="secondary-btn setting-btn" onclick="closeSettingsPage(); switchView('dashboard'); setTimeout(() => { const el = document.getElementById('dashReportSection'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }, 150);">
+                    مشاهده در داشبورد
+                </button>
+            </div>
+
+            <!-- App update -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>به‌روزرسانی برنامه</strong>
+                    <span id="updateStatus">نسخه‌ی فعلی به‌روز است.</span>
+                </div>
+                <button id="updateAppBtn" class="secondary-btn setting-btn" type="button" disabled>
+                    به‌روزرسانی
+                </button>
+            </div>
+
+            <!-- Backup -->
+            <div class="setting-row backup-setting">
+                <div class="setting-info">
+                    <strong>پشتیبان اطلاعات</strong>
+                    <span>دانلود یا بازیابی فایل پشتیبان تمرینات و برنامه‌ها.</span>
+                </div>
+                <div class="backup-actions">
+                    <button id="exportBtn" class="secondary-btn" type="button">
+                        دریافت پشتیبان
+                    </button>
+                    <label class="secondary-btn file-btn">
+                        بازیابی پشتیبان
+                        <input type="file" id="importInput" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Program upload -->
+            <div class="setting-row program-setting">
+                <div class="setting-info">
+                    <strong>برنامه‌ی تمرینی</strong>
+                    <span>بارگذاری فایل آماده‌شده برنامه جدید باشگاه.</span>
+                </div>
+                <div class="program-actions">
+                    <label class="secondary-btn file-btn">
+                        بارگذاری برنامه‌ی جدید
+                        <input type="file" id="programImportInput" accept=".json" hidden>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Delete data -->
+            <div class="setting-row danger-setting">
+                <div class="setting-info">
+                    <strong>حذف تاریخچه‌ی تمرین‌ها</strong>
+                    <span>فقط وزنه/تکرارهای ثبت‌شده پاک می‌شود؛ برنامه دست‌نخورده می‌ماند.</span>
+                </div>
+                <button id="clearBtn" class="danger-btn" type="button">
+                    حذف تاریخچه
+                </button>
+            </div>
+
+            <!-- Full reset -->
+            <div class="setting-row danger-setting">
+                <div class="setting-info">
+                    <strong>بازنشانی کامل</strong>
+                    <span>همه‌چیز از IndexedDB و حافظه دستگاه پاک می‌شود.</span>
+                </div>
+                <button id="fullResetBtn" class="danger-btn" type="button">
+                    حذف همه‌چیز
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Core Dependencies -->
+<script src="./js/exercise-catalog.js"></script>
+<script src="./js/workout-programs.js"></script>
+<script src="./js/default-program.js"></script>
+<script src="./js/workout-data.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/app.js"></script>
+<script src="./js/dashboard.js"></script>
+
+<script>
+    (function () {
+        if (!("serviceWorker" in navigator)) return;
+
+        const updateBtn = document.getElementById("updateAppBtn");
+        const updateStatus = document.getElementById("updateStatus");
+        let registration = null;
+        let userRequestedUpdate = false;
+
+        function markUpdateAvailable() {
+            if (updateBtn) {
+                updateBtn.disabled = false;
+                updateBtn.classList.add("update-ready");
+            }
+            if (updateStatus) {
+                updateStatus.textContent = "نسخه‌ی جدید آماده است. برای اعمال، دکمه‌ی به‌روزرسانی را بزن.";
+            }
+        }
+
+        function trackInstalling(worker) {
+            if (!worker) return;
+            worker.addEventListener("statechange", () => {
+                if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                    markUpdateAvailable();
+                }
+            });
+        }
+
+        window.addEventListener("load", () => {
+            navigator.serviceWorker.register("./service-worker.js")
+                .then(reg => {
+                    registration = reg;
+                    if (reg.waiting && navigator.serviceWorker.controller) markUpdateAvailable();
+                    reg.addEventListener("updatefound", () => trackInstalling(reg.installing));
+                    reg.update().catch(() => {});
+                })
+                .catch(err => console.error("Service Worker registration failed:", err));
+        });
+
+        function checkForUpdate() {
+            if (registration && navigator.onLine) registration.update().catch(() => {});
+        }
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") checkForUpdate();
+        });
+        const openBtn = document.getElementById("openSettingsBtn");
+        if (openBtn) openBtn.addEventListener("click", checkForUpdate);
+
+        if (updateBtn) {
+            updateBtn.addEventListener("click", () => {
+                const waiting = registration && registration.waiting;
+                if (!waiting) return;
+                userRequestedUpdate = true;
+                updateBtn.disabled = true;
+                if (updateStatus) updateStatus.textContent = "در حال به‌روزرسانی…";
+                waiting.postMessage({ type: "SKIP_WAITING" });
+            });
+        }
+
+        let reloading = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!userRequestedUpdate || reloading) return;
+            reloading = true;
+            window.location.reload();
+        });
+    })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1302 @@
+/* =====================================================
+   Gym Progress Tracker — Desktop Dashboard & Shell Styles
+   Anti-slop, clean typography, responsive grid & dark mode
+===================================================== */
+
+/* -------------------------
+   App Shell Layout
+------------------------- */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background: #f2f4f7;
+    direction: rtl;
+}
+
+/* -------------------------
+   Sidebar (Desktop >= 1024px)
+------------------------- */
+.app-sidebar {
+    display: none;
+    width: 260px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border-left: 1px solid #e5e7eb;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sidebar-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.sidebar-title h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.sidebar-title span {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+/* Navigation items */
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #4b5563;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: right;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-nav-item:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.sidebar-nav-item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.sidebar-nav-icon {
+    font-size: 17px;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: #f3f4f6;
+    margin: 10px 14px;
+}
+
+/* Dedicated Program Upload in Sidebar */
+.sidebar-action-upload {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2px 0 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #eff6ff;
+    border: 1px dashed #3b82f6;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.sidebar-action-upload:hover {
+    background: #dbeafe;
+    border-color: #2563eb;
+}
+
+body.dark-mode .sidebar-action-upload {
+    background: #1e3a8a33;
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+.sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-theme-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.sidebar-theme-btn:hover {
+    background: #f9fafb;
+}
+
+.sidebar-status {
+    font-size: 10.5px;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* -------------------------
+   Main Body Layout
+------------------------- */
+.app-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Desktop Topbar */
+.desktop-topbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 28px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.desktop-topbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.desktop-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.desktop-topbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.desktop-topbar-btn.primary {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+/* Desktop Theme Toggle Icon Button (Top-left corner) */
+.desktop-theme-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.desktop-theme-icon-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    transform: scale(1.05);
+}
+
+body.dark-mode .desktop-theme-icon-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f3f4f6;
+}
+
+/* Mobile Top Nav Switcher */
+.mobile-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.mobile-nav-brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+.mobile-tab-switch {
+    display: flex;
+    background: #f3f4f6;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 2px;
+}
+
+.mobile-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+}
+
+.mobile-tab-btn.active {
+    background: #ffffff;
+    color: #1d4ed8;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* -------------------------
+   Views Manager
+------------------------- */
+.app-view {
+    display: none;
+    width: 100%;
+}
+
+.app-view.active {
+    display: block;
+}
+
+/* -------------------------
+   Desktop Dashboard Page
+------------------------- */
+.dashboard-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Hero / Overview Banner */
+.dash-overview-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+}
+
+.dash-overview-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dash-program-kicker {
+    font-size: 12px;
+    color: #2563eb;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.dash-overview-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.dash-overview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.dash-overview-meta .sep {
+    color: #d1d5db;
+}
+
+.dash-progress-track {
+    width: 100%;
+    max-width: 460px;
+    margin-top: 6px;
+}
+
+.dash-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.dash-progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.dash-progress-bar-fill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+.dash-overview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dash-start-workout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+.dash-start-workout-btn:hover {
+    background: #1d4ed8;
+}
+
+/* -------------------------
+   KPI Summary Metric Cards
+------------------------- */
+.dash-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.dash-metric-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dash-metric-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.dash-metric-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.2;
+}
+
+.dash-metric-sub {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+/* -------------------------
+   Charts Grid
+------------------------- */
+.dash-charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 1080px) {
+    .dash-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dash-chart-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.dash-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dash-chart-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dash-chart-header span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dash-chart-body {
+    width: 100%;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dash-chart-svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.dash-empty-notice {
+    font-size: 12.5px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 30px 10px;
+}
+
+/* -------------------------
+   Training Cycle Tracker (Week 1..4 Sessions)
+------------------------- */
+.dash-cycle-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.dash-cycle-header {
+    margin-bottom: 16px;
+}
+
+.dash-cycle-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dash-cycle-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.dash-cycle-weeks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 900px) {
+    .dash-cycle-weeks {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.dash-cycle-week-col {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dash-cycle-week-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dash-cycle-week-badge {
+    font-size: 10.5px;
+    color: #6b7280;
+}
+
+.dash-cycle-session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.dash-cycle-session-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.dash-cycle-session-item.done {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.dash-cycle-session-item.active-next {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.dash-cycle-session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dash-cycle-session-info strong {
+    color: #1f2937;
+    font-size: 12px;
+}
+
+.dash-cycle-session-info span {
+    color: #6b7280;
+    font-size: 10px;
+}
+
+.dash-cycle-status-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+/* -------------------------
+   Recent Workouts Table
+------------------------- */
+.dash-table-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.dash-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.dash-table-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.dash-table-wrap {
+    overflow-x: auto;
+}
+
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.dash-table th,
+.dash-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+}
+
+.dash-table th {
+    color: #6b7280;
+    font-weight: 600;
+    background: #f9fafb;
+}
+
+.dash-table th:first-child,
+.dash-table td:first-child {
+    text-align: right;
+    font-weight: 600;
+}
+
+.dash-table-action-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #2563eb;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.dash-table-action-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+/* Workout Detail Modal */
+.dash-detail-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(17, 24, 39, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.dash-detail-modal {
+    width: 100%;
+    max-width: 580px;
+    max-height: 85vh;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.dash-detail-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dash-detail-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* -------------------------
+   Responsive Layout Rules
+------------------------- */
+@media (min-width: 1024px) {
+    .app-sidebar {
+        display: flex;
+    }
+
+    .desktop-topbar {
+        display: flex;
+    }
+
+    .mobile-nav-bar {
+        display: none;
+    }
+
+    /* Wrap the active workout recorder nicely on desktop */
+    #viewWorkout .container {
+        max-width: 820px;
+        margin: 24px auto;
+        padding: 0 16px 40px;
+    }
+
+    #viewPrograms,
+    #viewHistory,
+    #viewBank,
+    #viewReports,
+    #viewCalendar,
+    #viewBackup,
+    #viewSettings {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+}
+
+/* Mobile Dashboard Layout Rules (< 1024px) */
+@media (max-width: 1023px) {
+    /* Hide start next workout button & program upload buttons in mobile dashboard (Requirement 1) */
+    .dash-overview-actions,
+    .desktop-only-flex,
+    .dash-start-workout-btn,
+    #dashStartNextBtn {
+        display: none !important;
+    }
+}
+
+/* -------------------------
+   Dark Mode Support
+------------------------- */
+body.dark-mode .app-shell {
+    background: #0f172a;
+    color: #f3f4f6;
+}
+
+body.dark-mode .app-sidebar,
+body.dark-mode .desktop-topbar,
+body.dark-mode .mobile-nav-bar,
+body.dark-mode .dash-overview-card,
+body.dark-mode .dash-metric-card,
+body.dark-mode .dash-chart-card,
+body.dark-mode .dash-cycle-card,
+body.dark-mode .dash-table-card,
+body.dark-mode .dash-detail-modal {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f3f4f6;
+}
+
+body.dark-mode .sidebar-header,
+body.dark-mode .sidebar-divider,
+body.dark-mode .sidebar-footer,
+body.dark-mode .dash-table th,
+body.dark-mode .dash-table td {
+    border-color: #334155;
+}
+
+body.dark-mode .sidebar-title h1,
+body.dark-mode .desktop-topbar-title,
+body.dark-mode .dash-overview-title,
+body.dark-mode .dash-metric-val,
+body.dark-mode .dash-chart-header h3,
+body.dark-mode .dash-cycle-header h3,
+body.dark-mode .dash-table-header h3,
+body.dark-mode .dash-detail-modal-header h3 {
+    color: #f8fafc;
+}
+
+body.dark-mode .sidebar-nav-item {
+    color: #94a3b8;
+}
+
+body.dark-mode .sidebar-nav-item:hover {
+    background: #334155;
+    color: #f8fafc;
+}
+
+body.dark-mode .sidebar-nav-item.active {
+    background: #1e3a8a;
+    color: #93c5fd;
+}
+
+body.dark-mode .dash-cycle-week-col {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .dash-cycle-week-title {
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+body.dark-mode .dash-cycle-session-item {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-mode .dash-cycle-session-item.done {
+    background: #064e3b;
+    border-color: #059669;
+}
+
+body.dark-mode .dash-cycle-session-item.active-next {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .dash-table th {
+    background: #0f172a;
+    color: #94a3b8;
+}
+
+body.dark-mode .dash-table-action-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #93c5fd;
+}
+
+body.dark-mode .sidebar-theme-btn,
+body.dark-mode .desktop-topbar-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+
+body.dark-mode .mobile-tab-switch {
+    background: #0f172a;
+}
+
+body.dark-mode .mobile-tab-btn {
+    color: #94a3b8;
+}
+
+body.dark-mode .mobile-tab-btn.active {
+    background: #1e293b;
+    color: #60a5fa;
+}
+
+body.dark-mode .dash-progress-bar-bg {
+    background: #334155;
+}
+
+/* -------------------------
+   Calendar View (Identical to "تمرین امروز" Date Picker)
+------------------------- */
+.calendar-view-container {
+    max-width: 360px;
+    margin: 12px auto 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.calendar-desktop-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.calendar-day-details-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.calendar-day-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+/* -------------------------
+   Dedicated Program Upload Box (Requirement 3)
+------------------------- */
+.program-upload-card {
+    background: #ffffff;
+    border: 1.5px solid #dbeafe;
+    border-radius: 16px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+}
+
+.program-upload-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    max-width: 660px;
+}
+
+.program-upload-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+}
+
+.program-upload-title {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.program-upload-desc {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.65;
+}
+
+.program-upload-tags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.program-upload-tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.program-upload-btn-prominent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 26px;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: 1px solid #1d4ed8;
+}
+
+.program-upload-btn-prominent:hover {
+    background: #1d4ed8;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Dark mode overrides */
+body.dark-mode .calendar-desktop-card {
+    border-color: #334155 !important;
+    background: #1e293b !important;
+}
+
+body.dark-mode .calendar-day-details-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .calendar-day-item {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .program-upload-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+body.dark-mode .program-upload-title {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .program-upload-desc {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .program-upload-icon-wrapper {
+    background: #0f172a !important;
+    border-color: #3b82f6 !important;
+}
+
+body.dark-mode .program-upload-tag {
+    background: #0f172a !important;
+    color: #94a3b8 !important;
+}
+
+/* Embedded Dashboard Report Section Styles */
+.dash-report-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.dash-report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dash-report-titles h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.dash-report-titles span {
+    font-size: 12.5px;
+    color: #6b7280;
+}
+
+/* -------------------------
+   History Filters & Search
+------------------------- */
+.history-filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+
+.history-filter-select,
+.history-search-input {
+    min-height: 40px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1f2937;
+}
+
+.history-search-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* -------------------------
+   Program Upload Dedicated Box (In Programs View)
+------------------------- */
+.program-upload-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.program-upload-box-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.program-upload-box-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    max-width: 640px;
+}
+
+.program-upload-box-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.program-upload-box-text h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.program-upload-box-text p {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.program-upload-box-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.program-upload-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.program-upload-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.program-upload-action-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+}
+
+/* Dark mode additions */
+body.dark-mode .calendar-nav-wrap,
+body.dark-mode .calendar-day-details-card,
+body.dark-mode .history-filters-bar,
+body.dark-mode .program-upload-box {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f3f4f6;
+}
+
+body.dark-mode .program-upload-box-icon {
+    background: #1e3a8a44;
+    color: #60a5fa;
+}
+
+body.dark-mode .program-upload-box-text h3 {
+    color: #f8fafc;
+}
+
+body.dark-mode .program-upload-box-text p {
+    color: #94a3b8;
+}
+
+body.dark-mode .program-upload-badge {
+    background: #0f172a;
+    color: #94a3b8;
+}
+
+body.dark-mode .calendar-nav-btn,
+body.dark-mode .calendar-today-btn,
+body.dark-mode .history-filter-select,
+body.dark-mode .history-search-input {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f3f4f6;
+}
+
+body.dark-mode .calendar-month-title {
+    color: #f8fafc;
+}
+

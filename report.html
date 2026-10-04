@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <title>گزارش گروه‌های عضلانی — GymLog</title>
+    <meta name="description" content="تحلیل و گزارش گروه‌های عضلانی در برنامه GymLog" />
+    <meta property="og:title" content="گزارش گروه‌های عضلانی — GymLog" />
+    <meta property="og:description" content="تحلیل و گزارش گروه‌های عضلانی در برنامه GymLog" />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/report.css">
+</head>
+
+<body>
+
+<div class="container report-container">
+
+    <!-- =========================
+         Header
+    ========================= -->
+    <header class="page-header report-header">
+        <button type="button" id="backToAppBtn" class="settings-icon-btn" aria-label="بازگشت به برنامه">→</button>
+        <div class="report-header-titles">
+            <h1>گزارش گروه‌های عضلانی</h1>
+            <p>حجم تمرین بر اساس وزنه و تکرار</p>
+        </div>
+        <button type="button" id="reportThemeToggleBtn" class="settings-icon-btn" aria-label="تغییر تم">🌙</button>
+    </header>
+
+    <!-- =========================
+         Data source
+    ========================= -->
+    <section class="card data-source-bar">
+        <div class="data-source-info">
+            <strong id="dataSourceLabel">در حال بارگذاری اطلاعات…</strong>
+            <span id="dataSourceDetail"></span>
+        </div>
+        <div class="data-source-actions">
+            <label class="secondary-btn file-btn">
+                بارگذاری فایل بک‌آپ
+                <input type="file" id="reportBackupInput" accept=".json" hidden>
+            </label>
+            <button type="button" id="useDeviceDataBtn" class="secondary-btn" style="display:none;">
+                بازگشت به داده‌های دستگاه
+            </button>
+        </div>
+    </section>
+
+    <!-- =========================
+         Empty state
+    ========================= -->
+    <section id="reportEmptyState" class="card report-empty" style="display:none;">
+        <p>هنوز هیچ تمرینی با وزنه و تکرار روی این دستگاه ثبت نشده، پس گزارشی برای نمایش نیست.</p>
+        <p>یک جلسه تمرین ثبت کن یا از بالا فایل پشتیبان برنامه را بارگذاری کن تا گزارش ساخته شود.</p>
+    </section>
+
+    <!-- =========================
+         Report content
+    ========================= -->
+    <div id="reportContent" style="display:none;">
+
+        <section class="card range-selector">
+            <div class="range-pills" id="rangePills">
+                <button type="button" class="range-pill active" data-range="7">۷ روز اخیر</button>
+                <button type="button" class="range-pill" data-range="14">۱۴ روز اخیر</button>
+                <button type="button" class="range-pill" data-range="30">۳۰ روز اخیر</button>
+                <button type="button" class="range-pill" data-range="90">۹۰ روز اخیر</button>
+                <button type="button" class="range-pill" data-range="all">کل دوره</button>
+            </div>
+        </section>
+
+        <section class="report-hero card">
+            <div class="hero-stat">
+                <span>حجم کل دوره</span>
+                <strong id="heroTotalVolume">۰</strong>
+                <small>kg × تکرار</small>
+            </div>
+            <div class="hero-stat">
+                <span>جلسات ثبت‌شده</span>
+                <strong id="heroSessionCount">۰</strong>
+            </div>
+            <div class="hero-stat">
+                <span>مجموع ست‌های مؤثر</span>
+                <strong id="heroSetCount">۰</strong>
+            </div>
+        </section>
+
+        <section class="radar-section card">
+            <div id="radarChartWrap"></div>
+            <div id="radarLegend" class="radar-legend"></div>
+            <p class="radar-note">
+                حلقه‌ی نقطه‌چین آبی، مرجع عمومیِ رایج در تمرین قدرتی (حدود
+                <span id="thresholdLabel">۱۰</span> ست مؤثر در هفته برای هر گروه عضلانی) را نشان می‌دهد؛
+                این عدد دقیقی برای بدن شما نیست، فقط یک نقطه‌ی مقایسه است.
+            </p>
+        </section>
+
+        <!-- Desktop table -->
+        <section class="card category-table-wrap desktop-only">
+            <table class="category-table">
+                <thead>
+                    <tr>
+                        <th data-sort="name">گروه عضلانی</th>
+                        <th data-sort="sets">ست مؤثر</th>
+                        <th data-sort="volume">حجم (kg×تکرار)</th>
+                        <th data-sort="trend">تغییر نسبت به دوره قبل</th>
+                        <th data-sort="status">وضعیت</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody"></tbody>
+            </table>
+        </section>
+
+        <!-- Mobile cards -->
+        <section class="mobile-only" id="categoryCards"></section>
+
+    </div>
+
+</div>
+
+<script src="./js/exercise-catalog.js"></script>
+<script src="./js/storage.js"></script>
+<script src="./js/report.js"></script>
+
+</body>
+</html>
