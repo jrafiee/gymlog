@@ -1033,3 +1033,43 @@ body.dark-mode .pb-error {
         transition: none;
     }
 }
+
+/* ---------- دسکتاپ: فرم داخل چارچوب برنامه، منوی کناری و نوار بالا دیده می‌شوند ---------- */
+@media (min-width: 1024px) {
+    .pb-overlay {
+        top: 64px;
+        right: 260px;
+        left: 0;
+        bottom: 0;
+        z-index: 80;
+        background: #f2f4f7;
+        overflow-y: auto;
+    }
+
+    .pb-page {
+        max-width: 1000px;
+        height: auto;
+        min-height: calc(100% - 48px);
+        margin: 24px auto;
+        border-radius: 14px;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+
+    .pb-body {
+        overflow: visible;
+    }
+
+    .pb-foot {
+        position: sticky;
+        bottom: 0;
+        border-radius: 0 0 14px 14px;
+    }
+
+    body.dark-mode .pb-overlay {
+        background: #0f172a;
+    }
+
+    body.dark-mode .pb-page {
+        box-shadow: 0 0 0 1px #334155;
+    }
+}

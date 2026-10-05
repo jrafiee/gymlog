@@ -363,6 +363,8 @@
         history.pushState({ modal: "programBuilder" }, "");
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
+        const topTitle = document.getElementById("desktopTopbarTitle");
+        if (topTitle) topTitle.textContent = "ساخت برنامه تمرینی";
         renderStep();
     }
 
@@ -373,6 +375,10 @@
         document.body.style.overflow = "";
         if (onKey) document.removeEventListener("keydown", onKey);
         onKey = null;
+        const topTitle = document.getElementById("desktopTopbarTitle");
+        if (topTitle && typeof VIEW_TITLES !== "undefined" && typeof currentDesktopView !== "undefined") {
+            topTitle.textContent = VIEW_TITLES[currentDesktopView] || topTitle.textContent;
+        }
     }
 
     function closeBuilder(force) {
@@ -943,6 +949,16 @@
     /* =========================
        اتصال به صفحه
     ========================= */
+    /* در دسکتاپ فرم داخل چارچوب برنامه است؛ با کلیک روی منو، فرم بسته می‌شود و صفحه‌ی انتخاب‌شده باز می‌شود */
+    const originalSwitchView = window.switchView;
+    window.switchView = function () {
+        if (overlay && window.matchMedia("(min-width: 1024px)").matches) {
+            if (isDirty() && !confirm("برنامه‌ی ذخیره‌نشده از بین می‌رود. فرم بسته شود؟")) return;
+            closeBuilder(true);
+        }
+        return originalSwitchView.apply(this, arguments);
+    };
+
     window.openProgramBuilder = openProgramBuilder;
     window.renderUserView = renderUserView;
     window.renderUserChip = renderUserChip;
