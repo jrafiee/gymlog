@@ -6,7 +6,7 @@
 const CACHE_NAME = "gym-tracker-v22";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
-const MEDIA_CACHE = "gym-media-v1";
+const MEDIA_CACHE = "gym-media-v2";
 
 const FILES_TO_CACHE = [
     "./",
