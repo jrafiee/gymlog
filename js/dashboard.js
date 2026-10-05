@@ -774,22 +774,10 @@ function renderSettingsView() {
     const container = document.getElementById("viewSettingsContainer");
     if (!container) return;
 
-    const isDark = document.body.classList.contains("dark-mode");
-
     container.innerHTML = `
         <div class="card" style="padding:24px; max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:20px;">
             <h3 style="margin:0; font-size:18px; font-weight:700;">تنظیمات و نگهداری برنامه</h3>
             
-            <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
-                <div class="setting-info">
-                    <strong>ظاهر برنامه</strong>
-                    <span>تغییر بین حالت روشن و تاریک</span>
-                </div>
-                <button type="button" class="secondary-btn" id="dashToggleThemeBtn">
-                    ${isDark ? "☀️ حالت روشن" : "🌙 حالت تاریک"}
-                </button>
-            </div>
-
             <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
                 <div class="setting-info">
                     <strong>ساخت برنامه تمرینی</strong>
@@ -832,14 +820,12 @@ function renderSettingsView() {
         </div>
     `;
 
-    container.querySelector("#dashOpenBuilderBtn").addEventListener("click", () => {
-        if (typeof openProgramBuilder === "function") openProgramBuilder();
-    });
-
-    container.querySelector("#dashToggleThemeBtn").addEventListener("click", () => {
-        if (themeToggleBtn) themeToggleBtn.click();
-        renderSettingsView();
-    });
+    const builderBtn = container.querySelector("#dashOpenBuilderBtn");
+    if (builderBtn) {
+        builderBtn.addEventListener("click", () => {
+            if (typeof openProgramBuilder === "function") openProgramBuilder();
+        });
+    }
 
     container.querySelector("#dashClearHistoryBtn").addEventListener("click", async () => {
         if (confirm("تاریخچه‌ی تمرین‌ها حذف شود؟ برنامه‌ی تمرینی دست‌نخورده می‌ماند.")) {

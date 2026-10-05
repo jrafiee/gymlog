@@ -41,7 +41,6 @@
     const STEPS = ["روزها", "حرکات", "مشخصات", "خروجی"];
 
     const RANGES = {
-        age: [5, 100, "سن"],
         height: [100, 250, "قد"],
         waist: [30, 250, "دور کمر"],
         weight: [20, 400, "وزن"]
@@ -95,26 +94,32 @@
     /* =====================================================
        مشخصات کاربر: فرم، اعتبارسنجی، چیپ بالای صفحه
     ===================================================== */
+    function currentJalaliYear() {
+        try { return isoToJalali(getToday()).jy; } catch (e) { return new Date().getFullYear() - 621; }
+    }
+
+    function fieldHtml(name, label, unit, value, opts) {
+        opts = opts || {};
+        return `
+            <label class="pb-field ${opts.wide ? "pb-field-wide" : ""}">
+                <span class="pb-label">${label}</span>
+                <span class="pb-input">
+                    <input type="text" name="${name}" ${opts.mode ? `inputmode="${opts.mode}"` : ""} ${opts.max ? `maxlength="${opts.max}"` : ""} ${opts.auto ? `autocomplete="${opts.auto}"` : ""} placeholder="${esc(opts.ph || "")}" value="${esc(value)}">
+                    ${unit ? `<em>${unit}</em>` : ""}
+                </span>
+            </label>`;
+    }
+
     function profileFieldsHtml(p) {
         p = p || {};
-        const val = v => (v === undefined || v === null ? "" : esc(toFa(v)));
+        const val = v => (v === undefined || v === null ? "" : toFa(v));
         return `
         <div class="pb-form-grid">
-            <label class="pb-field pb-field-wide">نام و نام خانوادگی
-                <input type="text" name="fullName" maxlength="60" autocomplete="name" value="${esc(p.fullName || "")}">
-            </label>
-            <label class="pb-field">سن (سال)
-                <input type="text" name="age" inputmode="numeric" value="${val(p.age)}">
-            </label>
-            <label class="pb-field">قد (سانتی‌متر)
-                <input type="text" name="height" inputmode="decimal" value="${val(p.height)}">
-            </label>
-            <label class="pb-field">دور کمر (سانتی‌متر)
-                <input type="text" name="waist" inputmode="decimal" value="${val(p.waist)}">
-            </label>
-            <label class="pb-field">وزن (کیلوگرم)
-                <input type="text" name="weight" inputmode="decimal" value="${val(p.weight)}">
-            </label>
+            ${fieldHtml("fullName", "نام و نام خانوادگی", "", p.fullName || "", { wide: true, max: 60, auto: "name", ph: "مثلاً علی رضایی" })}
+            ${fieldHtml("birthYear", "سال تولد (شمسی)", "", val(p.birthYear), { mode: "numeric", max: 4, ph: toFa(currentJalaliYear() - 28) })}
+            ${fieldHtml("height", "قد", "cm", val(p.height), { mode: "decimal" })}
+            ${fieldHtml("waist", "دور کمر", "cm", val(p.waist), { mode: "decimal" })}
+            ${fieldHtml("weight", "وزن", "kg", val(p.weight), { mode: "decimal" })}
         </div>`;
     }
 
@@ -124,12 +129,21 @@
         if (!fullName) return { error: "نام و نام خانوادگی را وارد کن.", field: "fullName" };
 
         const out = { fullName };
+
+        const cy = currentJalaliYear();
+        const by = normNum(get("birthYear"));
+        if (isNaN(by)) return { error: "سال تولد را وارد کن.", field: "birthYear" };
+        if (by < 1300 || by > cy - 5 || Math.round(by) !== by) {
+            return { error: `سال تولد باید یک سال شمسی بین ${toFa(1300)} تا ${toFa(cy - 5)} باشد.`, field: "birthYear" };
+        }
+        out.birthYear = by;
+
         for (const key of Object.keys(RANGES)) {
             const [min, max, label] = RANGES[key];
             const n = normNum(get(key));
             if (isNaN(n)) return { error: `${label} را وارد کن.`, field: key };
             if (n < min || n > max) return { error: `${label} باید بین ${toFa(min)} تا ${toFa(max)} باشد.`, field: key };
-            out[key] = key === "age" ? Math.round(n) : Math.round(n * 10) / 10;
+            out[key] = Math.round(n * 10) / 10;
         }
         return { profile: out };
     }
@@ -141,7 +155,7 @@
             const el = document.getElementById(id);
             if (!el) return;
             if (name) {
-                el.textContent = "👤 " + name;
+                el.textContent = name;
                 el.hidden = false;
                 el.title = "مشاهده‌ی مشخصات کاربر";
             } else {
@@ -187,8 +201,13 @@
             container.innerHTML = `
             <div class="pb-user-wrap">
                 <section class="card pb-user-card">
-                    <h3 class="pb-user-title">${p ? "ویرایش مشخصات" : "مشخصات کاربر"}</h3>
-                    ${p ? "" : `<p class="pb-muted">هنوز مشخصاتی ثبت نشده. نام و اندازه‌های بدنت را وارد کن.</p>`}
+                    <div class="pb-form-head">
+                        <span class="pb-form-icon" aria-hidden="true">👤</span>
+                        <div>
+                            <h3 class="pb-user-title">${p ? "ویرایش مشخصات" : "مشخصات کاربر"}</h3>
+                            <p class="pb-muted">${p ? "اطلاعات خودت را به‌روز کن." : "هنوز مشخصاتی ثبت نشده. نام، سال تولد و اندازه‌های بدنت را وارد کن."}</p>
+                        </div>
+                    </div>
                     <div id="pbUserForm">${profileFieldsHtml(p)}</div>
                     <p class="pb-error" id="pbUserError" role="alert"></p>
                     <div class="pb-actions">
@@ -221,6 +240,10 @@
         const h = p.height / 100;
         const bmi = h > 0 ? Math.round((p.weight / (h * h)) * 10) / 10 : null;
         const whtr = p.height > 0 ? Math.round((p.waist / p.height) * 100) / 100 : null;
+        const cy = currentJalaliYear();
+        const ageText = p.birthYear
+            ? `متولد ${toFa(p.birthYear)} · ${toFa(cy - p.birthYear)} ساله`
+            : (p.age ? `${toFa(p.age)} ساله` : "");
         const initial = (p.fullName || "؟").trim().charAt(0);
         const firstUse = typeof getFirstUseAt === "function" ? getFirstUseAt() : null;
 
@@ -231,7 +254,7 @@
                     <span class="pb-avatar" aria-hidden="true">${esc(initial)}</span>
                     <div>
                         <h3 class="pb-user-title">${esc(p.fullName)}</h3>
-                        <span class="pb-muted">${toFa(p.age)} ساله</span>
+                        <span class="pb-muted">${ageText}</span>
                     </div>
                 </div>
                 <div class="pb-tiles">
@@ -355,8 +378,8 @@
     function closeBuilder(force) {
         if (!overlay) return;
         if (!force && isDirty() && !confirm("برنامه‌ی ذخیره‌نشده از بین می‌رود. بستن فرم؟")) return;
+        removeOverlay();
         if (history.state && history.state.modal === "programBuilder") history.back();
-        else removeOverlay();
     }
 
     window.addEventListener("popstate", () => { if (overlay) removeOverlay(); });
