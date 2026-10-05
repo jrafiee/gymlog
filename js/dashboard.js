@@ -25,6 +25,7 @@ const VIEW_TITLES = {
     history: "تاریخچه کامل تمرینات",
     bank: "بانک جامع حرکات ورزشی",
     calendar: "تقویم تمرینات",
+    user: "کاربر",
     backup: "پشتیبان‌گیری و بازیابی داده‌ها",
     settings: "تنظیمات برنامه"
 };
@@ -72,6 +73,8 @@ function switchView(viewName) {
         renderBankView();
     } else if (viewName === "calendar") {
         renderCalendarView();
+    } else if (viewName === "user") {
+        if (typeof renderUserView === "function") renderUserView();
     } else if (viewName === "backup") {
         renderBackupView();
     } else if (viewName === "settings") {
@@ -598,14 +601,10 @@ function renderProgramsView() {
         programsCardsHtml = monthKeys.map(mKey => {
             const month = workoutPrograms[mKey];
             const isCur = mKey === currentMonth;
-            const sessionsHtml = Object.values(month.sessions || {}).map(sess => `
-                <div class="my-program-session" style="margin-bottom:12px; background:#ffffff; border:1px solid #e5e7eb; border-radius:8px; padding:12px;">
-                    <h4 style="margin:0 0 6px; font-size:13px; color:#1f2937;">${sess.title}</h4>
-                    <ul style="margin:0; padding-right:18px; font-size:12px; color:#4b5563; line-height:1.8;">
-                        ${sess.exercises.map(e => `<li><strong>${e.name}</strong> — ${e.sets} ست × ${e.target} (استراحت ${e.rest})</li>`).join("")}
-                    </ul>
-                </div>
-            `).join("");
+            const sessionsHtml = Object.keys(month.sessions || {})
+                .sort((a, b) => Number(a) - Number(b))
+                .map(k => buildProgramSessionTableHtml(month.sessions[k], k))
+                .join("");
 
             return `
                 <div class="card" style="margin-bottom:16px; padding:20px;">
@@ -617,7 +616,7 @@ function renderProgramsView() {
                             <span style="font-size:12px; color:#6b7280;">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
                         </div>
                     </div>
-                    <div>${sessionsHtml}</div>
+                    <div class="dv-prog-sessions">${sessionsHtml}</div>
                 </div>
             `;
         }).join("");
@@ -793,6 +792,16 @@ function renderSettingsView() {
 
             <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
                 <div class="setting-info">
+                    <strong>ساخت برنامه تمرینی</strong>
+                    <span>طراحی برنامه‌ی جدید و ثبت مستقیم در برنامه یا دانلود به‌صورت فایل JSON</span>
+                </div>
+                <button type="button" class="primary-btn" id="dashOpenBuilderBtn">
+                    ساخت برنامه
+                </button>
+            </div>
+
+            <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
+                <div class="setting-info">
                     <strong>برنامه‌های تمرینی</strong>
                     <span>مشاهده و بارگذاری برنامه‌ها در بخش برنامه‌های تمرینی</span>
                 </div>
@@ -822,6 +831,10 @@ function renderSettingsView() {
             </div>
         </div>
     `;
+
+    container.querySelector("#dashOpenBuilderBtn").addEventListener("click", () => {
+        if (typeof openProgramBuilder === "function") openProgramBuilder();
+    });
 
     container.querySelector("#dashToggleThemeBtn").addEventListener("click", () => {
         if (themeToggleBtn) themeToggleBtn.click();

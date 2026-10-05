@@ -29,6 +29,7 @@ const LEGACY_PROGRAM_KEY = "gymProgressTracker_programOverrides";
 const LEGACY_LAST_BACKUP_KEY = "gymProgressTracker_lastBackupAt";
 const LEGACY_FIRST_USE_KEY = "gymProgressTracker_firstUseAt";
 const LEGACY_THEME_KEY = "gymTrackerTheme";
+const LEGACY_PROFILE_KEY = "gymProgressTracker_userProfile";
 
 // For backward-compatibility with code that references STORAGE_KEY
 const STORAGE_KEY = LEGACY_STORAGE_KEY;
@@ -761,6 +762,7 @@ async function fullResetStorage() {
         localStorage.removeItem(LEGACY_LAST_BACKUP_KEY);
         localStorage.removeItem(LEGACY_FIRST_USE_KEY);
         localStorage.removeItem(LEGACY_THEME_KEY);
+        localStorage.removeItem(LEGACY_PROFILE_KEY);
     } catch (e) { /* ignore */ }
 
     return true;
@@ -976,6 +978,8 @@ function exportData(options) {
             { key: "firstUseAt", value: getFirstUseAt() },
             { key: "theme", value: localStorage.getItem(LEGACY_THEME_KEY) || "light" }
         ];
+        const profileForBackup = getUserProfile();
+        if (profileForBackup) settingsArray.push({ key: "userProfile", value: profileForBackup });
 
         const backupData = {
             app: "Gym Progress Tracker",
@@ -1217,4 +1221,48 @@ function getBackupWarningInfo() {
         shouldWarn: daysSince >= 7,
         daysSince
     };
+}
+
+
+/* =====================================================
+   User Profile (name, age, height, waist, weight)
+   Stored in the "settings" store under key "userProfile",
+   mirrored to localStorage as an emergency fallback.
+===================================================== */
+
+function getUserProfile() {
+    if (_storeCache.settings && _storeCache.settings.userProfile) {
+        return _storeCache.settings.userProfile;
+    }
+    try {
+        const raw = localStorage.getItem(LEGACY_PROFILE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+async function saveUserProfile(profile) {
+    if (!profile || typeof profile !== "object") return false;
+    const clean = { ...profile, updatedAt: new Date().toISOString() };
+
+    if (!_storeCache.settings) _storeCache.settings = {};
+    _storeCache.settings.userProfile = clean;
+
+    try {
+        localStorage.setItem(LEGACY_PROFILE_KEY, JSON.stringify(clean));
+    } catch (e) { /* ignore */ }
+
+    if (_storeCache.db) {
+        try {
+            await putRecord(_storeCache.db, "settings", {
+                key: "userProfile",
+                value: clean,
+                updatedAt: clean.updatedAt
+            });
+        } catch (err) {
+            console.error("[GymLog DB] خطا در ذخیره‌ی مشخصات کاربر:", err);
+        }
+    }
+    return true;
 }

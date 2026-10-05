@@ -518,12 +518,208 @@
         return { events: events.slice(0, max), total: events.length };
     }
 
+    /* =========================
+       ۶) نمودار همه‌ی حرکات یک جلسه‌ی برنامه
+       حرکات با وزنه: بهترین ست (بیشترین وزن، در تساوی بیشترین تکرار)
+       حرکات وزن‌بدنی/زمانی (شنا، پلانک، ...): بیشترین عدد ثبت‌شده در فیلد «تکرار» هر جلسه
+       (برای پلانک همان مقدار ثانیه‌ای است که کاربر در فیلد تکرار می‌نویسد)
+    ========================= */
+    const TIMED_IDS = new Set(["plank", "side_plank"]);
+
+    function unitFor(id, target) {
+        if (target && target.timed) return /دقیقه|min/i.test(target.raw || "") ? "دقیقه" : "ثانیه";
+        if (TIMED_IDS.has(id)) return "ثانیه";
+        return "تکرار";
+    }
+
+    function bodyEntry(workout, ex) {
+        const sets = [];
+        let logged = 0;
+        (ex.sets || []).forEach(s => {
+            const hasW = s.weight !== "" && s.weight != null;
+            const hasR = s.reps !== "" && s.reps != null;
+            if (!hasW && !hasR) return;
+            logged += 1;
+            const r = num(s.reps);
+            const w = num(s.weight);
+            if (r !== null && r > 0) sets.push({ weight: w !== null && w > 0 ? w : 0, reps: r });
+        });
+
+        let best = null;
+        sets.forEach(s => {
+            if (!best || s.reps > best.reps || (s.reps === best.reps && s.weight > best.weight)) best = s;
+        });
+
+        return {
+            workoutId: workout.id,
+            date: workout.date,
+            week: workout.week,
+            session: workout.session,
+            month: workout.month,
+            sets,
+            logged,
+            incomplete: logged - sets.length,
+            best,
+            topSets: best ? sets.filter(s => s.reps === best.reps) : []
+        };
+    }
+
+    function bodySessions(workouts, exerciseId) {
+        const out = [];
+        sortWorkouts(workouts).forEach(w => {
+            const ex = (w.exercises || []).find(e => e.id === exerciseId);
+            if (!ex) return;
+            const entry = bodyEntry(w, ex);
+            if (entry.sets.length > 0) out.push(entry);
+        });
+        return out;
+    }
+
+    function interpretBody(sessions, target, unit) {
+        const n = sessions.length;
+        if (n === 0) return { level: "none", text: "برای این حرکت در بازه‌ی انتخاب‌شده ثبتی وجود ندارد." };
+        if (n === 1) return { level: "none", text: "فقط یک جلسه ثبت شده؛ داده کافی برای ارزیابی روند وجود ندارد." };
+
+        const f = sessions[0].best.reps;
+        const l = sessions[n - 1].best.reps;
+        const label = unit === "تکرار" ? "تکرار" : "مدت";
+        const change = l > f ? `${label} بیشتر شده (+${fa(l - f, 0)})`
+            : l < f ? `${label} کمتر شده (−${fa(f - l, 0)})`
+            : "بدون تغییر";
+        const u = unit === "تکرار" ? "" : " " + unit;
+
+        if (n === 2) {
+            return {
+                level: "limited",
+                text: `بهترین ثبت از ${fa(f, 0)}${u} به ${fa(l, 0)}${u} رسیده (${change}). با دو جلسه، داده کافی برای ارزیابی روند وجود ندارد.`
+            };
+        }
+
+        let text = `در ${fa(n, 0)} جلسه‌ی ثبت‌شده، بهترین ثبت از ${fa(f, 0)}${u} به ${fa(l, 0)}${u} رسیده است؛ ${change}.`;
+        if (target) {
+            const st = repStatus(l, target);
+            if (st === "ceiling") text += ` در جلسه‌ی آخر به سقف محدوده‌ی هدف (${fa(target.max, 0)}) رسیده است.`;
+            else if (st === "in") text += ` جلسه‌ی آخر داخل محدوده‌ی هدف، ولی پایین‌تر از سقف (${fa(target.max, 0)}) است.`;
+            else text += ` جلسه‌ی آخر پایین‌تر از حداقل محدوده‌ی هدف (${fa(target.min, 0)}) است.`;
+        }
+        return { level: "ok", text };
+    }
+
+    function computeSessionCharts(ctx, f) {
+        const { programs, catalog, today, activeMonth } = ctx;
+        const month = f.month && programs[f.month] ? f.month : activeMonth;
+
+        let ws = ctx.workouts;
+        if (month) ws = ws.filter(w => w.month === month);
+        if (f.range && f.range !== "all") ws = ws.filter(w => w.date >= addDays(today, -7 * Number(f.range) + 1));
+        ws = ws.filter(w => Number(w.session) === Number(f.session));
+
+        const prog = month && programs[month] ? programs[month] : null;
+        const sess = prog && prog.sessions ? prog.sessions[f.session] : null;
+
+        const order = sess ? sess.exercises.map(e => e.id) : [];
+        ws.forEach(w => (w.exercises || []).forEach(e => { if (!order.includes(e.id)) order.push(e.id); }));
+
+        const items = order.map(id => {
+            const target = getTarget(programs, month, id);
+            const kind = isTrackable(id, target, catalog) ? "load" : "reps";
+            const unit = kind === "load" ? "kg" : unitFor(id, target);
+            const hist = kind === "load" ? exerciseSessions(ws, id) : bodySessions(ws, id);
+
+            const sessions = hist.map(s => {
+                const t = getTarget(programs, s.month, id);
+                return Object.assign({}, s, { target: t, status: repStatus(s.best.reps, t) });
+            });
+            const lastTarget = sessions.length ? sessions[sessions.length - 1].target : target;
+
+            const val = s => (kind === "load" ? s.best.weight : s.best.reps);
+            let stats = null;
+            if (sessions.length) {
+                const top = sessions.reduce((m, s) => (val(s) > val(m) ? s : m), sessions[0]);
+                stats = {
+                    count: sessions.length,
+                    maxBest: top.best,
+                    last: sessions[sessions.length - 1].best,
+                    incompleteSessions: sessions.filter(s => s.incomplete > 0).length
+                };
+            }
+
+            return {
+                id,
+                name: catalog[id] ? catalog[id].name : id,
+                kind,
+                unit,
+                sessionTitle: sess ? sess.title : "",
+                sessions,
+                target: lastTarget,
+                stats,
+                interpretation: kind === "load"
+                    ? interpretProgression(sessions, lastTarget)
+                    : interpretBody(sessions, lastTarget, unit)
+            };
+        });
+
+        return { workoutCount: ws.length, items, sessionTitle: sess ? sess.title : "" };
+    }
+
+    /* =========================
+       ۷) تعداد ست هر گروه عضلانی (برای نمودار عنکبوتی)
+       هر ستی که وزنه یا تکرارش ثبت شده یک ست حساب می‌شود.
+    ========================= */
+    const MUSCLE_ORDER = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
+    const MUSCLE_MAP = {
+        machine_chest_press: "سینه", incline_dumbbell_press: "سینه", dumbbell_fly: "سینه",
+        elevated_pushup: "سینه", incline_pushup: "سینه", cable_crossover: "سینه",
+        close_grip_dumbbell_press: "سینه",
+        wide_lat_pulldown: "پشت", medium_grip_lat_pulldown: "پشت", seated_cable_row: "پشت",
+        chest_supported_row: "پشت", t_bar_row: "پشت", straight_arm_pullover: "پشت",
+        dumbbell_shoulder_press: "سرشانه", dumbbell_lateral_raise: "سرشانه",
+        rear_delt_fly: "سرشانه", face_pull: "سرشانه",
+        hammer_curl: "جلو بازو", cable_curl: "جلو بازو",
+        rope_triceps_pushdown: "پشت بازو", overhead_cable_triceps: "پشت بازو",
+        lying_dumbbell_triceps_extension: "پشت بازو",
+        leg_press: "پا", smith_squat: "پا", lying_leg_curl: "پا", leg_extension: "پا",
+        bulgarian_split_squat: "پا", smith_calf_raise: "پا",
+        dead_bug: "شکم", crunch: "شکم", cable_crunch: "شکم", side_plank: "شکم",
+        plank: "شکم", pallof_press: "شکم"
+    };
+
+    function computeMuscleSets(ctx, range) {
+        const { workouts, catalog, today } = ctx;
+        let ws = workouts;
+        if (range && range !== "all") ws = ws.filter(w => w.date >= addDays(today, -Number(range) + 1));
+
+        const counts = {};
+        MUSCLE_ORDER.forEach(c => { counts[c] = 0; });
+        let other = 0;
+
+        ws.forEach(w => (w.exercises || []).forEach(ex => {
+            const cat = MUSCLE_MAP[ex.id] || (catalog[ex.id] && catalog[ex.id].category) || null;
+            (ex.sets || []).forEach(s => {
+                const hasW = s.weight !== "" && s.weight != null;
+                const hasR = s.reps !== "" && s.reps != null;
+                if (!hasW && !hasR) return;
+                if (cat && counts[cat] !== undefined) counts[cat] += 1;
+                else other += 1;
+            });
+        }));
+
+        const groups = MUSCLE_ORDER.map(name => ({ name, sets: counts[name] }));
+        return {
+            groups,
+            total: groups.reduce((a, g) => a + g.sets, 0),
+            other,
+            workoutCount: ws.length
+        };
+    }
+
     global.DashAnalytics = {
         BODYWEIGHT_IDS,
         num, fa, fmtSet, addDays, diffDays, sortWorkouts,
         parseTarget, getTarget, isTrackable, repStatus,
         entryFromWorkout, exerciseSessions, isCeilingReached,
         computeStatus, computeProgression, computeComparison,
-        computeReadiness, computeRecords, interpretProgression
+        computeReadiness, computeRecords, interpretProgression,
+        computeSessionCharts, computeMuscleSets, MUSCLE_ORDER
     };
 })(window);

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/dashboard-overview.css">
     <link rel="stylesheet" href="./css/report.css">
+    <link rel="stylesheet" href="./css/program-builder.css">
 </head>
 
 <body>
@@ -58,6 +59,11 @@
                 تقویم تمرین
             </button>
 
+            <button type="button" class="sidebar-nav-item" data-nav="user">
+                <span class="sidebar-nav-icon">👤</span>
+                کاربر
+            </button>
+
             <div class="sidebar-divider"></div>
 
             <button type="button" class="sidebar-nav-item" data-nav="backup">
@@ -82,8 +88,11 @@
 
         <!-- Desktop Topbar -->
         <header class="desktop-topbar">
-            <div class="desktop-topbar-title" id="desktopTopbarTitle">
-                داشبورد مدیریت و تحلیل تمرین
+            <div class="desktop-topbar-heading">
+                <div class="desktop-topbar-title" id="desktopTopbarTitle">
+                    داشبورد مدیریت و تحلیل تمرین
+                </div>
+                <button type="button" class="user-chip" id="desktopUserChip" hidden></button>
             </div>
             <div class="desktop-topbar-actions">
                 <button type="button" class="desktop-theme-icon-btn" id="desktopThemeIconBtn" aria-label="تغییر حالت تیره/روشن" title="تغییر ظاهر برنامه (تیره / روشن)">
@@ -94,7 +103,10 @@
 
         <!-- Mobile Top Switcher (< 1024px) -->
         <div class="mobile-nav-bar">
-            <span class="mobile-nav-brand">GymLog</span>
+            <div class="mobile-nav-id">
+                <span class="mobile-nav-brand">GymLog</span>
+                <button type="button" class="user-chip" id="mobileUserChip" hidden></button>
+            </div>
             <div class="mobile-tab-switch">
                 <button type="button" class="mobile-tab-btn active" data-nav="workout">ثبت تمرین</button>
                 <button type="button" class="mobile-tab-btn" data-nav="dashboard">داشبورد</button>
@@ -249,6 +261,13 @@
         </div>
 
         <!-- =========================
+             View 7: User
+        ========================= -->
+        <div id="viewUser" class="app-view">
+            <div id="viewUserContainer" style="padding: 24px;"></div>
+        </div>
+
+        <!-- =========================
              View 8: Backup
         ========================= -->
         <div id="viewBackup" class="app-view">
@@ -292,6 +311,28 @@
                 </div>
                 <button class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(); switchView('dashboard');">
                     مشاهده داشبورد
+                </button>
+            </div>
+
+            <!-- User -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>کاربر</strong>
+                    <span>مشاهده و ویرایش نام، سن، قد، دور کمر و وزن</span>
+                </div>
+                <button class="secondary-btn setting-btn" type="button" onclick="closeSettingsPage(true); switchView('user');">
+                    مشاهده
+                </button>
+            </div>
+
+            <!-- Program builder -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>ساخت برنامه تمرینی</strong>
+                    <span>طراحی برنامه‌ی جدید و ثبت مستقیم یا دانلود فایل JSON</span>
+                </div>
+                <button id="openProgramBuilderBtn" class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(true); openProgramBuilder();">
+                    ساخت برنامه
                 </button>
             </div>
 
@@ -404,6 +445,7 @@
 <script src="./js/dashboard.js"></script>
 <script src="./js/dashboard-analytics.js"></script>
 <script src="./js/dashboard-overview.js"></script>
+<script src="./js/program-builder.js"></script>
 
 <script>
     (function () {

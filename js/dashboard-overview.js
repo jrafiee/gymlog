@@ -33,7 +33,7 @@
     const daysAgoText = n => (n === 0 ? "امروز" : n === 1 ? "دیروز" : `${fa(n, 0)} روز پیش`);
 
     /* وضعیت فیلترهای بخش «روند عملکرد» */
-    const state = { range: "8", month: null, session: "all", exercise: null };
+    const state = { range: "8", month: null, session: null, muscleRange: "all" };
     let ctxCache = null;
 
     /* =========================
@@ -164,9 +164,10 @@
     };
 
     /* =========================
-       بخش ۳: روند عملکرد حرکت
-       سؤال: در این حرکت، از جلسه‌ای به جلسه‌ی دیگر چه تغییری کرده‌ام؟
-       داده : بهترین ست هر جلسه (بیشترین وزن؛ در تساوی، بیشترین تکرار)
+       بخش ۳: روند عملکرد حرکات
+       جلسه‌ها به‌صورت باکس انتخاب می‌شوند؛ زیر آن نمودار تک‌تک حرکات همان جلسه
+       در باکس‌های جدا نمایش داده می‌شود و با کلیک، در مودال بزرگ باز می‌شود.
+       حرکات با وزنه: بهترین ست هر جلسه — حرکات وزن‌بدنی/زمانی: بیشترین تکرار (یا ثانیه)
     ========================= */
     const STATUS_COLORS = { ceiling: "#16a34a", in: "#2563eb", below: "#d97706", none: "#9ca3af" };
     const STATUS_LABELS = {
@@ -176,128 +177,256 @@
         none: "بدون target مشخص"
     };
 
+    let progItems = [];
+    let closeModalFn = null;
+
     function progressionFilters(ctx) {
         const monthKeys = Object.keys(ctx.programs);
-        const monthForSessions = state.month && state.month !== "all" ? state.month : ctx.activeMonth;
-        const sess = ctx.programs[monthForSessions] && ctx.programs[monthForSessions].sessions || {};
-
         const opt = (v, label, cur) => `<option value="${esc(v)}" ${String(cur) === String(v) ? "selected" : ""}>${esc(label)}</option>`;
-
         const range = ["4", "8", "all"].map(v => opt(v, v === "all" ? "کل دوره" : `${fa(v, 0)} هفته اخیر`, state.range)).join("");
-        const sessions = opt("all", "همه جلسات", state.session) +
-            Object.keys(sess).map(k => opt(k, `جلسه ${fa(k, 0)} — ${sess[k].title}`, state.session)).join("");
-        const months = opt("all", "همه برنامه‌ها", state.month) +
-            monthKeys.map(k => opt(k, ctx.programs[k].title, state.month)).join("");
-
-        return { range, sessions, months, multiMonth: monthKeys.length > 1 };
+        const months = monthKeys.map(k => opt(k, ctx.programs[k].title, state.month)).join("");
+        return { range, months, multiMonth: monthKeys.length > 1 };
     }
 
-    function chartSvg(sessions) {
-        const W = 560, H = 270, pl = 46, pr = 22, pt = 36, pb = 46;
+    /* نمودار خطی: compact = کارت کوچک، غیر compact = نسخه‌ی مودال با tooltip */
+    function chartSvg(item, compact) {
+        const sessions = item.sessions;
+        const isLoad = item.kind === "load";
+        const W = compact ? 300 : 560, H = compact ? 150 : 270;
+        const pl = compact ? 30 : 46, pr = compact ? 16 : 22, pt = compact ? 26 : 36, pb = compact ? 28 : 46;
         const n = sessions.length;
-        const ws = sessions.map(s => s.best.weight);
+        const val = s => (isLoad ? s.best.weight : s.best.reps);
+        const ws = sessions.map(val);
         let lo = Math.min(...ws), hi = Math.max(...ws);
-        if (lo === hi) { lo -= 2.5; hi += 2.5; }
-        else { const pad = (hi - lo) * 0.25; lo -= pad; hi += pad; }
+        if (lo === hi) {
+            const d = isLoad ? 2.5 : Math.max(1, Math.round(hi * 0.15));
+            lo -= d; hi += d;
+        } else {
+            const pad = (hi - lo) * 0.25; lo -= pad; hi += pad;
+        }
         lo = Math.max(0, lo);
 
         const x = i => (n === 1 ? (pl + (W - pl - pr) / 2) : pl + (i * (W - pl - pr)) / (n - 1));
-        const y = w => H - pb - ((w - lo) / (hi - lo)) * (H - pt - pb);
+        const y = v => H - pb - ((v - lo) / (hi - lo)) * (H - pt - pb);
+        const fs = compact ? 9 : 10;
 
         const grid = [0, 0.5, 1].map(f => {
             const v = lo + f * (hi - lo);
             const yy = y(v);
             return `<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W - pr}" y2="${yy.toFixed(1)}" stroke="currentColor" stroke-opacity="0.1" stroke-dasharray="3 3"/>
-                    <text x="${pl - 8}" y="${(yy + 3).toFixed(1)}" font-size="10" fill="#9ca3af" text-anchor="end">${fa(v, 1)}</text>`;
+                    <text x="${pl - 6}" y="${(yy + 3).toFixed(1)}" font-size="${fs}" fill="#9ca3af" text-anchor="end">${fa(v, isLoad ? 1 : 0)}</text>`;
         }).join("");
 
-        const path = sessions.map((s, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(s.best.weight).toFixed(1)}`).join(" ");
+        const path = sessions.map((s, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(val(s)).toFixed(1)}`).join(" ");
         const line = n > 1 ? `<path d="${path}" fill="none" stroke="#2563eb" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : "";
 
-        const step = n > 10 ? 2 : 1;
+        const step = compact ? 1 : (n > 10 ? 2 : 1);
+        const showVal = i => (compact ? (n <= 4 || i === n - 1) : i % step === 0);
+        const showDate = i => (compact ? (i === 0 || i === n - 1) : i % step === 0);
+        const text = s => (isLoad ? `${fa(s.best.weight)}×${fa(s.best.reps, 0)}` : fa(s.best.reps, 0));
+
         const dots = sessions.map((s, i) => {
-            const cx = x(i).toFixed(1), cy = y(s.best.weight).toFixed(1);
+            const cx = x(i).toFixed(1), cy = y(val(s)).toFixed(1);
+            const label = showVal(i)
+                ? `<text x="${cx}" y="${(y(val(s)) - 9).toFixed(1)}" font-size="${compact ? 9.5 : 10.5}" font-weight="700" fill="currentColor" text-anchor="middle">${text(s)}</text>`
+                : "";
+            const xl = showDate(i)
+                ? `<text x="${cx}" y="${H - (compact ? 8 : 18)}" font-size="${compact ? 9 : 9.5}" fill="#9ca3af" text-anchor="middle">${shortDate(s.date)}</text>`
+                : "";
+
+            if (compact) {
+                return `${label}${xl}<circle cx="${cx}" cy="${cy}" r="4.5" fill="${STATUS_COLORS[s.status]}" stroke="#fff" stroke-width="1.5"/>`;
+            }
+
+            const best = isLoad
+                ? `بهترین ست: ${fa(s.best.weight)} kg × ${fa(s.best.reps, 0)}`
+                : `بهترین ثبت: ${fa(s.best.reps, 0)} ${item.unit}${s.best.weight > 0 ? ` (با ${fa(s.best.weight)} kg)` : ""}`;
+            const all = isLoad
+                ? s.sets.map(t => `${fa(t.weight)}×${fa(t.reps, 0)}`).join("  ·  ")
+                : s.sets.map(t => fa(t.reps, 0)).join("  ·  ");
             const tip = [
                 pDate(s.date, true),
                 `هفته ${fa(s.week, 0)} · جلسه ${fa(s.session, 0)}`,
-                `بهترین ست: ${fa(s.best.weight)} kg × ${fa(s.best.reps, 0)}`,
-                `همه‌ی ست‌ها: ${s.sets.map(t => `${fa(t.weight)}×${fa(t.reps, 0)}`).join("  ·  ")}`,
+                best,
+                `همه‌ی ست‌ها: ${all}`,
                 s.target ? `هدف ${s.target.raw}: ${STATUS_LABELS[s.status]}` : STATUS_LABELS.none,
                 s.incomplete > 0 ? `⚠ ${fa(s.incomplete, 0)} ست ناقص ثبت شده` : ""
             ].filter(Boolean).join("\n");
-
-            const label = i % step === 0
-                ? `<text x="${cx}" y="${(y(s.best.weight) - 11).toFixed(1)}" font-size="10.5" font-weight="700" fill="currentColor" text-anchor="middle">${fa(s.best.weight)}×${fa(s.best.reps, 0)}</text>`
-                : "";
-            const xl = i % step === 0
-                ? `<text x="${cx}" y="${H - 18}" font-size="9.5" fill="#9ca3af" text-anchor="middle">${shortDate(s.date)}</text>`
-                : "";
 
             return `${label}${xl}
                 <circle class="dv-dot" cx="${cx}" cy="${cy}" r="6" fill="${STATUS_COLORS[s.status]}" stroke="#fff" stroke-width="2"
                         tabindex="0" data-tip="${esc(tip).replace(/\n/g, "&#10;")}"/>`;
         }).join("");
 
-        return `<svg viewBox="0 0 ${W} ${H}" class="dv-svg" role="img" aria-label="روند بهترین ست هر جلسه">${grid}${line}${dots}</svg>`;
+        return `<svg viewBox="0 0 ${W} ${H}" class="dv-svg" role="img" aria-label="روند ${esc(item.name)}">${grid}${line}${dots}</svg>`;
+    }
+
+    function itemTag(item) {
+        if (item.kind === "load") return "";
+        return item.unit === "تکرار" ? "وزن‌بدنی · تکرار" : `زمانی · ${item.unit}`;
+    }
+
+    function bestText(item, b) {
+        return item.kind === "load"
+            ? setHtml(b)
+            : `<bdi class="dv-num">${fa(b.reps, 0)}${item.unit === "تکرار" ? "" : " " + item.unit}</bdi>`;
+    }
+
+    function itemCardHtml(item, idx) {
+        const has = item.sessions.length > 0;
+        const tag = itemTag(item);
+        const foot = has
+            ? `<span>${fa(item.stats.count, 0)} جلسه</span><span>آخرین: ${bestText(item, item.stats.last)}</span>`
+            : `<span>—</span>`;
+        return `
+        <button type="button" class="dv-ex-card" data-idx="${idx}" aria-label="باز کردن نمودار ${esc(item.name)}">
+            <div class="dv-ex-head">
+                <strong>${esc(item.name)}</strong>
+                ${tag ? `<span class="dv-ex-tag">${esc(tag)}</span>` : ""}
+            </div>
+            ${has ? chartSvg(item, true) : `<div class="dv-ex-empty">ثبتی در این بازه وجود ندارد</div>`}
+            <div class="dv-ex-foot">${foot}</div>
+        </button>`;
+    }
+
+    function mountTips(root) {
+        const wrap = root.querySelector(".dv-chart");
+        const tip = root.querySelector(".dv-tip");
+        if (!wrap || !tip) return;
+
+        const show = el => {
+            tip.textContent = el.getAttribute("data-tip");
+            tip.hidden = false;
+            const wr = wrap.getBoundingClientRect();
+            const r = el.getBoundingClientRect();
+            const left = Math.min(Math.max(r.left - wr.left + r.width / 2, 100), wr.width - 100);
+            tip.style.left = left + "px";
+            tip.style.top = (r.top - wr.top) + "px";
+        };
+        const hide = () => { tip.hidden = true; };
+
+        root.querySelectorAll(".dv-dot").forEach(dot => {
+            dot.addEventListener("pointerenter", () => show(dot));
+            dot.addEventListener("pointerleave", hide);
+            dot.addEventListener("focus", () => show(dot));
+            dot.addEventListener("blur", hide);
+            dot.addEventListener("click", e => { e.stopPropagation(); show(dot); });
+        });
+        wrap.addEventListener("click", hide);
+    }
+
+    function openExerciseModal(item) {
+        if (closeModalFn) closeModalFn();
+
+        let body;
+        if (!item.sessions.length) {
+            body = `<div class="dv-empty">برای این حرکت در بازه‌ی انتخاب‌شده ثبتی وجود ندارد. بازه را روی «کل دوره» بگذار.</div>`;
+        } else {
+            const st = item.stats;
+            const legend = Object.keys(STATUS_COLORS).filter(k => k !== "none" || !item.target).map(k =>
+                `<span><i style="background:${STATUS_COLORS[k]}"></i>${STATUS_LABELS[k]}</span>`).join("");
+            const isLoad = item.kind === "load";
+            body = `
+                <div class="dv-chart">
+                    ${chartSvg(item, false)}
+                    <div class="dv-tip" hidden></div>
+                </div>
+                <div class="dv-legend">${legend}</div>
+                <div class="dv-observed-title">داده ثبت‌شده</div>
+                <dl class="dv-observed">
+                    <div><dt>جلسات</dt><dd>${fa(st.count, 0)}</dd></div>
+                    <div><dt>${isLoad ? "بیشترین وزنه" : "بیشترین مقدار"}</dt><dd>${bestText(item, st.maxBest)}</dd></div>
+                    <div><dt>آخرین بهترین ثبت</dt><dd>${bestText(item, st.last)}</dd></div>
+                    ${item.target ? `<div><dt>هدف برنامه</dt><dd>${esc(item.target.raw)}</dd></div>` : ""}
+                </dl>
+                <p class="dv-interp dv-interp-${item.interpretation.level}"><b>تفسیر</b>${esc(item.interpretation.text)}</p>
+                ${st.incompleteSessions ? `<p class="dv-note">در ${fa(st.incompleteSessions, 0)} جلسه، بعضی ست‌ها ناقص ثبت شده‌اند (فقط وزن یا فقط تکرار). این ست‌ها در نمودار لحاظ نشده‌اند.</p>` : ""}
+                <p class="dv-note">${isLoad
+                    ? "نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود؛ پس همه‌ی ست‌های ثبت‌شده بررسی شده‌اند و بهترین ست، ست با بیشترین وزنه است."
+                    : `برای این حرکت، بیشترین عدد ثبت‌شده در فیلد «تکرار» هر جلسه رسم می‌شود${item.unit === "تکرار" ? "" : ` (واحد: ${item.unit})`}.`}</p>`;
+        }
+
+        const overlay = document.createElement("div");
+        overlay.className = "dv-modal-overlay";
+        overlay.innerHTML = `
+            <div class="dv-modal" role="dialog" aria-modal="true" aria-label="${esc(item.name)}">
+                <div class="dv-modal-head">
+                    <div>
+                        <h3>${esc(item.name)}</h3>
+                        <p>${esc(item.sessionTitle)}${itemTag(item) ? " · " + esc(itemTag(item)) : ""}</p>
+                    </div>
+                    <button type="button" class="exercise-guide-close dv-modal-close" aria-label="بستن">×</button>
+                </div>
+                ${body}
+            </div>`;
+
+        const prevOverflow = document.body.style.overflow;
+        const onKey = e => { if (e.key === "Escape") close(); };
+        function close() {
+            overlay.remove();
+            document.body.style.overflow = prevOverflow;
+            document.removeEventListener("keydown", onKey);
+            closeModalFn = null;
+        }
+        closeModalFn = close;
+
+        overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+        overlay.querySelector(".dv-modal-close").addEventListener("click", close);
+        document.addEventListener("keydown", onKey);
+        document.body.style.overflow = "hidden";
+        document.body.appendChild(overlay);
+        mountTips(overlay);
     }
 
     const sectionProgression = {
         render(ctx) {
-            if (!state.month) state.month = ctx.activeMonth || "all";
-            const f = progressionFilters(ctx);
-            const data = A.computeProgression(ctx, state);
-            if (data.selected) state.exercise = data.selected.id;
+            const monthKeys = Object.keys(ctx.programs);
+            if (!state.month || !ctx.programs[state.month]) state.month = ctx.activeMonth || monthKeys[0] || null;
 
+            const sessMap = (state.month && ctx.programs[state.month] && ctx.programs[state.month].sessions) || {};
+            const keys = Object.keys(sessMap).sort((a, b) => Number(a) - Number(b));
+            if (!state.session || !sessMap[state.session]) state.session = keys[0] || null;
+
+            const f = progressionFilters(ctx);
             const filters = `
-                <div class="dv-filters">
+                <div class="dv-filters dv-filters-inline">
                     <label>بازه <select data-f="range">${f.range}</select></label>
                     ${f.multiMonth ? `<label>برنامه <select data-f="month">${f.months}</select></label>` : ""}
-                    <label>جلسه <select data-f="session">${f.sessions}</select></label>
-                    <label class="dv-filter-grow">حرکت
-                        <select data-f="exercise">
-                            ${data.list.length
-                                ? data.list.map(e => `<option value="${esc(e.id)}" ${data.selected && e.id === data.selected.id ? "selected" : ""}>${esc(e.name)} (${fa(e.count, 0)} جلسه)</option>`).join("")
-                                : `<option>—</option>`}
-                        </select>
-                    </label>
                 </div>`;
 
-            let body;
-            if (!data.selected) {
-                const hint = ctx.workouts.length && state.range !== "all"
-                    ? "در این بازه جلسه‌ای با وزنه و تکرار کامل ثبت نشده. بازه را روی «کل دوره» بگذار."
-                    : "هنوز جلسه‌ای با وزنه و تکرار کامل ثبت نشده است.";
-                body = `<div class="dv-empty">${hint}</div>`;
-            } else {
-                const st = data.stats;
-                const legend = Object.keys(STATUS_COLORS).filter(k => k !== "none" || !data.target).map(k =>
-                    `<span><i style="background:${STATUS_COLORS[k]}"></i>${STATUS_LABELS[k]}</span>`).join("");
+            const sessionBoxes = keys.length
+                ? `<div class="dv-sessions" role="tablist" aria-label="انتخاب جلسه">
+                    ${keys.map(k => `
+                        <button type="button" role="tab" aria-selected="${k === state.session}" class="dv-sess-btn ${k === state.session ? "active" : ""}" data-sess="${esc(k)}">
+                            <b>جلسه ${fa(k, 0)}</b>
+                            <span>${esc(sessMap[k].title)}</span>
+                        </button>`).join("")}
+                   </div>`
+                : "";
 
+            let body;
+            if (!state.session) {
+                progItems = [];
+                body = `<div class="dv-empty">برای نمایش نمودار، ابتدا یک برنامه‌ی تمرینی بارگذاری کن.</div>`;
+            } else {
+                const data = A.computeSessionCharts(ctx, state);
+                progItems = data.items;
+                const logged = progItems.some(it => it.sessions.length);
+                const hint = logged ? "" : `<p class="dv-note">برای این جلسه در بازه‌ی انتخاب‌شده چیزی ثبت نشده. بازه را روی «کل دوره» بگذار یا یک جلسه ثبت کن.</p>`;
                 body = `
-                    <div class="dv-chart">
-                        ${chartSvg(data.sessions)}
-                        <div class="dv-tip" hidden></div>
-                    </div>
-                    <div class="dv-legend">${legend}</div>
-                    <div class="dv-observed-title">داده ثبت‌شده</div>
-                    <dl class="dv-observed">
-                        <div><dt>جلسات</dt><dd>${fa(st.count, 0)}</dd></div>
-                        <div><dt>بیشترین وزنه</dt><dd>${setHtml(st.maxWeight)}</dd></div>
-                        <div><dt>آخرین بهترین ست</dt><dd>${setHtml(st.last)}</dd></div>
-                        ${data.target ? `<div><dt>هدف برنامه</dt><dd>${esc(data.target.raw)}</dd></div>` : ""}
-                    </dl>
-                    <p class="dv-interp dv-interp-${data.interpretation.level}"><b>تفسیر</b>${esc(data.interpretation.text)}</p>
-                    ${st.incompleteSessions ? `<p class="dv-note">در ${fa(st.incompleteSessions, 0)} جلسه، بعضی ست‌ها ناقص ثبت شده‌اند (فقط وزن یا فقط تکرار). این ست‌ها در نمودار لحاظ نشده‌اند.</p>` : ""}
-                    <p class="dv-note">نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود؛ پس همه‌ی ست‌های ثبت‌شده بررسی شده‌اند و بهترین ست، ست با بیشترین وزنه است. حرکات وزن‌بدنی و زمانی (مثل پلانک و شنا) در این نمودار نیستند.</p>`;
+                    <div class="dv-ex-grid">${progItems.map(itemCardHtml).join("")}</div>
+                    ${hint}
+                    <p class="dv-note">روی هر نمودار کلیک کن تا بزرگ شود. حرکات با وزنه: بهترین ست هر جلسه — حرکات وزن‌بدنی و زمانی (شنا، پلانک و …): بیشترین تکرار یا ثانیه‌ی ثبت‌شده.</p>`;
             }
 
             return `
             <section class="dv-card">
                 <header class="dv-card-head">
-                    <h3>روند عملکرد حرکت</h3>
-                    <p>بهترین ست هر جلسه برای حرکت انتخاب‌شده</p>
+                    <h3>روند عملکرد حرکات</h3>
+                    <p>یک جلسه را انتخاب کن تا نمودار همه‌ی حرکات آن را ببینی</p>
                 </header>
                 ${filters}
+                ${sessionBoxes}
                 ${body}
             </section>`;
         },
@@ -306,84 +435,111 @@
                 sel.addEventListener("change", () => {
                     const k = sel.dataset.f;
                     state[k] = sel.value;
-                    if (k === "month") state.session = "all";
-                    if (k === "month" || k === "session" || k === "range") state.exercise = null;
+                    if (k === "month") state.session = null;
                     refresh("progression");
                 });
             });
 
-            const wrap = slot.querySelector(".dv-chart");
-            const tip = slot.querySelector(".dv-tip");
-            if (!wrap || !tip) return;
-
-            const show = el => {
-                tip.textContent = el.getAttribute("data-tip");
-                tip.hidden = false;
-                const wr = wrap.getBoundingClientRect();
-                const r = el.getBoundingClientRect();
-                const left = Math.min(Math.max(r.left - wr.left + r.width / 2, 100), wr.width - 100);
-                tip.style.left = left + "px";
-                tip.style.top = (r.top - wr.top) + "px";
-            };
-            const hide = () => { tip.hidden = true; };
-
-            slot.querySelectorAll(".dv-dot").forEach(dot => {
-                dot.addEventListener("pointerenter", () => show(dot));
-                dot.addEventListener("pointerleave", hide);
-                dot.addEventListener("focus", () => show(dot));
-                dot.addEventListener("blur", hide);
-                dot.addEventListener("click", e => { e.stopPropagation(); show(dot); });
+            slot.querySelectorAll(".dv-sess-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    state.session = btn.dataset.sess;
+                    refresh("progression");
+                });
             });
-            wrap.addEventListener("click", hide);
+
+            slot.querySelectorAll(".dv-ex-card").forEach(card => {
+                card.addEventListener("click", () => {
+                    const item = progItems[Number(card.dataset.idx)];
+                    if (item) openExerciseModal(item);
+                });
+            });
         }
     };
 
     /* =========================
-       بخش ۴: مقایسه با جلسه قبل
-       سؤال: در جلسه‌ی آخر نسبت به دفعه‌ی قبلِ همین جلسه‌ی برنامه چه تغییری کرده‌ام؟
+       بخش ۴: نمودار عنکبوتی گروه‌های عضلانی
+       سؤال: در بازه‌ی انتخاب‌شده برای هر گروه عضلانی چند ست ثبت کرده‌ام؟
     ========================= */
-    const sectionCompare = {
+    const MUSCLE_RANGES = [["7", "۷ روز اخیر"], ["30", "۳۰ روز اخیر"], ["90", "۹۰ روز اخیر"], ["all", "کل دوره‌ها"]];
+
+    function radarSvg(groups) {
+        const size = 380, c = size / 2, R = 120, n = groups.length;
+        const maxV = Math.max(...groups.map(g => g.sets), 1);
+        const top = Math.max(4, Math.ceil(maxV / 4) * 4);
+        const pt = (i, f) => {
+            const a = (Math.PI * 2 * i) / n - Math.PI / 2;
+            return { x: c + R * f * Math.cos(a), y: c + R * f * Math.sin(a) };
+        };
+        const poly = f => groups.map((_, i) => { const p = pt(i, f); return `${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(" ");
+
+        const rings = [0.25, 0.5, 0.75, 1].map(f =>
+            `<polygon points="${poly(f)}" fill="none" stroke="currentColor" stroke-opacity="0.14"/>`).join("");
+        const ringLabels = [0.25, 0.5, 0.75, 1].map(f =>
+            `<text x="${c + 4}" y="${(c - R * f - 2).toFixed(1)}" font-size="9" fill="#9ca3af">${fa(top * f, 0)}</text>`).join("");
+        const axes = groups.map((_, i) => {
+            const p = pt(i, 1);
+            return `<line x1="${c}" y1="${c}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="currentColor" stroke-opacity="0.12"/>`;
+        }).join("");
+
+        const pts = groups.map((g, i) => pt(i, g.sets / top));
+        const area = `<polygon points="${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}" fill="#2563eb" fill-opacity="0.2" stroke="#2563eb" stroke-width="2" stroke-linejoin="round"/>`;
+        const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="#2563eb" stroke="#fff" stroke-width="1.5"/>`).join("");
+
+        const labels = groups.map((g, i) => {
+            const a = (Math.PI * 2 * i) / n - Math.PI / 2;
+            const lx = c + (R + 30) * Math.cos(a), ly = c + (R + 30) * Math.sin(a);
+            return `<text x="${lx.toFixed(1)}" y="${(ly - 3).toFixed(1)}" text-anchor="middle" font-size="12.5" fill="currentColor">${esc(g.name)}</text>
+                    <text x="${lx.toFixed(1)}" y="${(ly + 12).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="#2563eb">${fa(g.sets, 0)} ست</text>`;
+        }).join("");
+
+        return `<svg viewBox="0 0 ${size} ${size}" class="dv-radar-svg" role="img" aria-label="تعداد ست هر گروه عضلانی">${rings}${axes}${ringLabels}${area}${dots}${labels}</svg>`;
+    }
+
+    const sectionMuscle = {
         render(ctx) {
-            const c = A.computeComparison(ctx);
-            const head = (sub) => `<header class="dv-card-head"><h3>تغییر نسبت به جلسه‌ی قبل</h3>${sub ? `<p>${sub}</p>` : ""}</header>`;
+            const d = A.computeMuscleSets(ctx, state.muscleRange);
+            const pills = MUSCLE_RANGES.map(([v, l]) =>
+                `<button type="button" class="dv-pill ${state.muscleRange === v ? "active" : ""}" data-mr="${v}">${l}</button>`).join("");
 
-            if (c.state === "empty") {
-                return `<section class="dv-card">${head("")}<div class="dv-empty">بعد از ثبت اولین جلسه، مقایسه اینجا نمایش داده می‌شود.</div></section>`;
-            }
-
-            const sub = `${esc(c.sessionTitle)} · ${pDate(c.current.date)}` +
-                (c.prevWorkout ? ` · جلسه‌ی قبل: ${pDate(c.prevWorkout.date)}` : "");
-
-            if (c.state === "no-previous") {
-                return `<section class="dv-card">${head(sub)}<div class="dv-empty">این اولین ثبت از این جلسه‌ی برنامه است؛ جلسه‌ی قبلی برای مقایسه وجود ندارد.</div></section>`;
-            }
-
-            const sm = c.summary;
-            const summary = c.rows.some(r => r.change)
-                ? `<p class="dv-summary">${fa(sm.up, 0)} حرکت بهتر · ${fa(sm.same, 0)} بدون تغییر · ${fa(sm.lower, 0)} حرکت با وزنه یا تکرار کمتر</p>`
-                : "";
-
-            const rows = c.rows.map(r => `
-                <li class="dv-cmp-row">
-                    <div class="dv-cmp-top">
-                        <strong>${esc(r.name)}</strong>
-                        ${r.change ? `<span class="dv-chip dv-chip-${r.change.tone}">${esc(r.change.text)}</span>` : `<span class="dv-chip dv-chip-same">مقایسه‌ای ندارد</span>`}
+            let body;
+            if (!d.total) {
+                body = `<div class="dv-empty">در این بازه ستی ثبت نشده. بازه را روی «کل دوره‌ها» بگذار یا یک جلسه ثبت کن.</div>`;
+            } else {
+                const max = Math.max(...d.groups.map(g => g.sets), 1);
+                const rows = d.groups.slice().sort((a, b) => b.sets - a.sets).map(g => `
+                    <li class="dv-mus-row">
+                        <span class="dv-mus-name">${esc(g.name)}</span>
+                        <span class="dv-mus-bar"><i style="width:${Math.round((g.sets / max) * 100)}%"></i></span>
+                        <b>${fa(g.sets, 0)}</b>
+                    </li>`).join("");
+                body = `
+                    <div class="dv-radar">
+                        <div class="dv-radar-chart">${radarSvg(d.groups)}</div>
+                        <div class="dv-radar-side">
+                            <p class="dv-radar-total">مجموع <b>${fa(d.total, 0)}</b> ست در <b>${fa(d.workoutCount, 0)}</b> جلسه</p>
+                            <ul class="dv-mus-list">${rows}</ul>
+                        </div>
                     </div>
-                    <div class="dv-cmp-vals">
-                        ${r.prev ? `<span class="dv-cmp-prev">${setHtml(r.prev.best)}</span><span class="dv-arrow">←</span>` : ""}
-                        <span class="dv-cmp-cur">${setHtml(r.cur.best)}</span>
-                        <span class="dv-cmp-meta">${fa(r.cur.logged, 0)} ست${r.setCountChanged ? ` (قبلاً ${fa(r.prev.logged, 0)})` : ""}${r.target ? ` · هدف ${esc(r.target.raw)}` : ""}${r.ceiling ? " · به سقف رسید" : ""}</span>
-                    </div>
-                    ${r.caveat ? `<p class="dv-caveat">${esc(r.caveat)}</p>` : ""}
-                </li>`).join("");
+                    <p class="dv-note">هر ستی که وزنه یا تکرارش ثبت شده یک ست حساب می‌شود؛ نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود.${d.other ? ` ${fa(d.other, 0)} ست مربوط به حرکاتی که گروه عضلانی مشخصی ندارند در نمودار نیامده است.` : ""}</p>`;
+            }
 
             return `
             <section class="dv-card">
-                ${head(sub)}
-                ${summary}
-                <ul class="dv-cmp-list">${rows}</ul>
-                ${c.skipped ? `<p class="dv-note">${fa(c.skipped, 0)} حرکت وزن‌بدنی یا زمانی در مقایسه‌ی بار لحاظ نشد.</p>` : ""}
+                <header class="dv-card-head">
+                    <h3>تعداد ست هر گروه عضلانی</h3>
+                    <p>مقایسه‌ی تعداد ست‌های ثبت‌شده برای سینه، پشت، سرشانه، بازو، پا و شکم</p>
+                </header>
+                <div class="dv-pills">${pills}</div>
+                ${body}
             </section>`;
+        },
+        mount(slot) {
+            slot.querySelectorAll(".dv-pill").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    state.muscleRange = btn.dataset.mr;
+                    refresh("muscle");
+                });
+            });
         }
     };
 
@@ -491,7 +647,7 @@
         program: sectionProgram,
         status: sectionStatus,
         progression: sectionProgression,
-        compare: sectionCompare,
+        muscle: sectionMuscle,
         ready: sectionReady,
         records: sectionRecords,
         cycle: sectionCycle
@@ -504,9 +660,10 @@
             slot("program"),
             slot("status"),
             slot("progression"),
+            slot("muscle"),
             `<div class="dv-split">
-                ${slot("compare")}
-                <div class="dv-stack">${slot("ready")}${slot("records")}</div>
+                ${slot("ready")}
+                ${slot("records")}
             </div>`,
             slot("cycle")
         ].join("");

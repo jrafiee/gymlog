@@ -376,26 +376,47 @@ function getMonthDateRangeText(monthKey) {
     return formatPersianDate(startDate, true) + " تا " + formatPersianDate(endDate, true);
 }
 
+/* جدول ساختاریافته‌ی یک جلسه از برنامه (هم در صفحه‌ی برنامه‌ها و هم در «برنامه‌های من») */
+function buildProgramSessionTableHtml(session, key) {
+    const exercises = session.exercises || [];
+    const rows = exercises.map((e, i) => {
+        const reps = String(e.target || "").replace(/^\s*[\d۰-۹]+\s*[×xX*]\s*/, "");
+        return `
+            <tr>
+                <td class="dv-prog-idx">${(i + 1).toLocaleString("fa-IR")}</td>
+                <td class="dv-prog-name">${e.name}</td>
+                <td>${Number(e.sets).toLocaleString("fa-IR")}</td>
+                <td class="dv-prog-reps">${reps}</td>
+                <td>${e.rest || "—"}</td>
+            </tr>`;
+    }).join("");
+
+    return `
+        <div class="dv-prog-session">
+            <div class="dv-prog-session-head">
+                <span class="dv-prog-session-num">جلسه ${Number(key).toLocaleString("fa-IR")}</span>
+                <h4>${session.title}</h4>
+                <span class="dv-prog-session-count">${exercises.length.toLocaleString("fa-IR")} حرکت</span>
+            </div>
+            <div class="dv-prog-table-wrap">
+                <table class="dv-prog-table">
+                    <thead>
+                        <tr><th>#</th><th>حرکت</th><th>ست</th><th>تکرار / زمان هدف</th><th>استراحت</th></tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
 function buildMyProgramCardHtml(monthKey) {
     const month = workoutPrograms[monthKey];
     const isCurrent = monthKey === currentMonth;
 
-    const sessionsHtml = Object.values(month.sessions)
-        .map(session => `
-            <div class="my-program-session">
-                <h4>${session.title}</h4>
-                <ul class="my-program-exercise-list">
-                    ${session.exercises.map(exercise => `
-                        <li>
-                            <span class="my-program-exercise-name">${exercise.name}</span>
-                            <span class="my-program-exercise-meta">
-                                ${exercise.sets} ست × ${exercise.target} — استراحت ${exercise.rest}
-                            </span>
-                        </li>
-                    `).join("")}
-                </ul>
-            </div>
-        `).join("");
+    const sessionsHtml = Object.keys(month.sessions)
+        .map(k => buildProgramSessionTableHtml(month.sessions[k], k))
+        .join("");
 
     return `
         <div class="my-program-card" data-month="${monthKey}">
