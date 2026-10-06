@@ -49,22 +49,6 @@
     direction: rtl !important;
 }
 
-.dv-bank-edit {
-    min-height: 34px;
-    padding: 4px 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    background: #ffffff;
-    color: #2563eb;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.dv-bank-edit:hover {
-    background: #eff6ff;
-    border-color: #93c5fd;
-}
-
 .dv-bank-none {
     display: none;
     padding: 24px;
@@ -252,12 +236,18 @@
     position: absolute;
     bottom: 4px;
     right: 4px;
-    padding: 0 6px;
+    left: 4px;
+    padding: 1px 6px;
     border-radius: 4px;
     background: rgba(17, 24, 39, 0.75);
     color: #ffffff;
     font-size: 10px;
     font-style: normal;
+    direction: ltr;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .ee-media-item button {
@@ -305,17 +295,7 @@
 }
 
 /* ---------- Dark mode ---------- */
-body.dark-mode .dv-bank-edit {
-    background: #1e293b;
-    border-color: #475569;
-    color: #93c5fd;
-}
-
-body.dark-mode .dv-bank-edit:hover {
-    background: #172554;
-}
-
-body.dark-mode .dv-bank-badge {
+body.dark-mode body.dark-mode body.dark-mode .dv-bank-badge {
     background: #1e3a8a;
     color: #bfdbfe !important;
 }
@@ -364,4 +344,21 @@ body.dark-mode .ee-media-empty {
 
 body.dark-mode .ee-error {
     color: #fca5a5;
+}
+
+.dv-bank-export {
+    min-height: 42px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    direction: ltr;
+}
+
+.exercise-guide-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.exercise-guide-actions button {
+    flex: 1;
 }

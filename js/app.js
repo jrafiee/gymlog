@@ -878,6 +878,19 @@ function handleExerciseMediaError(element) {
     element.replaceWith(fallback);
 }
 
+/* بعد از افزودن/ویرایش حرکت: برنامه‌ها و صفحه‌ها دوباره ساخته شوند */
+function refreshAfterCatalogChange() {
+    try {
+        workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
+    } catch (err) {
+        console.error(err);
+    }
+    if (typeof currentDesktopView !== "undefined" && currentDesktopView === "bank" && typeof renderBankView === "function") {
+        renderBankView();
+    }
+    renderAll();
+}
+
 function showExerciseGuide(exerciseId) {
     const catalog = getEffectiveCatalog();
     const curProg = getCurrentProgram();
@@ -907,7 +920,10 @@ function showExerciseGuide(exerciseId) {
             </div>
             ${imagesHtml}
             ${instructionsHtml}
-            <button type="button" class="primary-btn exercise-guide-done">بستن</button>
+            <div class="exercise-guide-actions">
+                ${catalog[exerciseId] ? `<button type="button" class="secondary-btn exercise-guide-edit">✏️ ویرایش</button>` : ""}
+                <button type="button" class="primary-btn exercise-guide-done">بستن</button>
+            </div>
         </div>
     `;
 
@@ -921,6 +937,16 @@ function showExerciseGuide(exerciseId) {
 
     overlay.querySelector(".exercise-guide-close").addEventListener("click", closeOverlay);
     overlay.querySelector(".exercise-guide-done").addEventListener("click", closeOverlay);
+
+    const editBtn = overlay.querySelector(".exercise-guide-edit");
+    if (editBtn) {
+        editBtn.addEventListener("click", () => {
+            closeOverlay();
+            if (typeof openExerciseEditor === "function") {
+                openExerciseEditor(exerciseId, refreshAfterCatalogChange);
+            }
+        });
+    }
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
 
     document.body.appendChild(overlay);

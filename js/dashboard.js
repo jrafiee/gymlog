@@ -764,7 +764,6 @@ function renderBankView() {
                             <span>${ex.key}</span>
                             ${badgeFor(ex.key)}
                         </button>
-                        <button type="button" class="dv-bank-edit" data-edit="${ex.key}">✏️ ویرایش</button>
                     </div>
                 `).join("")}
             </div>
@@ -778,8 +777,11 @@ function renderBankView() {
                 <div class="dv-bank-tools">
                     <input type="search" id="bankSearchInput" class="dv-bank-search" placeholder="جستجوی حرکت…">
                     <button type="button" class="primary-btn dv-bank-add" id="bankAddBtn">+ افزودن حرکت جدید</button>
+                    <button type="button" class="secondary-btn dv-bank-export" id="bankExportBtn" title="دریافت فایل exercise-catalog.js با همه‌ی حرکت‌ها">⬇ exercise-catalog.js</button>
+                    <button type="button" class="secondary-btn dv-bank-export" id="bankMediaBtn" title="دانلود تصویر/ویدیوهای بارگذاری‌شده با نام شناسه‌ی یکتا">⬇ فایل‌های رسانه</button>
                 </div>
             </div>
+            <p class="dv-note">برای ویرایش یک حرکت، روی آن کلیک کن و در پنجره‌ی باز‌شده «ویرایش» را بزن. تصویرها در خروجی با مسیر assets/exercises/شناسه‌ی‌یکتا.پسوند نوشته می‌شوند؛ خودِ فایل‌ها را با دکمه‌ی «فایل‌های رسانه» بگیر و در همان پوشه بگذار.</p>
             ${groupsHtml}
             <div class="dv-bank-none" id="bankNoResult">حرکتی پیدا نشد.</div>
         </div>
@@ -791,22 +793,17 @@ function renderBankView() {
         });
     });
 
-    const afterChange = () => {
-        try {
-            workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
-        } catch (e) { console.error(e); }
-        renderBankView();
-        if (typeof renderAll === "function") renderAll();
-    };
-
-    container.querySelectorAll(".dv-bank-edit").forEach(btn => {
-        btn.addEventListener("click", () => {
-            if (typeof openExerciseEditor === "function") openExerciseEditor(btn.dataset.edit, afterChange);
-        });
-    });
+    const afterChange = refreshAfterCatalogChange;
 
     container.querySelector("#bankAddBtn").addEventListener("click", () => {
         if (typeof openExerciseEditor === "function") openExerciseEditor(null, afterChange);
+    });
+
+    container.querySelector("#bankExportBtn").addEventListener("click", () => {
+        if (typeof exportExerciseCatalogJs === "function") exportExerciseCatalogJs();
+    });
+    container.querySelector("#bankMediaBtn").addEventListener("click", () => {
+        if (typeof downloadUploadedMedia === "function") downloadUploadedMedia();
     });
 
     const search = container.querySelector("#bankSearchInput");

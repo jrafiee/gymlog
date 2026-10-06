@@ -82,6 +82,123 @@
         throw new Error("فقط تصویر یا ویدیو قابل بارگذاری است: " + file.name);
     }
 
+    /* ---------- نام‌گذاری فایل‌های آپلودی بر اساس شناسه‌ی یکتا ---------- */
+    const MIME_EXT = {
+        "image/jpeg": "jpg", "image/jpg": "jpg", "image/png": "png", "image/gif": "gif",
+        "image/webp": "webp", "image/svg+xml": "svg",
+        "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov"
+    };
+    const isData = p => typeof p === "string" && p.startsWith("data:");
+    const MEDIA_DIR = "assets/exercises/";
+
+    function extOfData(src) {
+        const m = /^data:([^;,]+)/.exec(src);
+        if (!m) return "bin";
+        return MIME_EXT[m[1]] || (m[1].split("/")[1] || "bin").replace(/\W/g, "");
+    }
+
+    /* فایل اول: id.ext ، فایل‌های بعدی: id-2.ext ، id-3.ext ... */
+    function mediaFileName(id, ordinal, src) {
+        return id + (ordinal > 0 ? "-" + (ordinal + 1) : "") + "." + extOfData(src);
+    }
+
+    function resolveMedia(id, images) {
+        let n = 0;
+        return (images || []).map(p => {
+            if (!isData(p)) return { src: p, path: p, name: String(p).split("/").pop(), uploaded: false };
+            const name = mediaFileName(id, n++, p);
+            return { src: p, path: MEDIA_DIR + name, name, uploaded: true };
+        });
+    }
+
+    function downloadBlob(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    /* ---------- خروجی exercise-catalog.js ---------- */
+    function buildCatalogJs() {
+        const catalog = getEffectiveCatalog();
+        const map = typeof EXERCISE_CATEGORIES_MAP !== "undefined" ? EXERCISE_CATEGORIES_MAP : {};
+        const groups = {};
+        Object.keys(catalog).forEach(id => {
+            const cat = catalog[id].category || map[id] || "سایر";
+            (groups[cat] = groups[cat] || []).push(id);
+        });
+        const cats = CATS.filter(c => groups[c]).concat(Object.keys(groups).filter(c => !CATS.includes(c)));
+        const q = v => JSON.stringify(String(v));
+
+        const blocks = cats.map(cat => {
+            const items = groups[cat].map(id => {
+                const ex = catalog[id];
+                const paths = resolveMedia(id, ex.images).map(m => m.path);
+                const lines = [`        name: ${q(ex.name || id)}`];
+                if (ex.nameEn) lines.push(`        nameEn: ${q(ex.nameEn)}`);
+                lines.push(`        category: ${q(cat)}`);
+                if (ex.bodyweight) lines.push(`        bodyweight: true`);
+                lines.push(`        images: [${paths.map(q).join(", ")}]`);
+                const ins = (ex.instructions || []).map(t => `            ${q(t)}`).join(",\n");
+                lines.push(ins ? `        instructions: [\n${ins}\n        ]` : `        instructions: []`);
+                return `    ${id}: {\n${lines.join(",\n")}\n    }`;
+            });
+            return `    /* =================================================\n       ${cat}\n       ================================================= */\n\n${items.join(",\n\n")}`;
+        });
+
+        return `/* =====================================================
+   کاتالوگ استاندارد حرکات
+   (خروجی گرفته‌شده از GymLog)
+
+   تصویر/ویدیوی هر حرکت باید در پوشه‌ی assets/exercises
+   با همان نامی که در images آمده قرار بگیرد.
+   فایل‌های بارگذاری‌شده در برنامه با نام «شناسه‌ی یکتا» ذکر شده‌اند.
+
+   id هر حرکت باید ثابت بماند، چون سابقه‌ی تمرین‌ها
+   بر اساس همین id ذخیره می‌شود.
+===================================================== */
+
+const exerciseCatalog = {
+
+${blocks.join(",\n\n\n")}
+
+};
+`;
+    }
+
+    function exportExerciseCatalogJs() {
+        downloadBlob(new Blob([buildCatalogJs()], { type: "text/javascript;charset=utf-8" }), "exercise-catalog.js");
+        toast("فایل exercise-catalog.js دانلود شد.");
+    }
+
+    /* فایل‌های آپلودی با نام شناسه‌ی یکتا، برای قرار دادن در assets/exercises */
+    function downloadUploadedMedia() {
+        const catalog = getEffectiveCatalog();
+        const files = [];
+        Object.keys(catalog).forEach(id => {
+            resolveMedia(id, catalog[id].images).forEach(m => { if (m.uploaded) files.push(m); });
+        });
+        if (!files.length) {
+            toast("فایل بارگذاری‌شده‌ای وجود ندارد.", "info");
+            return;
+        }
+        files.forEach((m, i) => setTimeout(() => {
+            const a = document.createElement("a");
+            a.href = m.src;
+            a.download = m.name;
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }, i * 500));
+        toast(`${files.length.toLocaleString("fa-IR")} فایل در حال دانلود است. اگر مرورگر پرسید، دانلود چندفایلی را مجاز کن.`);
+    }
+
     function openExerciseEditor(editId, onSaved) {
         if (document.querySelector(".ee-overlay")) return;
 
@@ -158,7 +275,7 @@
                         + بارگذاری تصویر / ویدیو
                         <input type="file" id="eeFile" accept="image/*,video/*" multiple hidden>
                     </label>
-                    <small>تصویرها خودکار کوچک می‌شوند. حداکثر حجم ویدیو ۱۲ مگابایت است.</small>
+                    <small>نام فایل‌های بارگذاری‌شده خودکار به «شناسه‌ی یکتا» تغییر می‌کند (مثلاً dumbbell_press.jpg) و در خروجی کاتالوگ با همین نام و مسیر assets/exercises می‌آید. تصویرها خودکار کوچک می‌شوند. حداکثر حجم ویدیو ۱۲ مگابایت است.</small>
                 </div>
 
                 <p class="ee-error" id="eeError" role="alert"></p>
@@ -175,19 +292,32 @@
         const field = n => overlay.querySelector(`[name="${n}"]`);
         const errEl = $("#eeError");
 
+        const currentId = () => (isEdit ? editId : (field("id").value.trim() || "شناسه"));
+
         function renderMedia() {
             const box = $("#eeMedia");
             if (!st.media.length) {
                 box.innerHTML = `<div class="ee-media-empty">هنوز فایلی اضافه نشده است.</div>`;
                 return;
             }
-            box.innerHTML = st.media.map((m, i) => `
+            const items = resolveMedia(currentId(), st.media);
+            box.innerHTML = items.map((m, i) => `
                 <div class="ee-media-item">
-                    ${isVideo(m)
-                        ? `<video src="${esc(m)}" muted playsinline preload="metadata"></video><em>ویدیو</em>`
-                        : `<img src="${esc(m)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'فایل پیدا نشد'}))">`}
+                    ${isVideo(m.src)
+                        ? `<video src="${esc(m.src)}" muted playsinline preload="metadata"></video>`
+                        : `<img src="${esc(m.src)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'فایل پیدا نشد'}))">`}
+                    <em class="ee-fname" data-i="${i}">${esc(m.name)}</em>
                     <button type="button" data-rm="${i}" aria-label="حذف فایل">×</button>
                 </div>`).join("");
+        }
+
+        /* با تغییر شناسه فقط برچسب نام فایل‌ها به‌روز شود */
+        function updateNames() {
+            const items = resolveMedia(currentId(), st.media);
+            overlay.querySelectorAll(".ee-fname").forEach(el => {
+                const m = items[Number(el.dataset.i)];
+                if (m) el.textContent = m.name;
+            });
         }
 
         function close() {
@@ -204,9 +334,9 @@
 
         if (!isEdit) {
             field("nameEn").addEventListener("input", e => {
-                if (!st.idTouched) field("id").value = slugify(e.target.value);
+                if (!st.idTouched) { field("id").value = slugify(e.target.value); updateNames(); }
             });
-            field("id").addEventListener("input", () => { st.idTouched = true; });
+            field("id").addEventListener("input", () => { st.idTouched = true; updateNames(); });
         }
 
         $("#eeMedia").addEventListener("click", e => {
@@ -296,4 +426,6 @@
     }
 
     window.openExerciseEditor = openExerciseEditor;
+    window.exportExerciseCatalogJs = exportExerciseCatalogJs;
+    window.downloadUploadedMedia = downloadUploadedMedia;
 })();
