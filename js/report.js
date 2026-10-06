@@ -85,9 +85,9 @@ function getReportCatalog() {
 }
 
 function resolveCategory(exerciseId, catalog) {
-    if (CATEGORY_MAP[exerciseId]) return CATEGORY_MAP[exerciseId];
     const entry = catalog[exerciseId];
     if (entry && entry.category && CATEGORY_COLORS[entry.category]) return entry.category;
+    if (CATEGORY_MAP[exerciseId]) return CATEGORY_MAP[exerciseId];
     return "سایر";
 }
 

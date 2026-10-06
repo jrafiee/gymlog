@@ -547,7 +547,7 @@ function showExerciseBankPage() {
     const groups = {};
     exerciseKeys.forEach(key => {
         const item = catalog[key];
-        const category = EXERCISE_CATEGORIES_MAP[key] || item.category || "سایر حرکات";
+        const category = item.category || EXERCISE_CATEGORIES_MAP[key] || "سایر حرکات";
         if (!groups[category]) {
             groups[category] = [];
         }
@@ -568,7 +568,7 @@ function showExerciseBankPage() {
     sortedCategories.forEach(catName => {
         const exercises = groups[catName];
         const itemsHtml = exercises.map(item => {
-            const hasImg = item.images && item.images.length > 0 && !item.images[0].endsWith(".mp4");
+            const hasImg = item.images && item.images.length > 0 && !isVideoSrc(item.images[0]);
             const thumbHtml = hasImg
                 ? `<img src="${item.images[0]}" alt="${item.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'exercise-bank-thumb-placeholder\\'>🏋️</span>'">`
                 : `<span class="exercise-bank-thumb-placeholder">🏋️</span>`;
@@ -646,7 +646,10 @@ function showExerciseBankPage() {
 }
 
 if (openExerciseBankBtn) {
-    openExerciseBankBtn.addEventListener("click", showExerciseBankPage);
+    openExerciseBankBtn.addEventListener("click", () => {
+        closeSettingsPage(true);
+        switchView("bank");
+    });
 }
 
 /* =========================
@@ -843,9 +846,19 @@ function formatHistorySets(sets) {
 /* =========================
 رسانه و راهنمای حرکت
 ========================= */
+function isVideoSrc(path) {
+    const p = String(path || "");
+    if (p.startsWith("data:")) return p.startsWith("data:video");
+    return p.split("?")[0].split(".").pop().toLowerCase() === "mp4";
+}
+
 function createExerciseMedia(mediaPath, exerciseName) {
-    const extension = mediaPath.split("?")[0].split(".").pop().toLowerCase();
-    if (extension === "mp4") {
+    if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
+        return `
+            <video class="exercise-guide-video" src="${mediaPath}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
+        `;
+    }
+    if (isVideoSrc(mediaPath)) {
         return `
             <video class="exercise-guide-video" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
                 <source src="${mediaPath}" type="video/mp4">
@@ -1344,6 +1357,7 @@ function collectProgramAssetUrls(programsRaw, catalog) {
             (session.exercises || []).forEach(exercise => {
                 const entry = catalog[exercise.id];
                 ((entry && entry.images) || []).forEach(path => {
+                    if (String(path).startsWith("data:")) return;
                     try {
                         urls.add(new URL(path, location.href).href);
                     } catch (e) { /* مسیر نامعتبر */ }

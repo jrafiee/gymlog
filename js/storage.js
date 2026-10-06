@@ -1266,3 +1266,53 @@ async function saveUserProfile(profile) {
     }
     return true;
 }
+
+
+/* =====================================================
+   Catalog Exercise Editing (add / edit / reset)
+   - حرکت جدید یا ویرایش‌شده در store «exercises» ذخیره می‌شود و روی
+     کاتالوگ پیش‌فرض (exercise-catalog.js) override می‌شود.
+   - فایل‌های بارگذاری‌شده به‌صورت data URL داخل IndexedDB نگه‌داری
+     می‌شوند؛ نسخه‌ی احتیاطی localStorage بدون آن‌ها نوشته می‌شود
+     (حجم localStorage محدود است).
+===================================================== */
+
+function mirrorCatalogToLocalStorage() {
+    const light = {};
+    Object.keys(_storeCache.catalogOverrides).forEach(id => {
+        const e = _storeCache.catalogOverrides[id];
+        light[id] = e && Array.isArray(e.images)
+            ? { ...e, images: e.images.filter(p => typeof p !== "string" || !p.startsWith("data:")) }
+            : e;
+    });
+    saveDataToKey(LEGACY_CATALOG_KEY, light);
+}
+
+async function saveCatalogExercise(id, entry) {
+    if (!id || !entry || typeof entry !== "object") throw new Error("اطلاعات حرکت نامعتبر است.");
+
+    if (_storeCache.db) {
+        await putRecord(_storeCache.db, "exercises", {
+            id,
+            ...entry,
+            isCustom: true,
+            updatedAt: new Date().toISOString()
+        });
+    }
+
+    _storeCache.catalogOverrides = { ..._storeCache.catalogOverrides, [id]: entry };
+    mirrorCatalogToLocalStorage();
+    return true;
+}
+
+async function resetCatalogExercise(id) {
+    if (_storeCache.db) {
+        try { await deleteRecordByKey(_storeCache.db, "exercises", id); }
+        catch (e) { console.error("[GymLog DB] خطا در بازگردانی حرکت:", e); }
+    }
+    const next = { ..._storeCache.catalogOverrides };
+    delete next[id];
+    _storeCache.catalogOverrides = next;
+    mirrorCatalogToLocalStorage();
+    return true;
+}

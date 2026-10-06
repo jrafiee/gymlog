@@ -74,7 +74,7 @@
 
     function catOf(id, item) {
         const map = typeof EXERCISE_CATEGORIES_MAP !== "undefined" ? EXERCISE_CATEGORIES_MAP : {};
-        return map[id] || (item && item.category) || "سایر";
+        return (item && item.category) || map[id] || "سایر";
     }
 
     function isDesktopLayout() {

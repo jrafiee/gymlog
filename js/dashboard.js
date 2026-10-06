@@ -435,6 +435,10 @@ function renderFullHistoryView() {
 let calendarState = null; // { jy, jm }
 let calendarSelectedDate = null;
 
+function isWideCalendar() {
+    return !!(window.matchMedia && window.matchMedia("(min-width: 1024px)").matches);
+}
+
 function renderCalendarView() {
     const container = document.getElementById("viewCalendarContainer");
     if (!container) return;
@@ -442,6 +446,8 @@ function renderCalendarView() {
     const allWorkouts = typeof getWorkouts === "function" ? getWorkouts() : [];
     const datesSet = new Set(allWorkouts.map(w => w.date));
     const todayIso = typeof getToday === "function" ? getToday() : "2026-10-04";
+    const fmt = (iso, long) => (typeof formatPersianDate === "function" ? formatPersianDate(iso, long) : iso);
+    const vol = w => Math.round(typeof calculateVolume === "function" ? calculateVolume(w) : 0).toLocaleString("fa-IR");
 
     if (!calendarState) {
         calendarState = typeof isoToJalali === "function" ? isoToJalali(todayIso) : { jy: 1405, jm: 7 };
@@ -450,34 +456,27 @@ function renderCalendarView() {
         calendarSelectedDate = todayIso;
     }
 
-    const monthName = (typeof PERSIAN_MONTH_NAMES !== "undefined" && PERSIAN_MONTH_NAMES[calendarState.jm - 1]) || `ماه ${calendarState.jm}`;
-
-    // Selected single day workouts
     const selectedDateWorkouts = allWorkouts.filter(w => w.date === calendarSelectedDate);
 
-    let selectedDayHtml = "";
+    let selectedDayHtml;
     if (selectedDateWorkouts.length > 0) {
         selectedDayHtml = `
-            <div class="calendar-day-details-card" style="margin-top: 16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:16px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid #f3f4f6;">
-                    <strong style="font-size:14px; color:#111827;">تمرین‌های ثبت‌شده در ${typeof formatPersianDate === "function" ? formatPersianDate(calendarSelectedDate, true) : calendarSelectedDate}</strong>
-                    <span style="font-size:12px; color:#16a34a; font-weight:bold;">${selectedDateWorkouts.length} جلسه</span>
+            <div class="calendar-day-details-card">
+                <div class="calendar-day-head">
+                    <strong>تمرین‌های ثبت‌شده در ${fmt(calendarSelectedDate, true)}</strong>
+                    <span>${selectedDateWorkouts.length.toLocaleString("fa-IR")} جلسه</span>
                 </div>
                 ${selectedDateWorkouts.map(w => `
-                    <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="calendar-day-item">
                         <div>
                             <strong>هفته ${w.week} · جلسه ${w.session}</strong>
-                            <span style="display:block; font-size:11.5px; color:#6b7280; margin-top:2px;">
-                                ${(w.exercises || []).length} حرکت · حجم: ${Math.round(typeof calculateVolume === "function" ? calculateVolume(w) : 0).toLocaleString("fa-IR")} kg×reps
+                            <span class="calendar-day-sub">
+                                ${(w.exercises || []).length} حرکت · حجم: ${vol(w)} kg×reps
                             </span>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button type="button" class="dash-table-action-btn cal-view-detail-btn" data-id="${w.id}">
-                                مشاهده جزئیات
-                            </button>
-                            <button type="button" class="dash-table-action-btn cal-open-workout-btn" data-session="${w.session}" data-week="${w.week}" data-date="${w.date}" style="color:#2563eb;">
-                                رفتن به جلسه
-                            </button>
+                        <div class="calendar-day-actions">
+                            <button type="button" class="dash-table-action-btn cal-view-detail-btn" data-id="${w.id}">مشاهده جزئیات</button>
+                            <button type="button" class="dash-table-action-btn cal-open-workout-btn" data-session="${w.session}" data-week="${w.week}" data-date="${w.date}">رفتن به جلسه</button>
                         </div>
                     </div>
                 `).join("")}
@@ -485,62 +484,113 @@ function renderCalendarView() {
         `;
     } else {
         selectedDayHtml = `
-            <div class="calendar-day-details-card" style="margin-top: 16px; background:#ffffff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; text-align:center; color:#6b7280;">
-                <p style="margin:0 0 10px; font-size:13px;">در تاریخ ${typeof formatPersianDate === "function" ? formatPersianDate(calendarSelectedDate, true) : calendarSelectedDate} هیچ تمرینی ثبت نشده است.</p>
-                <button type="button" class="secondary-btn" id="calRecordNewDateBtn" style="font-size:12px; min-height:36px; padding:6px 14px;">
-                    ✍️ ثبت تمرین برای این روز
-                </button>
+            <div class="calendar-day-details-card calendar-day-empty">
+                <p>در تاریخ ${fmt(calendarSelectedDate, true)} هیچ تمرینی ثبت نشده است.</p>
+                <button type="button" class="secondary-btn" id="calRecordNewDateBtn">✍️ ثبت تمرین برای این روز</button>
             </div>
         `;
     }
 
-    // Identical layout & styling to the DatePicker Modal in "Today's Workout"
-    container.innerHTML = `
-        <div style="max-width: 400px; margin: 0 auto;">
-            <!-- Exact Calendar Box like Today's Workout -->
-            <div class="date-picker-modal" style="width:100%; max-width:100%; border:1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                <div class="date-picker-header">
-                    <button type="button" class="date-picker-nav" id="calPrevMonthBtn" aria-label="ماه قبل">‹</button>
-                    <h3 style="margin:0; font-size:15px; font-weight:700;">${monthName} ${calendarState.jy}</h3>
-                    <button type="button" class="date-picker-nav" id="calNextMonthBtn" aria-label="ماه بعد">›</button>
+    const weekdays = (typeof PERSIAN_WEEKDAY_LABELS !== "undefined" ? PERSIAN_WEEKDAY_LABELS : [])
+        .slice().reverse().map(l => `<span>${l}</span>`).join("");
+    const monthNames = typeof PERSIAN_MONTH_NAMES !== "undefined" ? PERSIAN_MONTH_NAMES : [];
+    const wide = isWideCalendar();
+
+    if (wide) {
+        /* دسکتاپ: نمای یک‌ساله، ۱۲ ماه کنار هم */
+        const todayJ = typeof isoToJalali === "function" ? isoToJalali(todayIso) : { jy: 0, jm: 0 };
+        const jy = calendarState.jy;
+        let yearCount = 0;
+
+        const cards = Array.from({ length: 12 }, (_, i) => i + 1).map(jm => {
+            const len = jalaliMonthLength(jy, jm);
+            const start = jalaliToIsoDate(jy, jm, 1);
+            const end = jalaliToIsoDate(jy, jm, len);
+            const count = allWorkouts.filter(w => w.date >= start && w.date <= end).length;
+            yearCount += count;
+            const isCurrent = todayJ.jy === jy && todayJ.jm === jm;
+            return `
+                <section class="cal-month-card ${isCurrent ? "current" : ""}">
+                    <header>
+                        <h4>${monthNames[jm - 1] || jm}</h4>
+                        <span>${count ? count.toLocaleString("fa-IR") + " جلسه" : ""}</span>
+                    </header>
+                    <div class="date-picker-weekdays">${weekdays}</div>
+                    <div class="date-picker-grid">${buildDatePickerGrid(jy, jm, calendarSelectedDate, todayIso, datesSet)}</div>
+                </section>`;
+        }).join("");
+
+        container.innerHTML = `
+            <div class="cal-wide">
+                <div class="cal-wide-main">
+                    <div class="cal-wide-bar">
+                        <div class="cal-wide-nav">
+                            <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="سال قبل">‹</button>
+                            <h3>سال ${jy.toLocaleString("fa-IR", { useGrouping: false })}</h3>
+                            <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="سال بعد">›</button>
+                            <button type="button" class="secondary-btn cal-today-btn" id="calTodayBtn">امروز</button>
+                        </div>
+                        <span class="cal-wide-count">${yearCount.toLocaleString("fa-IR")} جلسه در این سال</span>
+                    </div>
+                    <div class="cal-year-grid">${cards}</div>
+                    <div class="date-picker-legend"><span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده</div>
                 </div>
-                <div class="date-picker-weekdays">
-                    ${(typeof PERSIAN_WEEKDAY_LABELS !== "undefined" ? PERSIAN_WEEKDAY_LABELS : []).slice().reverse().map(l => `<span>${l}</span>`).join("")}
-                </div>
-                <div class="date-picker-grid">
-                    ${typeof buildDatePickerGrid === "function" ? buildDatePickerGrid(calendarState.jy, calendarState.jm, calendarSelectedDate, todayIso, datesSet) : ""}
-                </div>
-                <div class="date-picker-legend">
-                    <span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده
-                </div>
+                <aside class="cal-wide-side">${selectedDayHtml}</aside>
             </div>
+        `;
+    } else {
+        /* موبایل: نمای یک ماه */
+        const monthName = monthNames[calendarState.jm - 1] || `ماه ${calendarState.jm}`;
+        container.innerHTML = `
+            <div style="max-width: 400px; margin: 0 auto;">
+                <div class="date-picker-modal" style="width:100%; max-width:100%; border:1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                    <div class="date-picker-header">
+                        <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="ماه قبل">‹</button>
+                        <h3 style="margin:0; font-size:15px; font-weight:700;">${monthName} ${calendarState.jy}</h3>
+                        <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="ماه بعد">›</button>
+                    </div>
+                    <div class="date-picker-weekdays">${weekdays}</div>
+                    <div class="date-picker-grid">
+                        ${buildDatePickerGrid(calendarState.jy, calendarState.jm, calendarSelectedDate, todayIso, datesSet)}
+                    </div>
+                    <div class="date-picker-legend">
+                        <span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده
+                    </div>
+                </div>
+                <div style="margin-top:16px;">${selectedDayHtml}</div>
+            </div>
+        `;
+    }
 
-            <!-- Details for Selected Day -->
-            ${selectedDayHtml}
-        </div>
-    `;
-
-    // Month Navigation Listeners (‹ ماه قبل)
-    container.querySelector("#calPrevMonthBtn").addEventListener("click", () => {
-        calendarState.jm -= 1;
-        if (calendarState.jm < 1) {
-            calendarState.jm = 12;
+    container.querySelector("#calPrevBtn").addEventListener("click", () => {
+        if (wide) {
             calendarState.jy -= 1;
+        } else {
+            calendarState.jm -= 1;
+            if (calendarState.jm < 1) { calendarState.jm = 12; calendarState.jy -= 1; }
         }
         renderCalendarView();
     });
 
-    // Month Navigation Listeners (› ماه بعد)
-    container.querySelector("#calNextMonthBtn").addEventListener("click", () => {
-        calendarState.jm += 1;
-        if (calendarState.jm > 12) {
-            calendarState.jm = 1;
+    container.querySelector("#calNextBtn").addEventListener("click", () => {
+        if (wide) {
             calendarState.jy += 1;
+        } else {
+            calendarState.jm += 1;
+            if (calendarState.jm > 12) { calendarState.jm = 1; calendarState.jy += 1; }
         }
         renderCalendarView();
     });
 
-    // Day Selection Listeners
+    const todayBtn = container.querySelector("#calTodayBtn");
+    if (todayBtn) {
+        todayBtn.addEventListener("click", () => {
+            calendarState = typeof isoToJalali === "function" ? isoToJalali(todayIso) : calendarState;
+            calendarSelectedDate = todayIso;
+            renderCalendarView();
+        });
+    }
+
     container.querySelectorAll(".date-picker-day:not(.empty)").forEach(cell => {
         cell.addEventListener("click", () => {
             calendarSelectedDate = cell.dataset.iso;
@@ -548,16 +598,13 @@ function renderCalendarView() {
         });
     });
 
-    // Detail Modal Button in calendar
     container.querySelectorAll(".cal-view-detail-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            const wid = Number(btn.dataset.id);
-            const target = allWorkouts.find(w => w.id === wid);
+            const target = allWorkouts.find(w => w.id === Number(btn.dataset.id));
             if (target) showWorkoutDetailModal(target);
         });
     });
 
-    // Go to workout button
     container.querySelectorAll(".cal-open-workout-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             const sNum = Number(btn.dataset.session);
@@ -583,6 +630,14 @@ function renderCalendarView() {
             switchView("workout");
         });
     }
+}
+
+/* با تغییر اندازه‌ی پنجره بین حالت موبایل (یک ماه) و دسکتاپ (یک سال) جابه‌جا شود */
+if (window.matchMedia) {
+    const calMq = window.matchMedia("(min-width: 1024px)");
+    const onCalMqChange = () => { if (currentDesktopView === "calendar") renderCalendarView(); };
+    if (calMq.addEventListener) calMq.addEventListener("change", onCalMqChange);
+    else if (calMq.addListener) calMq.addListener(onCalMqChange);
 }
 
 /* =====================================================
@@ -672,12 +727,13 @@ function renderBankView() {
     if (!container) return;
 
     const catalog = typeof getEffectiveCatalog === "function" ? getEffectiveCatalog() : {};
+    const overrides = typeof loadCatalogOverrides === "function" ? loadCatalogOverrides() : {};
     const keys = Object.keys(catalog);
 
     const groups = {};
     keys.forEach(k => {
         const item = catalog[k];
-        const cat = (typeof EXERCISE_CATEGORIES_MAP !== "undefined" && EXERCISE_CATEGORIES_MAP[k]) || item.category || "سایر";
+        const cat = item.category || (typeof EXERCISE_CATEGORIES_MAP !== "undefined" && EXERCISE_CATEGORIES_MAP[k]) || "سایر";
         if (!groups[cat]) groups[cat] = [];
         groups[cat].push({ key: k, ...item });
     });
@@ -691,15 +747,25 @@ function renderBankView() {
         return a.localeCompare(b, "fa");
     });
 
+    const badgeFor = k => {
+        if (!overrides[k]) return "";
+        const builtIn = typeof exerciseCatalog !== "undefined" && exerciseCatalog[k];
+        return `<span class="dv-bank-badge">${builtIn ? "ویرایش‌شده" : "سفارشی"}</span>`;
+    };
+
     const groupsHtml = categories.map(cat => `
         <section class="dv-bank-group">
             <h4>${cat} <span>${groups[cat].length.toLocaleString("fa-IR")} حرکت</span></h4>
             <div class="dv-bank-grid">
                 ${groups[cat].map(ex => `
-                    <button type="button" class="dv-bank-item" data-id="${ex.key}">
-                        <strong>${ex.name}</strong>
-                        <span>${ex.key}</span>
-                    </button>
+                    <div class="dv-bank-card" data-search="${String(ex.name + " " + (ex.nameEn || "") + " " + ex.key).toLowerCase().replace(/"/g, "")}">
+                        <button type="button" class="dv-bank-item" data-id="${ex.key}">
+                            <strong>${ex.name}</strong>
+                            <span>${ex.key}</span>
+                            ${badgeFor(ex.key)}
+                        </button>
+                        <button type="button" class="dv-bank-edit" data-edit="${ex.key}">✏️ ویرایش</button>
+                    </div>
                 `).join("")}
             </div>
         </section>
@@ -707,8 +773,15 @@ function renderBankView() {
 
     container.innerHTML = `
         <div class="dv-bank">
-            <h3 class="dv-bank-title">کاتالوگ حرکات بدنسازی (${keys.length.toLocaleString("fa-IR")} حرکت)</h3>
+            <div class="dv-bank-head">
+                <h3 class="dv-bank-title">کاتالوگ حرکات بدنسازی (${keys.length.toLocaleString("fa-IR")} حرکت)</h3>
+                <div class="dv-bank-tools">
+                    <input type="search" id="bankSearchInput" class="dv-bank-search" placeholder="جستجوی حرکت…">
+                    <button type="button" class="primary-btn dv-bank-add" id="bankAddBtn">+ افزودن حرکت جدید</button>
+                </div>
+            </div>
             ${groupsHtml}
+            <div class="dv-bank-none" id="bankNoResult">حرکتی پیدا نشد.</div>
         </div>
     `;
 
@@ -716,6 +789,41 @@ function renderBankView() {
         item.addEventListener("click", () => {
             if (typeof showExerciseGuide === "function") showExerciseGuide(item.dataset.id);
         });
+    });
+
+    const afterChange = () => {
+        try {
+            workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
+        } catch (e) { console.error(e); }
+        renderBankView();
+        if (typeof renderAll === "function") renderAll();
+    };
+
+    container.querySelectorAll(".dv-bank-edit").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (typeof openExerciseEditor === "function") openExerciseEditor(btn.dataset.edit, afterChange);
+        });
+    });
+
+    container.querySelector("#bankAddBtn").addEventListener("click", () => {
+        if (typeof openExerciseEditor === "function") openExerciseEditor(null, afterChange);
+    });
+
+    const search = container.querySelector("#bankSearchInput");
+    search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        let total = 0;
+        container.querySelectorAll(".dv-bank-group").forEach(group => {
+            let visible = 0;
+            group.querySelectorAll(".dv-bank-card").forEach(card => {
+                const show = !q || card.dataset.search.includes(q);
+                card.style.display = show ? "" : "none";
+                if (show) visible += 1;
+            });
+            group.style.display = visible ? "" : "none";
+            total += visible;
+        });
+        container.querySelector("#bankNoResult").style.display = total ? "none" : "block";
     });
 }
 

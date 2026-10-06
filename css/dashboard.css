@@ -792,7 +792,6 @@ body.dark-mode .desktop-theme-icon-btn {
     #viewHistory,
     #viewBank,
     #viewReports,
-    #viewCalendar,
     #viewBackup,
     #viewSettings {
         max-width: 1080px;
@@ -1347,4 +1346,195 @@ body.dark-mode .dash-cycle-session-item.active-next:hover {
     #viewWorkout .page-header {
         display: none !important;
     }
+}
+
+/* =====================================================
+   تقویم دسکتاپ: نمای یک‌ساله (۱۲ ماه) + پنل جزئیات روز
+===================================================== */
+@media (min-width: 1024px) {
+    #viewCalendar {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+}
+
+.cal-wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1250px) {
+    .cal-wide {
+        grid-template-columns: 1fr;
+    }
+}
+
+.cal-wide-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.cal-wide-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cal-wide-nav h3 {
+    min-width: 90px;
+    margin: 0;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.cal-today-btn {
+    min-height: 34px;
+    padding: 4px 14px;
+    font-size: 12.5px;
+}
+
+.cal-wide-count {
+    font-size: 12.5px;
+    color: #6b7280;
+}
+
+.cal-year-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 14px;
+}
+
+.cal-month-card {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.cal-month-card.current {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.cal-month-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.cal-month-card h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.cal-month-card header span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+}
+
+.cal-month-card .date-picker-grid {
+    gap: 2px;
+}
+
+.cal-month-card .date-picker-day {
+    height: 32px;
+    font-size: 12px;
+}
+
+.cal-month-card .date-picker-day-circle {
+    width: 26px;
+    height: 26px;
+}
+
+.cal-wide-side {
+    position: sticky;
+    top: 84px;
+}
+
+.calendar-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+}
+
+.calendar-day-head span {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 700;
+    color: #16a34a;
+}
+
+.calendar-day-item {
+    flex-direction: column;
+    align-items: stretch !important;
+}
+
+.calendar-day-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: #6b7280;
+}
+
+.calendar-day-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.calendar-day-empty {
+    text-align: center;
+    color: #6b7280;
+}
+
+.calendar-day-empty p {
+    margin: 0 0 10px;
+    font-size: 13px;
+}
+
+.calendar-day-empty .secondary-btn {
+    min-height: 36px;
+    padding: 6px 14px;
+    font-size: 12px;
+}
+
+body.dark-mode .cal-wide-nav h3,
+body.dark-mode .cal-month-card h4 {
+    color: #f8fafc;
+}
+
+body.dark-mode .cal-wide-count,
+body.dark-mode .calendar-day-sub {
+    color: #94a3b8;
+}
+
+body.dark-mode .cal-month-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark-mode .cal-month-card.current {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+body.dark-mode .calendar-day-head {
+    border-color: #334155;
 }

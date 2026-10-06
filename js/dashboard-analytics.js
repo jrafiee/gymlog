@@ -694,7 +694,7 @@
         let other = 0;
 
         ws.forEach(w => (w.exercises || []).forEach(ex => {
-            const cat = MUSCLE_MAP[ex.id] || (catalog[ex.id] && catalog[ex.id].category) || null;
+            const cat = (catalog[ex.id] && catalog[ex.id].category) || MUSCLE_MAP[ex.id] || null;
             (ex.sets || []).forEach(s => {
                 const hasW = s.weight !== "" && s.weight != null;
                 const hasR = s.reps !== "" && s.reps != null;
