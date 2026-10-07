@@ -605,44 +605,82 @@
         return { level: "ok", text };
     }
 
+    /* چارت همه‌ی حرکات یک جلسه‌ی برنامه
+       - فهرست حرکات از «جلسه‌ی انتخاب‌شده در برنامه‌ی انتخاب‌شده» می‌آید
+       - سابقه‌ی هر حرکت از همه‌ی برنامه‌های قبلی (بر اساس id حرکت) جمع می‌شود
+       - هر ثبت برچسب inCycle دارد: آیا مربوط به دوره‌ی انتخاب‌شده (پیش‌فرض: آخرین) است؟ */
     function computeSessionCharts(ctx, f) {
         const { programs, catalog, today, activeMonth } = ctx;
-        const month = f.month && programs[f.month] ? f.month : activeMonth;
+        const isAll = f.month === "all";
+        const month = isAll ? null : (f.month && programs[f.month] ? f.month : activeMonth);
 
         let ws = ctx.workouts;
-        if (month) ws = ws.filter(w => w.month === month);
         if (f.range && f.range !== "all") ws = ws.filter(w => w.date >= addDays(today, -7 * Number(f.range) + 1));
-        ws = ws.filter(w => Number(w.session) === Number(f.session));
 
         const prog = month && programs[month] ? programs[month] : null;
         const sess = prog && prog.sessions ? prog.sessions[f.session] : null;
 
-        const order = sess ? sess.exercises.map(e => e.id) : [];
-        ws.forEach(w => (w.exercises || []).forEach(e => { if (!order.includes(e.id)) order.push(e.id); }));
+        /* ترتیب حرکات: در حالت «کل سابقه» اجتماع حرکات همه‌ی برنامه‌ها (به‌ترتیب گروه عضلانی)،
+           در غیر این صورت حرکات جلسه‌ی انتخاب‌شده */
+        let order = sess ? sess.exercises.map(e => e.id) : [];
+        if (isAll) {
+            const seen = [];
+            const monthKeys = Object.keys(programs).sort((a, b) => parseInt(a.replace(/\D/g, ""), 10) - parseInt(b.replace(/\D/g, ""), 10));
+            monthKeys.forEach(mk => Object.keys(programs[mk].sessions || {}).forEach(k =>
+                (programs[mk].sessions[k].exercises || []).forEach(e => { if (!seen.includes(e.id)) seen.push(e.id); })));
+            ws.forEach(w => (w.exercises || []).forEach(e => { if (!seen.includes(e.id)) seen.push(e.id); }));
+            const rank = id => {
+                const cat = (catalog[id] && catalog[id].category) || MUSCLE_MAP[id];
+                const i = MUSCLE_ORDER.indexOf(cat);
+                return i === -1 ? 99 : i;
+            };
+            order = seen.map((id, i) => ({ id, i })).sort((a, b) => rank(a.id) - rank(b.id) || a.i - b.i).map(x => x.id);
+        }
+
+        /* target حرکت: از برنامه‌ی انتخاب‌شده، وگرنه از جدیدترین برنامه‌ای که حرکت در آن هست */
+        const targetFor = id => {
+            let t = getTarget(programs, month || activeMonth, id);
+            if (t) return t;
+            const keys = Object.keys(programs).sort((a, b) => parseInt(b.replace(/\D/g, ""), 10) - parseInt(a.replace(/\D/g, ""), 10));
+            for (const k of keys) { t = getTarget(programs, k, id); if (t) return t; }
+            return null;
+        };
+
+        const makeStats = (sessions, isLoad) => {
+            if (!sessions.length) return null;
+            const val = s => (isLoad ? s.best.weight : s.best.reps);
+            const top = sessions.reduce((m, s) => (val(s) > val(m) ? s : m), sessions[0]);
+            return {
+                count: sessions.length,
+                maxBest: top.best,
+                last: sessions[sessions.length - 1].best,
+                incompleteSessions: sessions.filter(s => s.incomplete > 0).length
+            };
+        };
 
         const items = order.map(id => {
-            const target = getTarget(programs, month, id);
+            const target = targetFor(id);
             const kind = isTrackable(id, target, catalog) ? "load" : "reps";
             const unit = kind === "load" ? "kg" : unitFor(id, target);
-            const hist = kind === "load" ? exerciseSessions(ws, id) : bodySessions(ws, id);
 
+            const hist = kind === "load" ? exerciseSessions(ws, id) : bodySessions(ws, id);
             const sessions = hist.map(s => {
                 const t = getTarget(programs, s.month, id);
-                return Object.assign({}, s, { target: t, status: repStatus(s.best.reps, t) });
+                return Object.assign({}, s, {
+                    target: t,
+                    status: repStatus(s.best.reps, t),
+                    programTitle: programs[s.month] ? programs[s.month].title : "",
+                    inCycle: isAll ? true : s.month === month
+                });
             });
-            const lastTarget = sessions.length ? sessions[sessions.length - 1].target : target;
+            const cycleSessions = sessions.filter(s => s.inCycle);
 
-            const val = s => (kind === "load" ? s.best.weight : s.best.reps);
-            let stats = null;
-            if (sessions.length) {
-                const top = sessions.reduce((m, s) => (val(s) > val(m) ? s : m), sessions[0]);
-                stats = {
-                    count: sessions.length,
-                    maxBest: top.best,
-                    last: sessions[sessions.length - 1].best,
-                    incompleteSessions: sessions.filter(s => s.incomplete > 0).length
-                };
-            }
+            const lastTarget = (cycleSessions.length ? cycleSessions : sessions).length
+                ? (cycleSessions.length ? cycleSessions : sessions).slice(-1)[0].target
+                : target;
+            const interp = list => (kind === "load"
+                ? interpretProgression(list, lastTarget)
+                : interpretBody(list, lastTarget, unit));
 
             return {
                 id,
@@ -651,15 +689,26 @@
                 unit,
                 sessionTitle: sess ? sess.title : "",
                 sessions,
+                programCount: new Set(sessions.map(s => s.month)).size,
                 target: lastTarget,
-                stats,
-                interpretation: kind === "load"
-                    ? interpretProgression(sessions, lastTarget)
-                    : interpretBody(sessions, lastTarget, unit)
+                stats: makeStats(sessions, kind === "load"),
+                interpretation: interp(sessions),
+                cycle: {
+                    sessions: cycleSessions,
+                    stats: makeStats(cycleSessions, kind === "load"),
+                    interpretation: interp(cycleSessions)
+                }
             };
         });
 
-        return { workoutCount: ws.length, items, sessionTitle: sess ? sess.title : "" };
+        return {
+            isAll,
+            workoutCount: ws.length,
+            items: isAll ? items.filter(it => it.sessions.length > 0) : items,
+            sessionTitle: isAll ? "همه‌ی حرکات در تمام برنامه‌ها" : (sess ? sess.title : ""),
+            cycleMonth: month,
+            cycleTitle: isAll ? "" : (prog ? prog.title : "")
+        };
     }
 
     /* =========================

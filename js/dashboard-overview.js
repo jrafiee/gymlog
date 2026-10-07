@@ -33,7 +33,7 @@
     const daysAgoText = n => (n === 0 ? "امروز" : n === 1 ? "دیروز" : `${fa(n, 0)} روز پیش`);
 
     /* وضعیت فیلترهای بخش «روند عملکرد» */
-    const state = { range: "8", month: null, session: null, muscleRange: "all" };
+    const state = { range: "all", month: "all", session: null, muscleRange: "all" };
     let ctxCache = null;
 
     /* =========================
@@ -178,19 +178,24 @@
     };
 
     let progItems = [];
+    let progCycleTitle = "";
     let closeModalFn = null;
 
     function progressionFilters(ctx) {
         const monthKeys = Object.keys(ctx.programs);
         const opt = (v, label, cur) => `<option value="${esc(v)}" ${String(cur) === String(v) ? "selected" : ""}>${esc(label)}</option>`;
-        const range = ["4", "8", "all"].map(v => opt(v, v === "all" ? "کل دوره" : `${fa(v, 0)} هفته اخیر`, state.range)).join("");
-        const months = monthKeys.map(k => opt(k, ctx.programs[k].title, state.month)).join("");
-        return { range, months, multiMonth: monthKeys.length > 1 };
+        const range = ["4", "8", "all"].map(v => opt(v, v === "all" ? "کل سابقه" : `${fa(v, 0)} هفته اخیر`, state.range)).join("");
+        const months = opt("all", "کل سابقه", state.month) + monthKeys.map(k => opt(k, ctx.programs[k].title, state.month)).join("");
+        return { range, months };
     }
 
     /* نمودار خطی: compact = کارت کوچک، غیر compact = نسخه‌ی مودال با tooltip */
-    function chartSvg(item, compact) {
-        const sessions = item.sessions;
+    /* نمودار خطی: compact = کارت کوچک، غیر compact = نسخه‌ی مودال با tooltip
+       list = فهرست ثبت‌ها (پیش‌فرض: کل سابقه).
+       وقتی چند برنامه در نمودار هست: ثبت‌های دوره‌ی انتخاب‌شده پررنگ، برنامه‌های قبلی کم‌رنگ،
+       و مرز بین برنامه‌ها با خط‌چین مشخص می‌شود. */
+    function chartSvg(item, compact, list) {
+        const sessions = list || item.sessions;
         const isLoad = item.kind === "load";
         const W = compact ? 300 : 560, H = compact ? 150 : 270;
         const pl = compact ? 30 : 46, pr = compact ? 16 : 22, pt = compact ? 26 : 36, pb = compact ? 28 : 46;
@@ -209,6 +214,8 @@
         const x = i => (n === 1 ? (pl + (W - pl - pr) / 2) : pl + (i * (W - pl - pr)) / (n - 1));
         const y = v => H - pb - ((v - lo) / (hi - lo)) * (H - pt - pb);
         const fs = compact ? 9 : 10;
+        const mixed = new Set(sessions.map(s => s.month)).size > 1;
+        const dim = s => mixed && !s.inCycle;
 
         const grid = [0, 0.5, 1].map(f => {
             const v = lo + f * (hi - lo);
@@ -217,25 +224,45 @@
                     <text x="${pl - 6}" y="${(yy + 3).toFixed(1)}" font-size="${fs}" fill="#9ca3af" text-anchor="end">${fa(v, isLoad ? 1 : 0)}</text>`;
         }).join("");
 
-        const path = sessions.map((s, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(val(s)).toFixed(1)}`).join(" ");
-        const line = n > 1 ? `<path d="${path}" fill="none" stroke="#2563eb" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : "";
+        /* خط روند: هر پاره‌خط جداگانه، تا بخش دوره‌ی انتخاب‌شده پررنگ‌تر دیده شود */
+        let line = "";
+        for (let i = 1; i < n; i++) {
+            const strong = !dim(sessions[i]) && !dim(sessions[i - 1]);
+            line += `<line x1="${x(i - 1).toFixed(1)}" y1="${y(val(sessions[i - 1])).toFixed(1)}" x2="${x(i).toFixed(1)}" y2="${y(val(sessions[i])).toFixed(1)}"
+                stroke="#2563eb" stroke-opacity="${strong ? 0.75 : 0.28}" stroke-width="${strong ? 2.2 : 1.6}" stroke-linecap="round"/>`;
+        }
 
-        const step = compact ? 1 : (n > 10 ? 2 : 1);
-        const showVal = i => (compact ? (n <= 4 || i === n - 1) : i % step === 0);
-        const showDate = i => (compact ? (i === 0 || i === n - 1) : i % step === 0);
+        /* مرز بین برنامه‌ها */
+        let seps = "";
+        for (let i = 1; i < n; i++) {
+            if (sessions[i].month === sessions[i - 1].month) continue;
+            const sx = ((x(i - 1) + x(i)) / 2).toFixed(1);
+            seps += `<line x1="${sx}" y1="${pt - 12}" x2="${sx}" y2="${H - pb}" stroke="#9ca3af" stroke-opacity="0.55" stroke-dasharray="4 3"/>`;
+            if (!compact) {
+                seps += `<text x="${(Number(sx) + 4).toFixed(1)}" y="${pt - 14}" font-size="9.5" fill="#9ca3af">${esc(sessions[i].programTitle)}</text>`;
+            }
+        }
+        if (!compact && mixed) {
+            seps += `<text x="${pl + 2}" y="${pt - 14}" font-size="9.5" fill="#9ca3af">${esc(sessions[0].programTitle)}</text>`;
+        }
+
+        const step = compact ? 1 : (n > 10 ? Math.ceil(n / 8) : 1);
+        const showVal = i => (compact ? (n <= 4 || i === n - 1) : (i % step === 0 || i === n - 1));
+        const showDate = i => (compact ? (i === 0 || i === n - 1) : (i % step === 0 || i === n - 1));
         const text = s => (isLoad ? `${fa(s.best.weight)}×${fa(s.best.reps, 0)}` : fa(s.best.reps, 0));
 
         const dots = sessions.map((s, i) => {
             const cx = x(i).toFixed(1), cy = y(val(s)).toFixed(1);
+            const op = dim(s) ? 0.5 : 1;
             const label = showVal(i)
-                ? `<text x="${cx}" y="${(y(val(s)) - 9).toFixed(1)}" font-size="${compact ? 9.5 : 10.5}" font-weight="700" fill="currentColor" text-anchor="middle">${text(s)}</text>`
+                ? `<text x="${cx}" y="${(y(val(s)) - 9).toFixed(1)}" font-size="${compact ? 9.5 : 10.5}" font-weight="700" fill="currentColor" fill-opacity="${dim(s) ? 0.6 : 1}" text-anchor="middle">${text(s)}</text>`
                 : "";
             const xl = showDate(i)
                 ? `<text x="${cx}" y="${H - (compact ? 8 : 18)}" font-size="${compact ? 9 : 9.5}" fill="#9ca3af" text-anchor="middle">${shortDate(s.date)}</text>`
                 : "";
 
             if (compact) {
-                return `${label}${xl}<circle cx="${cx}" cy="${cy}" r="4.5" fill="${STATUS_COLORS[s.status]}" stroke="#fff" stroke-width="1.5"/>`;
+                return `${label}${xl}<circle cx="${cx}" cy="${cy}" r="${dim(s) ? 3.5 : 4.5}" fill="${STATUS_COLORS[s.status]}" fill-opacity="${op}" stroke="#fff" stroke-width="1.5"/>`;
             }
 
             const best = isLoad
@@ -246,7 +273,7 @@
                 : s.sets.map(t => fa(t.reps, 0)).join("  ·  ");
             const tip = [
                 pDate(s.date, true),
-                `هفته ${fa(s.week, 0)} · جلسه ${fa(s.session, 0)}`,
+                `${s.programTitle || ""} · هفته ${fa(s.week, 0)} · جلسه ${fa(s.session, 0)}`,
                 best,
                 `همه‌ی ست‌ها: ${all}`,
                 s.target ? `هدف ${s.target.raw}: ${STATUS_LABELS[s.status]}` : STATUS_LABELS.none,
@@ -254,11 +281,11 @@
             ].filter(Boolean).join("\n");
 
             return `${label}${xl}
-                <circle class="dv-dot" cx="${cx}" cy="${cy}" r="6" fill="${STATUS_COLORS[s.status]}" stroke="#fff" stroke-width="2"
+                <circle class="dv-dot" cx="${cx}" cy="${cy}" r="${dim(s) ? 5 : 6.5}" fill="${STATUS_COLORS[s.status]}" fill-opacity="${op}" stroke="#fff" stroke-width="2"
                         tabindex="0" data-tip="${esc(tip).replace(/\n/g, "&#10;")}"/>`;
         }).join("");
 
-        return `<svg viewBox="0 0 ${W} ${H}" class="dv-svg" role="img" aria-label="روند ${esc(item.name)}">${grid}${line}${dots}</svg>`;
+        return `<svg viewBox="0 0 ${W} ${H}" class="dv-svg" role="img" aria-label="روند ${esc(item.name)}">${grid}${seps}${line}${dots}</svg>`;
     }
 
     function itemTag(item) {
@@ -273,76 +300,103 @@
     }
 
     function itemCardHtml(item, idx) {
-        const has = item.sessions.length > 0;
+        const list = item.sessions;
+        const has = list.length > 0;
         const tag = itemTag(item);
-        const foot = has
-            ? `<span>${fa(item.stats.count, 0)} جلسه</span><span>آخرین: ${bestText(item, item.stats.last)}</span>`
-            : `<span>—</span>`;
+        const st = item.stats;
+        let foot;
+        if (!has) {
+            foot = `<span>—</span>`;
+        } else {
+            const inCycle = state.month !== "all" ? item.cycle.sessions.length : 0;
+            foot = `<span>${fa(st.count, 0)} جلسه · ${fa(item.programCount, 0)} برنامه${inCycle ? ` · این دوره: ${fa(inCycle, 0)}` : ""}</span><span>آخرین: ${bestText(item, st.last)}</span>`;
+        }
         return `
         <button type="button" class="dv-ex-card" data-idx="${idx}" aria-label="باز کردن نمودار ${esc(item.name)}">
             <div class="dv-ex-head">
                 <strong>${esc(item.name)}</strong>
                 ${tag ? `<span class="dv-ex-tag">${esc(tag)}</span>` : ""}
             </div>
-            ${has ? chartSvg(item, true) : `<div class="dv-ex-empty">ثبتی در این بازه وجود ندارد</div>`}
+            ${has ? chartSvg(item, true, list) : `<div class="dv-ex-empty">ثبتی در این بازه وجود ندارد</div>`}
             <div class="dv-ex-foot">${foot}</div>
         </button>`;
     }
 
     function mountTips(root) {
-        const wrap = root.querySelector(".dv-chart");
-        const tip = root.querySelector(".dv-tip");
-        if (!wrap || !tip) return;
+        root.querySelectorAll(".dv-chart").forEach(wrap => {
+            const tip = wrap.querySelector(".dv-tip");
+            if (!tip) return;
 
-        const show = el => {
-            tip.textContent = el.getAttribute("data-tip");
-            tip.hidden = false;
-            const wr = wrap.getBoundingClientRect();
-            const r = el.getBoundingClientRect();
-            const left = Math.min(Math.max(r.left - wr.left + r.width / 2, 100), wr.width - 100);
-            tip.style.left = left + "px";
-            tip.style.top = (r.top - wr.top) + "px";
-        };
-        const hide = () => { tip.hidden = true; };
+            const show = el => {
+                tip.textContent = el.getAttribute("data-tip");
+                tip.hidden = false;
+                const wr = wrap.getBoundingClientRect();
+                const r = el.getBoundingClientRect();
+                const left = Math.min(Math.max(r.left - wr.left + r.width / 2, 100), wr.width - 100);
+                tip.style.left = left + "px";
+                tip.style.top = (r.top - wr.top) + "px";
+            };
+            const hide = () => { tip.hidden = true; };
 
-        root.querySelectorAll(".dv-dot").forEach(dot => {
-            dot.addEventListener("pointerenter", () => show(dot));
-            dot.addEventListener("pointerleave", hide);
-            dot.addEventListener("focus", () => show(dot));
-            dot.addEventListener("blur", hide);
-            dot.addEventListener("click", e => { e.stopPropagation(); show(dot); });
+            wrap.querySelectorAll(".dv-dot").forEach(dot => {
+                dot.addEventListener("pointerenter", () => show(dot));
+                dot.addEventListener("pointerleave", hide);
+                dot.addEventListener("focus", () => show(dot));
+                dot.addEventListener("blur", hide);
+                dot.addEventListener("click", e => { e.stopPropagation(); show(dot); });
+            });
+            wrap.addEventListener("click", hide);
         });
-        wrap.addEventListener("click", hide);
     }
 
-    function openExerciseModal(item) {
+    /* یک بخش مودال: نمودار + داده‌ی ثبت‌شده + تفسیر */
+    function modalBlock(item, title, list, stats, interp, withTip) {
+        if (!list.length) {
+            return `<section class="dv-mblock"><h4 class="dv-mblock-title">${esc(title)}</h4>
+                <div class="dv-empty">برای این بخش ثبتی وجود ندارد.</div></section>`;
+        }
+        const isLoad = item.kind === "load";
+        return `
+        <section class="dv-mblock">
+            <h4 class="dv-mblock-title">${esc(title)}</h4>
+            <div class="dv-chart">
+                ${chartSvg(item, false, list)}
+                ${withTip ? `<div class="dv-tip" hidden></div>` : `<div class="dv-tip" hidden></div>`}
+            </div>
+            <dl class="dv-observed">
+                <div><dt>جلسات</dt><dd>${fa(stats.count, 0)}</dd></div>
+                <div><dt>${isLoad ? "بیشترین وزنه" : "بیشترین مقدار"}</dt><dd>${bestText(item, stats.maxBest)}</dd></div>
+                <div><dt>آخرین بهترین ثبت</dt><dd>${bestText(item, stats.last)}</dd></div>
+                ${item.target ? `<div><dt>هدف برنامه</dt><dd>${esc(item.target.raw)}</dd></div>` : ""}
+            </dl>
+            <p class="dv-interp dv-interp-${interp.level}"><b>تفسیر</b>${esc(interp.text)}</p>
+            ${stats.incompleteSessions ? `<p class="dv-note">در ${fa(stats.incompleteSessions, 0)} جلسه، بعضی ست‌ها ناقص ثبت شده‌اند (فقط وزن یا فقط تکرار) و در نمودار لحاظ نشده‌اند.</p>` : ""}
+        </section>`;
+    }
+
+    function openExerciseModal(item, cycleTitle) {
         if (closeModalFn) closeModalFn();
 
         let body;
         if (!item.sessions.length) {
-            body = `<div class="dv-empty">برای این حرکت در بازه‌ی انتخاب‌شده ثبتی وجود ندارد. بازه را روی «کل دوره» بگذار.</div>`;
+            body = `<div class="dv-empty">برای این حرکت در بازه‌ی انتخاب‌شده ثبتی وجود ندارد. بازه را روی «کل سابقه» بگذار.</div>`;
         } else {
-            const st = item.stats;
+            const isLoad = item.kind === "load";
             const legend = Object.keys(STATUS_COLORS).filter(k => k !== "none" || !item.target).map(k =>
                 `<span><i style="background:${STATUS_COLORS[k]}"></i>${STATUS_LABELS[k]}</span>`).join("");
-            const isLoad = item.kind === "load";
+            const multi = item.programCount > 1;
+            const hasCycle = multi && !!cycleTitle;
+            const cTitle = cycleTitle;
+
             body = `
-                <div class="dv-chart">
-                    ${chartSvg(item, false)}
-                    <div class="dv-tip" hidden></div>
-                </div>
+                ${modalBlock(item,
+                    multi ? `کل روند در ${fa(item.programCount, 0)} برنامه` : "کل روند",
+                    item.sessions, item.stats, item.interpretation, true)}
+                ${hasCycle ? `<p class="dv-note dv-mlegend-note">نقطه‌های پررنگ مربوط به «${esc(cTitle)}» و نقطه‌های کم‌رنگ مربوط به برنامه‌های قبلی‌اند؛ خط‌چین مرز دو برنامه را نشان می‌دهد.</p>` : ""}
+                ${hasCycle ? modalBlock(item, `عملکرد ${cTitle}`, item.cycle.sessions, item.cycle.stats, item.cycle.interpretation, true) : ""}
                 <div class="dv-legend">${legend}</div>
-                <div class="dv-observed-title">داده ثبت‌شده</div>
-                <dl class="dv-observed">
-                    <div><dt>جلسات</dt><dd>${fa(st.count, 0)}</dd></div>
-                    <div><dt>${isLoad ? "بیشترین وزنه" : "بیشترین مقدار"}</dt><dd>${bestText(item, st.maxBest)}</dd></div>
-                    <div><dt>آخرین بهترین ثبت</dt><dd>${bestText(item, st.last)}</dd></div>
-                    ${item.target ? `<div><dt>هدف برنامه</dt><dd>${esc(item.target.raw)}</dd></div>` : ""}
-                </dl>
-                <p class="dv-interp dv-interp-${item.interpretation.level}"><b>تفسیر</b>${esc(item.interpretation.text)}</p>
-                ${st.incompleteSessions ? `<p class="dv-note">در ${fa(st.incompleteSessions, 0)} جلسه، بعضی ست‌ها ناقص ثبت شده‌اند (فقط وزن یا فقط تکرار). این ست‌ها در نمودار لحاظ نشده‌اند.</p>` : ""}
                 <p class="dv-note">${isLoad
-                    ? "نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود؛ پس همه‌ی ست‌های ثبت‌شده بررسی شده‌اند و بهترین ست، ست با بیشترین وزنه است."
+                    ? "نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود؛ پس همه‌ی ست‌های ثبت‌شده بررسی شده‌اند و بهترین ست، ست با بیشترین وزنه است. سابقه‌ی حرکت بر اساس شناسه‌ی حرکت از همه‌ی برنامه‌ها جمع می‌شود، حتی اگر شماره‌ی جلسه‌اش فرق کرده باشد."
                     : `برای این حرکت، بیشترین عدد ثبت‌شده در فیلد «تکرار» هر جلسه رسم می‌شود${item.unit === "تکرار" ? "" : ` (واحد: ${item.unit})`}.`}</p>`;
         }
 
@@ -381,20 +435,22 @@
     const sectionProgression = {
         render(ctx) {
             const monthKeys = Object.keys(ctx.programs);
-            if (!state.month || !ctx.programs[state.month]) state.month = ctx.activeMonth || monthKeys[0] || null;
+            if (state.month !== "all" && !ctx.programs[state.month]) state.month = "all";
+            const isAll = state.month === "all";
 
-            const sessMap = (state.month && ctx.programs[state.month] && ctx.programs[state.month].sessions) || {};
+            const sessMap = (!isAll && ctx.programs[state.month] && ctx.programs[state.month].sessions) || {};
             const keys = Object.keys(sessMap).sort((a, b) => Number(a) - Number(b));
-            if (!state.session || !sessMap[state.session]) state.session = keys[0] || null;
+            if (!isAll && (!state.session || !sessMap[state.session])) state.session = keys[0] || null;
 
             const f = progressionFilters(ctx);
             const filters = `
                 <div class="dv-filters dv-filters-inline">
                     <label>بازه <select data-f="range">${f.range}</select></label>
-                    ${f.multiMonth ? `<label>برنامه <select data-f="month">${f.months}</select></label>` : ""}
+                    <label>دوره مقایسه <select data-f="month">${f.months}</select></label>
                 </div>`;
 
-            const sessionBoxes = keys.length
+            /* با «کل سابقه» دکمه‌های جلسه پنهان‌اند: یک حرکت ممکن است در برنامه‌های مختلف در جلسه‌های متفاوتی باشد */
+            const sessionBoxes = !isAll && keys.length
                 ? `<div class="dv-sessions" role="tablist" aria-label="انتخاب جلسه">
                     ${keys.map(k => `
                         <button type="button" role="tab" aria-selected="${k === state.session}" class="dv-sess-btn ${k === state.session ? "active" : ""}" data-sess="${esc(k)}">
@@ -405,17 +461,24 @@
                 : "";
 
             let body;
-            if (!state.session) {
+            if (!isAll && !state.session) {
                 progItems = [];
                 body = `<div class="dv-empty">برای نمایش نمودار، ابتدا یک برنامه‌ی تمرینی بارگذاری کن.</div>`;
             } else {
                 const data = A.computeSessionCharts(ctx, state);
                 progItems = data.items;
+                progCycleTitle = data.cycleTitle;
                 const logged = progItems.some(it => it.sessions.length);
-                const hint = logged ? "" : `<p class="dv-note">برای این جلسه در بازه‌ی انتخاب‌شده چیزی ثبت نشده. بازه را روی «کل دوره» بگذار یا یک جلسه ثبت کن.</p>`;
+                const hint = logged ? "" : `<p class="dv-note">برای این انتخاب در بازه‌ی فعلی چیزی ثبت نشده. بازه را روی «کل سابقه» بگذار یا یک جلسه ثبت کن.</p>`;
+                const scopeNote = isAll
+                    ? "روند هر حرکت در تمام برنامه‌ها نمایش داده می‌شود؛ خط‌چین مرز دو برنامه است. برای دیدن جلسه‌های یک برنامه، آن را از «دوره مقایسه» انتخاب کن."
+                    : (monthKeys.length > 1
+                        ? `روند هر حرکت در همه‌ی برنامه‌ها نمایش داده می‌شود؛ ثبت‌های «${esc(data.cycleTitle)}» پررنگ و برنامه‌های قبلی کم‌رنگ‌اند. با کلیک روی هر نمودار، نمودار جداگانه‌ی همان دوره هم کنارش باز می‌شود.`
+                        : "");
                 body = `
                     <div class="dv-ex-grid">${progItems.map(itemCardHtml).join("")}</div>
                     ${hint}
+                    ${scopeNote ? `<p class="dv-note">${scopeNote}</p>` : ""}
                     <p class="dv-note">روی هر نمودار کلیک کن تا بزرگ شود. حرکات با وزنه: بهترین ست هر جلسه — حرکات وزن‌بدنی و زمانی (شنا، پلانک و …): بیشترین تکرار یا ثانیه‌ی ثبت‌شده.</p>`;
             }
 
@@ -423,7 +486,7 @@
             <section class="dv-card">
                 <header class="dv-card-head">
                     <h3>روند عملکرد حرکات</h3>
-                    <p>یک جلسه را انتخاب کن تا نمودار همه‌ی حرکات آن را ببینی</p>
+                    <p>${isAll ? "روند همه‌ی حرکات در تمام برنامه‌ها" : "یک جلسه را انتخاب کن تا نمودار همه‌ی حرکات آن را در تمام برنامه‌ها ببینی"}</p>
                 </header>
                 ${filters}
                 ${sessionBoxes}
@@ -450,7 +513,7 @@
             slot.querySelectorAll(".dv-ex-card").forEach(card => {
                 card.addEventListener("click", () => {
                     const item = progItems[Number(card.dataset.idx)];
-                    if (item) openExerciseModal(item);
+                    if (item) openExerciseModal(item, progCycleTitle);
                 });
             });
         }
