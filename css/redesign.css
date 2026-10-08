@@ -1,0 +1,217 @@
+/* =====================================================
+   GymLog — بازطراحی ورزشی (لایه‌ی override)
+   بعد از gl-extras.css لود شود. به JS دست نمی‌زند.
+   ساده، خوانا (پیرچشمی)، مناسب استفاده در باشگاه
+===================================================== */
+:root {
+    --rd-bg: #f4f5f7; --rd-card: #ffffff; --rd-line: #cfd5de;
+    --rd-text: #111827; --rd-sub: #4b5563;
+    --rd-accent: #c2410c; --rd-ink: #ffffff; --rd-soft: #fff1e8;
+    --rd-ok: #15803d; --rd-input: #ffffff; --rd-nav: #ffffff;
+}
+body.dark-mode {
+    --rd-bg: #0a0c0f; --rd-card: #14181d; --rd-line: #3a4452;
+    --rd-text: #ffffff; --rd-sub: #cbd5e1;
+    --rd-accent: #c6f432; --rd-ink: #0a0c0f; --rd-soft: #1d280a;
+    --rd-ok: #4ade80; --rd-input: #0a0c0f; --rd-nav: #0f1318;
+}
+
+body:not(.rd) {
+    font-family: Vazirmatn, "Segoe UI", Tahoma, system-ui, sans-serif;
+    background: var(--rd-bg);
+    color: var(--rd-text);
+
+    .app-shell { background: var(--rd-bg); }
+    .card, .exercise-card, .summary-card, .dv-card, .dv-kpi, .dash-overview-card,
+    .dash-cycle-card, .dash-table-card, .dv-ex-card, .dv-welcome, .dv-prog-session {
+        background: var(--rd-card);
+        border: 2px solid var(--rd-line);
+        border-radius: 16px;
+        color: var(--rd-text);
+    }
+    .exercise-header { background: transparent; border-color: var(--rd-line); }
+    .page-header p, .selector-title, .exercise-meta, .field label, .section-title p,
+    .dv-card-head p, .dv-kpi-label, .dv-kpi-sub, .dv-note, .setting-info span,
+    .summary-card span, .summary-card small, .history-empty, .dv-empty {
+        color: var(--rd-sub);
+    }
+
+    /* ---------- دکمه‌ها ---------- */
+    button, .secondary-btn { min-height: 52px; border-radius: 14px; font-size: 16px; }
+    .primary-btn, .dash-start-workout-btn {
+        background: var(--rd-accent); color: var(--rd-ink); border-color: var(--rd-accent);
+        font-weight: 800; letter-spacing: 0;
+    }
+    .secondary-btn {
+        background: var(--rd-card); color: var(--rd-text);
+        border: 2px solid var(--rd-line);
+    }
+    .danger-btn { border-width: 2px; }
+
+    /* ---------- فرم‌ها ---------- */
+    input, select, .date-picker-btn {
+        background: var(--rd-input); color: var(--rd-text);
+        border: 2px solid var(--rd-line); border-radius: 12px; min-height: 52px;
+    }
+    input:focus, select:focus {
+        border-color: var(--rd-accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--rd-accent) 30%, transparent);
+    }
+    .session-note { background: var(--rd-soft); color: var(--rd-text); font-size: 14px; }
+
+    /* ---------- انتخاب جلسه ---------- */
+    .session-btn {
+        background: var(--rd-card); color: var(--rd-text);
+        border: 2px solid var(--rd-line); border-radius: 14px; min-height: 76px;
+    }
+    .session-btn strong { font-size: 16px; }
+    .session-btn span { font-size: 13px; color: var(--rd-sub); }
+    .session-btn.active {
+        background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-ink);
+    }
+    .session-btn.active span { color: var(--rd-ink); opacity: 0.85; }
+
+    /* ---------- حرکت ---------- */
+    .exercise-header { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px; }
+    .exercise-title { flex: 1 0 100%; }
+    .exercise-header h2 { font-size: 22px; font-weight: 800; }
+    .exercise-number {
+        width: 38px; height: 38px; font-size: 17px;
+        background: var(--rd-accent); color: var(--rd-ink);
+    }
+    .exercise-meta { font-size: 15px; }
+    .exercise-help-btn, .exercise-history-btn, .exercise-rest-btn {
+        flex: 1 1 0; margin: 0; min-height: 50px; padding: 6px 8px; font-size: 14px; font-weight: 700;
+        background: var(--rd-card); color: var(--rd-text);
+        border: 2px solid var(--rd-line); border-radius: 12px;
+    }
+    .exercise-rest-btn { background: var(--rd-soft); border-color: var(--rd-accent); }
+
+    /* ---------- ست‌ها ---------- */
+    .sets-container { padding: 12px; }
+    .set-row { grid-template-columns: 64px 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .set-label { font-size: 17px; color: var(--rd-text); }
+    .set-row input {
+        height: 60px; font-size: 24px; font-weight: 800; border-radius: 14px;
+    }
+    .set-row input::placeholder { font-size: 14px; font-weight: 500; color: var(--rd-sub); opacity: 1; }
+    .set-difference { font-size: 15px; color: var(--rd-sub); font-weight: 600; }
+
+    /* ---------- خلاصه و ذخیره ---------- */
+    .summary-card strong { font-size: 26px; color: var(--rd-accent); }
+    .summary-card span { font-size: 14px; }
+    #finishWorkoutBtn { min-height: 64px; font-size: 18px; }
+
+    /* ---------- جدول‌ها ---------- */
+    .history-table, .dash-table { font-size: 14px; }
+    .history-table th, .dash-table th { background: transparent; color: var(--rd-sub); }
+    .history-table td, .dash-table td, .history-table th, .dash-table th { border-color: var(--rd-line); }
+
+    /* ---------- تقویم/انتخاب تاریخ ---------- */
+    .date-picker-modal, .dash-detail-modal, .dv-modal, .exercise-guide-modal, .ee-modal {
+        background: var(--rd-card); color: var(--rd-text);
+    }
+    .date-picker-day { font-size: 16px; height: 46px; color: var(--rd-text); }
+    .date-picker-day.selected { background: var(--rd-accent); color: var(--rd-ink); }
+    .date-picker-day.today { box-shadow: inset 0 0 0 2px var(--rd-accent); }
+    .date-picker-day.has-workout .date-picker-day-circle { border-color: var(--rd-ok); }
+    .date-picker-weekdays { font-size: 13px; color: var(--rd-sub); }
+    .date-picker-legend { font-size: 13px; color: var(--rd-sub); }
+    .date-picker-nav { background: var(--rd-line); color: var(--rd-text); width: 44px; height: 44px; }
+
+    .exercise-guide-instructions { font-size: 18px; color: var(--rd-text); }
+    .exercise-guide-close { background: var(--rd-line); color: var(--rd-text); width: 46px; height: 46px; }
+    .setting-row .setting-btn { min-height: 52px; font-size: 14px; }
+    .setting-info strong { font-size: 16px; color: var(--rd-text); }
+
+    /* ---------- تایمر ---------- */
+    .rest-timer { background: var(--rd-card); border: 2px solid var(--rd-accent); }
+    .rest-timer-time { font-size: 38px; font-weight: 800; color: var(--rd-text); }
+    .rest-timer-label { font-size: 15px; color: var(--rd-sub); }
+    .rest-timer-track i { background: var(--rd-accent); }
+    .rest-timer-track { height: 10px; }
+    .rest-timer-actions button { min-height: 48px; font-size: 14px; background: var(--rd-input); color: var(--rd-text); border: 2px solid var(--rd-line); }
+
+    /* ---------- نوار بالا و منوی کناری ---------- */
+    .app-sidebar, .desktop-topbar, .mobile-nav-bar {
+        background: var(--rd-nav); border-color: var(--rd-line); color: var(--rd-text);
+    }
+    .sidebar-logo { background: var(--rd-accent); color: var(--rd-ink); }
+    .sidebar-title h1, .desktop-topbar-title, .mobile-nav-brand { color: var(--rd-text); }
+    .sidebar-nav-item { color: var(--rd-sub); font-size: 15px; padding: 12px 14px; }
+    .sidebar-nav-item:hover { background: var(--rd-soft); color: var(--rd-text); }
+    .sidebar-nav-item.active { background: var(--rd-accent); color: var(--rd-ink); font-weight: 800; }
+    .user-chip { color: var(--rd-accent); }
+    .settings-icon-btn { background: var(--rd-card); color: var(--rd-text); border: 2px solid var(--rd-line); width: 48px; height: 48px; }
+    .settings-page-overlay, .settings-page, .my-programs-overlay, .my-programs-page { background: var(--rd-bg); color: var(--rd-text); }
+
+    /* ---------- داشبورد: رنگ‌های آبی ثابت ---------- */
+    .dash-program-kicker, .dv-prog-table td.dv-prog-reps { color: var(--rd-accent); }
+    .dash-progress-bar-fill, .dv-mus-bar i { background: var(--rd-accent); }
+    .dash-progress-bar-bg, .dv-mus-bar { background: var(--rd-line); }
+    .dv-kpi-val, .dash-overview-title, .dv-card-head h3 { color: var(--rd-text); }
+    .dv-pill.active { background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-ink); }
+    .dv-pill, .dv-sess-btn { background: var(--rd-card); color: var(--rd-text); border: 2px solid var(--rd-line); }
+    .dv-sess-btn.active { background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-ink); }
+    .dv-sess-btn.active span { color: var(--rd-ink); }
+    .dash-cycle-week-col { background: var(--rd-bg); border-color: var(--rd-line); }
+    .dash-cycle-session-item { background: var(--rd-card); border-color: var(--rd-line); }
+    .dash-cycle-session-info strong { color: var(--rd-text); }
+    .dash-cycle-session-info span { color: var(--rd-sub); font-size: 12px; }
+    .dash-cycle-session-item.done { border-color: var(--rd-ok); background: var(--rd-card); }
+    .dash-cycle-session-item.active-next { border-color: var(--rd-accent); box-shadow: 0 0 0 2px var(--rd-accent); background: var(--rd-soft); }
+}
+
+/* =====================================================
+   موبایل: خوانایی بیشتر + نوار پایین بزرگ
+===================================================== */
+@media (max-width: 1023px) {
+    body:not(.rd) {
+        font-size: 18px;
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+
+        .container { padding: 12px 12px 24px; }
+
+        /* حداقل اندازه‌ی متن */
+        .setting-info span, .dv-note, .dv-kpi-sub, .dv-list-sub, .dv-ex-foot,
+        .my-program-dates, .my-program-exercise-meta, .history-table, .dv-prog-table,
+        .exercise-history-info, .dash-cycle-week-badge, .gl-hint {
+            font-size: 14px;
+        }
+        .history-table th, .history-table td { padding: 12px 6px; }
+        .exercise-history-info { font-size: 14px; }
+        .history-set { font-size: 17px; min-height: 56px; }
+        .exercise-note > summary { font-size: 15px; color: var(--rd-sub); padding: 10px 0; }
+        .exercise-note-input, .session-note-input { font-size: 17px; color: var(--rd-text); background: var(--rd-input); border: 2px solid var(--rd-line); }
+
+        /* نوار بالا: فقط نام برنامه و تنظیمات */
+        .mobile-nav-bar { padding: 10px 14px; }
+        .mobile-nav-brand { font-size: 20px; font-weight: 800; color: var(--rd-accent); }
+
+        /* نوار پایین */
+        .mobile-tab-switch {
+            position: fixed; z-index: 960; right: 0; left: 0; bottom: 0;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+            background: var(--rd-nav); border-top: 2px solid var(--rd-line); border-radius: 0;
+        }
+        .mobile-tab-btn {
+            min-height: 58px; border-radius: 14px; font-size: 17px; font-weight: 800;
+            background: var(--rd-card); color: var(--rd-text); border: 2px solid var(--rd-line);
+        }
+        .mobile-tab-btn.active {
+            background: var(--rd-accent); color: var(--rd-ink); border-color: var(--rd-accent); box-shadow: none;
+        }
+
+        /* تایمر بالای نوار پایین */
+        .rest-timer { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+        .app-toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); font-size: 16px; }
+
+        /* مودال راهنما */
+        .exercise-guide-header h2 { font-size: 24px; }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
