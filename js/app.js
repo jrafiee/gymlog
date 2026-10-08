@@ -48,6 +48,8 @@ const openExerciseBankBtn = document.getElementById("openExerciseBankBtn");
 const backupWarningBanner = document.getElementById("backupWarningBanner");
 const backupWarningDetail = document.getElementById("backupWarningDetail");
 const backupWarningBtn = document.getElementById("backupWarningBtn");
+const sessionNote = document.getElementById("sessionNote");
+const sessionPrevNote = document.getElementById("sessionPrevNote");
 
 /* =========================================================
    تشخیص هوشمند هفته و جلسه بعدی بر اساس سوابق
@@ -538,9 +540,19 @@ function renderExercises() {
         weekNumber.value = currentWorkout.week;
     }
 
+    if (sessionNote) sessionNote.value = (currentWorkout && currentWorkout.note) || "";
+    if (sessionPrevNote) {
+        const prevNote = previous && previous.note;
+        sessionPrevNote.textContent = prevNote ? "یادداشت جلسه قبل: " + prevNote : "";
+        sessionPrevNote.hidden = !prevNote;
+    }
+
     program.exercises.forEach((exercise, index) => {
         const previousExercise = previous?.exercises?.find(item => item.id === exercise.id);
         const currentExercise = currentWorkout?.exercises?.find(item => item.id === exercise.id);
+        const restSec = parseRestSeconds(exercise.rest);
+        const exNote = (currentExercise && currentExercise.note) || "";
+        const prevExNote = (previousExercise && previousExercise.note) || "";
 
         const card = document.createElement("section");
         card.className = "exercise-card";
@@ -561,10 +573,16 @@ function renderExercises() {
                 <button type="button" class="exercise-history-btn" data-exercise-id="${exercise.id}">
                     📈 سابقه حرکت
                 </button>
+                ${restSec ? `<button type="button" class="exercise-rest-btn" data-seconds="${restSec}" data-exercise-name="${esc(exercise.name)}">⏱ استراحت</button>` : ""}
             </div>
             <div class="sets-container" data-exercise="${exercise.id}">
                 ${createSetRows(exercise, previousExercise, currentExercise)}
             </div>
+            <details class="exercise-note" ${exNote ? "open" : ""}>
+                <summary>📝 یادداشت این حرکت</summary>
+                ${prevExNote ? `<div class="exercise-prev-note">جلسه قبل: ${esc(prevExNote)}</div>` : ""}
+                <textarea class="exercise-note-input" rows="2" maxlength="1000" placeholder="مثلاً تنظیم دستگاه، حس حرکت، دلیل کم‌شدن وزنه…">${esc(exNote)}</textarea>
+            </details>
         `;
         exerciseList.appendChild(card);
     });
@@ -610,7 +628,8 @@ function getExerciseHistory(exerciseId) {
             week: workout.week,
             month: workout.month,
             session: workout.session,
-            sets: exercise.sets
+            sets: exercise.sets,
+            note: exercise.note || ""
         });
     });
 
@@ -643,6 +662,7 @@ function showExerciseHistory(exerciseId) {
                         <div class="exercise-history-sets">
                             ${formatHistorySets(record.sets)}
                         </div>
+                        ${record.note ? `<div class="exercise-history-note">📝 ${esc(record.note)}</div>` : ""}
                     </div>
                 `).join("")}
             </div>
@@ -762,10 +782,17 @@ function showExerciseGuide(exerciseId) {
     const editBtn = overlay.querySelector(".exercise-guide-edit");
     if (editBtn) {
         editBtn.addEventListener("click", () => {
+            /* اگر بستن راهنما با history.back() انجام می‌شود، ویرایشگر باید بعد از popstate باز شود؛
+               وگرنه back ناهمگام همان state تازه‌ی ویرایشگر را می‌بندد. */
+            const closesViaHistory = !!(history.state && history.state.modal === "exerciseGuide");
+            const openEditor = () => {
+                if (typeof openExerciseEditor === "function") {
+                    openExerciseEditor(exerciseId, refreshAfterCatalogChange);
+                }
+            };
             closeOverlay();
-            if (typeof openExerciseEditor === "function") {
-                openExerciseEditor(exerciseId, refreshAfterCatalogChange);
-            }
+            if (closesViaHistory) window.addEventListener("popstate", openEditor, { once: true });
+            else openEditor();
         });
     }
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
@@ -814,6 +841,9 @@ function collectWorkout() {
         exercises: []
     };
 
+    const sessionNoteText = sessionNote ? sessionNote.value.trim() : "";
+    if (sessionNoteText) result.note = sessionNoteText;
+
     document.querySelectorAll(".sets-container").forEach(container => {
         const exerciseId = container.dataset.exercise;
         const sets = [];
@@ -822,7 +852,12 @@ function collectWorkout() {
             const reps = row.querySelector(".reps-input").value;
             sets.push({ weight, reps });
         });
-        result.exercises.push({ id: exerciseId, sets });
+        const card = container.closest(".exercise-card");
+        const noteEl = card ? card.querySelector(".exercise-note-input") : null;
+        const exNoteText = noteEl ? noteEl.value.trim() : "";
+        const entry = { id: exerciseId, sets };
+        if (exNoteText) entry.note = exNoteText;
+        result.exercises.push(entry);
     });
 
     return result;
@@ -1099,12 +1134,24 @@ if (weekNumber) {
     });
 }
 
+/* یادداشت‌ها همراه ست‌ها ذخیره می‌شوند (جلسه‌ی بدون هیچ ستی ذخیره نمی‌شود)؛ با تأخیر کوتاه */
+let noteSaveTimer = null;
+function scheduleNoteSave() {
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = setTimeout(() => { autoSaveWorkout().catch(() => {}); }, 500);
+}
+
+if (sessionNote) sessionNote.addEventListener("input", scheduleNoteSave);
+
 function attachInputEvents() {
     document.querySelectorAll(".weight-input, .reps-input").forEach(input => {
         input.addEventListener("input", () => {
             updateSummary();
             autoSaveWorkout();
         });
+    });
+    document.querySelectorAll(".exercise-note-input").forEach(input => {
+        input.addEventListener("input", scheduleNoteSave);
     });
 }
 

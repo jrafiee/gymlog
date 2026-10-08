@@ -1,0 +1,170 @@
+/* =====================================================
+   GymLog — استایل‌های افزوده
+
+   ۱) متغیرهای تم (--gl-*) برای کلاس‌هایی که جایگزین style="" های ثابت شده‌اند
+   ۲) یادداشت جلسه/حرکت، دکمه‌ی استراحت و تایمر
+   حالت تیره با body.dark-mode فعال می‌شود (همان مکانیزم برنامه).
+   اگر در style.css متغیرهای تم دارید، مقدار --gl-* را به آن‌ها وصل کنید.
+===================================================== */
+:root {
+    --gl-surface: #ffffff;
+    --gl-surface-2: #f9fafb;
+    --gl-border: #e2e8f0;
+    --gl-border-soft: #f3f4f6;
+    --gl-text: #0f172a;
+    --gl-muted: #64748b;
+    --gl-faint: #9ca3af;
+    --gl-accent: #2563eb;
+    --gl-accent-soft: #eff6ff;
+    --gl-chip-bg: #f1f5f9;
+    --gl-chip-text: #475569;
+    --gl-danger: #dc2626;
+    --gl-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode {
+    --gl-surface: #1e293b;
+    --gl-surface-2: #172033;
+    --gl-border: #334155;
+    --gl-border-soft: #2a3649;
+    --gl-text: #f1f5f9;
+    --gl-muted: #94a3b8;
+    --gl-faint: #7c8aa0;
+    --gl-accent: #60a5fa;
+    --gl-accent-soft: rgba(96, 165, 250, 0.16);
+    --gl-chip-bg: #273449;
+    --gl-chip-text: #cbd5e1;
+    --gl-danger: #f87171;
+    --gl-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- عمومی ---------- */
+.gl-view-pad { padding: 24px; }
+.gl-muted-sm { font-size: 12px; color: var(--gl-muted); }
+.gl-unit { color: var(--gl-faint); }
+.gl-empty-pad { padding: 16px; color: var(--gl-faint); }
+.gl-cell-flex { display: flex; align-items: center; gap: 8px; }
+.gl-btn-block { width: 100%; }
+.gl-danger-text { color: var(--gl-danger); }
+.gl-hint { display: block; margin-top: 6px; font-size: 11px; color: var(--gl-faint); }
+
+/* ---------- تاریخچه ---------- */
+.gl-hist-head { flex-wrap: wrap; gap: 12px; }
+.gl-hist-title { margin: 0 0 4px; }
+
+/* ---------- تقویم موبایل ---------- */
+.gl-cal-mobile { max-width: 400px; margin: 0 auto; }
+.gl-cal-mobile-card {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--gl-border);
+    box-shadow: var(--gl-shadow);
+}
+.gl-cal-title { margin: 0; font-size: 15px; font-weight: 700; }
+.gl-cal-day { margin-top: 16px; }
+
+/* ---------- صفحه‌ی برنامه‌ها ---------- */
+.gl-upload-box {
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--gl-shadow);
+}
+.gl-upload-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.gl-upload-content { display: flex; align-items: flex-start; gap: 16px; max-width: 640px; }
+.gl-upload-icon {
+    width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+    background: var(--gl-accent-soft); color: var(--gl-accent);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.gl-upload-text h3 { margin: 0 0 6px; font-size: 16px; font-weight: 800; color: var(--gl-text); }
+.gl-upload-text p { margin: 0 0 10px; font-size: 13px; color: var(--gl-muted); line-height: 1.6; }
+.gl-upload-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gl-badge {
+    padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+    background: var(--gl-chip-bg); color: var(--gl-chip-text);
+}
+.gl-upload-btn {
+    cursor: pointer; padding: 12px 24px; font-size: 14px; font-weight: 700; border-radius: 10px;
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.gl-section-title { margin-bottom: 16px; }
+.gl-section-title h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--gl-text); }
+.gl-program-card { margin-bottom: 16px; padding: 20px; }
+.gl-program-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.gl-program-card-title { margin: 0; font-size: 18px; font-weight: 800; }
+
+/* ---------- پشتیبان و تنظیمات ---------- */
+.gl-panel { padding: 24px; max-width: 640px; margin: 0 auto; }
+.gl-panel-col { display: flex; flex-direction: column; gap: 20px; }
+.gl-panel-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.gl-panel-col .gl-panel-title { margin: 0; }
+.gl-panel-desc { margin: 0 0 20px; font-size: 13px; color: var(--gl-muted); }
+.gl-info-box {
+    background: var(--gl-surface-2); border: 1px solid var(--gl-border);
+    border-radius: 10px; padding: 16px; margin-bottom: 20px;
+}
+.gl-info-box strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.gl-info-box span { font-size: 12px; color: var(--gl-muted); }
+.gl-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gl-file-label { cursor: pointer; text-align: center; }
+.gl-setting-row { border-bottom: 1px solid var(--gl-border-soft); padding-bottom: 16px; }
+@media (max-width: 520px) { .gl-grid-2 { grid-template-columns: 1fr; } }
+
+/* ---------- یادداشت‌ها ---------- */
+.session-note-card { padding: 14px 16px; margin-top: 12px; }
+.session-note-label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.session-note-input,
+.exercise-note-input {
+    width: 100%; box-sizing: border-box; resize: vertical; font: inherit; font-size: 13px;
+    padding: 10px 12px; border-radius: 10px; line-height: 1.7;
+    border: 1px solid var(--gl-border); background: var(--gl-surface-2); color: var(--gl-text);
+}
+.session-note-input:focus,
+.exercise-note-input:focus { outline: 2px solid var(--gl-accent); outline-offset: 0; }
+.exercise-note { margin-top: 10px; }
+.exercise-note > summary { cursor: pointer; font-size: 13px; color: var(--gl-muted); padding: 4px 0; user-select: none; }
+.exercise-note[open] > summary { margin-bottom: 6px; }
+.exercise-prev-note {
+    font-size: 12px; color: var(--gl-muted); background: var(--gl-accent-soft);
+    border-radius: 8px; padding: 6px 10px; margin-bottom: 8px; white-space: pre-wrap;
+}
+.exercise-history-note,
+.dv-detail-note {
+    margin: 8px 0 0; font-size: 12px; color: var(--gl-muted); white-space: pre-wrap; line-height: 1.7;
+}
+.dv-detail-note-session {
+    background: var(--gl-accent-soft); border-radius: 8px; padding: 8px 10px; margin-bottom: 12px;
+}
+
+/* ---------- دکمه‌ی استراحت ---------- */
+.exercise-rest-btn {
+    font: inherit; font-size: 13px; cursor: pointer; padding: 8px 12px; border-radius: 10px;
+    border: 1px solid var(--gl-border); background: var(--gl-surface); color: var(--gl-text);
+}
+.exercise-rest-btn:active { transform: scale(0.97); }
+
+/* ---------- تایمر استراحت ---------- */
+.rest-timer {
+    position: fixed; z-index: 950; right: 12px; left: 12px; margin: 0 auto; max-width: 420px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 12px 14px; border-radius: 14px;
+    background: var(--gl-surface); color: var(--gl-text);
+    border: 1px solid var(--gl-border); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.rest-timer[hidden] { display: none; }
+.rest-timer-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rest-timer-label { font-size: 13px; color: var(--gl-muted); }
+.rest-timer-time { font-size: 26px; font-variant-numeric: tabular-nums; direction: ltr; }
+.rest-timer-track { height: 6px; border-radius: 99px; background: var(--gl-chip-bg); overflow: hidden; margin: 8px 0 10px; }
+.rest-timer-track i { display: block; height: 100%; width: 0; background: var(--gl-accent); transition: width 0.25s linear; }
+.rest-timer-actions { display: flex; gap: 8px; }
+.rest-timer-actions button {
+    flex: 1; font: inherit; font-size: 12px; cursor: pointer; padding: 8px 6px; border-radius: 8px;
+    border: 1px solid var(--gl-border); background: var(--gl-surface-2); color: var(--gl-text);
+}
+.rest-timer.done { border-color: #16a34a; }
+.rest-timer.done .rest-timer-label { color: #16a34a; font-weight: 700; }
+.rest-timer.done .rest-timer-track i { background: #16a34a; }

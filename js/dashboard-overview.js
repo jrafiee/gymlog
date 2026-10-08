@@ -371,7 +371,6 @@
     }
 
     function openExerciseModal(item, cycleTitle) {
-        if (closeModalFn) closeModalFn();
 
         let body;
         if (!item.sessions.length) {
@@ -410,14 +409,16 @@
                 ${body}
             </div>`;
 
-        const prevOverflow = document.body.style.overflow;
+        let prevOverflow = "";
         const onKey = e => { if (e.key === "Escape") close(); };
-        function close() {
+        /* اگر مودال قبلی هنوز باز باشد، openModalHistory آن را جایگزین می‌کند (cleanup قبلی اول اجرا می‌شود) */
+        const close = openModalHistory("exerciseChart", () => {
             overlay.remove();
             document.body.style.overflow = prevOverflow;
             document.removeEventListener("keydown", onKey);
             closeModalFn = null;
-        }
+        });
+        prevOverflow = document.body.style.overflow;
         closeModalFn = close;
 
         overlay.addEventListener("click", e => { if (e.target === overlay) close(); });

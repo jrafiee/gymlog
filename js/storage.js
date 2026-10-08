@@ -236,17 +236,26 @@ function sanitizeWorkout(rawWorkout) {
         ? rawWorkout.month.trim()
         : "month1";
 
+    const cleanNote = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+
     const exercises = Array.isArray(rawWorkout.exercises)
-        ? rawWorkout.exercises.map(ex => ({
-            id: String(ex.id || ""),
-            sets: Array.isArray(ex.sets)
-                ? ex.sets.map(s => ({
-                    weight: s && s.weight !== undefined && s.weight !== null ? String(s.weight) : "",
-                    reps: s && s.reps !== undefined && s.reps !== null ? String(s.reps) : ""
-                }))
-                : []
-        })).filter(ex => ex.id !== "")
+        ? rawWorkout.exercises.map(ex => {
+            const out = {
+                id: String(ex.id || ""),
+                sets: Array.isArray(ex.sets)
+                    ? ex.sets.map(s => ({
+                        weight: s && s.weight !== undefined && s.weight !== null ? String(s.weight) : "",
+                        reps: s && s.reps !== undefined && s.reps !== null ? String(s.reps) : ""
+                    }))
+                    : []
+            };
+            const exNote = cleanNote(ex.note, 1000);
+            if (exNote) out.note = exNote;
+            return out;
+        }).filter(ex => ex.id !== "")
         : [];
+
+    const note = cleanNote(rawWorkout.note, 2000);
 
     return {
         id,
@@ -255,6 +264,7 @@ function sanitizeWorkout(rawWorkout) {
         month,
         session,
         exercises,
+        ...(note ? { note } : {}),
         updatedAt: rawWorkout.updatedAt || new Date().toISOString()
     };
 }
@@ -818,8 +828,45 @@ function saveDataToKey(key, data) {
  * Imports a program package (catalog additions + monthly workout programs).
  * Stores records into IndexedDB and keeps cache and fallback synchronized.
  */
-async function importProgramPackage(pkg) {
-    if (!pkg || typeof pkg !== "object") return false;
+/**
+ * فرمت‌های ورودی را یکسان می‌کند:
+ *  - { programsRaw: {month1: {...}}, catalogAdditions: {id: {...}} }   (قدیمی / فایل برنامه)
+ *  - { programs: [{id, ...}], exercises: [{id, ...}] }                 (پشتیبان نسخه‌دار)
+ * اگر هر دو باشند، شکل شیء (programsRaw / catalogAdditions) اولویت دارد.
+ */
+function normalizeProgramPackage(pkg) {
+    const out = { ...pkg };
+
+    if (!out.programsRaw && Array.isArray(pkg.programs)) {
+        out.programsRaw = {};
+        pkg.programs.forEach(p => {
+            if (p && p.id) {
+                const { id, updatedAt, ...rest } = p;
+                out.programsRaw[id] = rest;
+            }
+        });
+    }
+
+    if (!out.catalogAdditions && Array.isArray(pkg.exercises)) {
+        out.catalogAdditions = {};
+        pkg.exercises.forEach(e => {
+            if (e && e.id) {
+                const { id, isCustom, updatedAt, ...rest } = e;
+                out.catalogAdditions[id] = rest;
+            }
+        });
+    }
+
+    return out;
+}
+
+async function importProgramPackage(rawPkg) {
+    if (!rawPkg || typeof rawPkg !== "object") return false;
+    const pkg = normalizeProgramPackage(rawPkg);
+
+    const hasCatalog = pkg.catalogAdditions && Object.keys(pkg.catalogAdditions).length > 0;
+    const hasPrograms = pkg.programsRaw && Object.keys(pkg.programsRaw).length > 0;
+    if (!hasCatalog && !hasPrograms) return false;
 
     // 1. Catalog additions
     if (pkg.catalogAdditions && typeof pkg.catalogAdditions === "object") {
@@ -1033,10 +1080,11 @@ async function restoreBackup(data) {
     // Detect format
     const isNewVersioned = (data.app === "Gym Progress Tracker" || data.schemaVersion) && Array.isArray(data.workouts);
     const isLegacyWorkoutBackup = Array.isArray(data.workouts);
-    const isProgramOnly = !data.workouts && (data.catalogAdditions || data.programsRaw || data.programs);
+    const isProgramOnly = !data.workouts && (data.catalogAdditions || data.programsRaw || data.programs || data.exercises);
 
     if (isProgramOnly) {
-        await importProgramPackage(data);
+        const imported = await importProgramPackage(data);
+        if (!imported) throw new Error("فایل هیچ برنامه یا حرکت قابل‌استفاده‌ای ندارد.");
         return { type: "program", count: 1 };
     }
 
@@ -1049,31 +1097,10 @@ async function restoreBackup(data) {
             if (w) cleanWorkouts.push(w);
         });
 
-        // Extract programs
-        let programsObj = {};
-        if (data.programsRaw && typeof data.programsRaw === "object") {
-            programsObj = data.programsRaw;
-        } else if (Array.isArray(data.programs)) {
-            data.programs.forEach(p => {
-                if (p && p.id) {
-                    const { id, ...rest } = p;
-                    programsObj[id] = rest;
-                }
-            });
-        }
-
-        // Extract exercises
-        let exercisesObj = {};
-        if (data.catalogAdditions && typeof data.catalogAdditions === "object") {
-            exercisesObj = data.catalogAdditions;
-        } else if (Array.isArray(data.exercises)) {
-            data.exercises.forEach(e => {
-                if (e && e.id) {
-                    const { id, ...rest } = e;
-                    exercisesObj[id] = rest;
-                }
-            });
-        }
+        // Programs & exercises: same normalizer as importProgramPackage
+        const normalized = normalizeProgramPackage(data);
+        const programsObj = normalized.programsRaw || {};
+        const exercisesObj = normalized.catalogAdditions || {};
 
         // Write transactionally to IndexedDB
         if (_storeCache.db) {

@@ -108,3 +108,54 @@ const EXERCISE_CATEGORIES_MAP = {
     plank: "شکم",
     pallof_press: "شکم"
 };
+
+
+/* ---------- مودال‌ها و دکمه‌ی Back ----------
+   openModalHistory(key, cleanup) یک state در history می‌گذارد و تابع close() برمی‌گرداند.
+   - Back (گوشی/مرورگر) مودال بالایی را می‌بندد: cleanup اجرا می‌شود.
+   - close() (دکمه‌ی ×، Escape، کلیک روی پس‌زمینه) اگر state همین مودال بالای history باشد
+     history.back() می‌زند، وگرنه مستقیم cleanup را اجرا می‌کند.
+   - اگر مودالی با همان key از قبل باز باشد، بدون push دوباره جایگزین می‌شود. */
+const _modalStack = [];
+
+function openModalHistory(key, cleanup) {
+    const idx = _modalStack.findIndex(m => m.key === key);
+    const reuse = idx !== -1;
+    if (reuse) _modalStack[idx].run();
+    else history.pushState({ modal: key }, "");
+
+    const entry = {
+        key,
+        done: false,
+        run() {
+            if (entry.done) return;
+            entry.done = true;
+            const i = _modalStack.indexOf(entry);
+            if (i !== -1) _modalStack.splice(i, 1);
+            cleanup();
+        }
+    };
+    _modalStack.push(entry);
+
+    return function close() {
+        if (entry.done) return;
+        if (history.state && history.state.modal === key) history.back();
+        else entry.run();
+    };
+}
+
+window.addEventListener("popstate", () => {
+    const top = _modalStack[_modalStack.length - 1];
+    if (top && (!history.state || history.state.modal !== top.key)) top.run();
+});
+
+/* ---------- زمان استراحت ----------
+   "90 ثانیه" → 90 ، "2–3 دقیقه" → 120 (کران پایین بازه) ، نامشخص → null */
+function parseRestSeconds(str) {
+    const t = toLatinDigits(str).replace(/[–—]/g, "-");
+    const m = t.match(/(\d+(?:\.\d+)?)\s*(?:-\s*\d+(?:\.\d+)?)?\s*(دقیقه|ثانیه|min|sec)/i);
+    if (!m) return null;
+    const mult = /دقیقه|min/i.test(m[2]) ? 60 : 1;
+    const sec = Math.round(parseFloat(m[1]) * mult);
+    return sec > 0 ? sec : null;
+}

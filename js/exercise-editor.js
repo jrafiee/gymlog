@@ -297,13 +297,13 @@ ${blocks.join(",\n\n\n")}
             });
         }
 
-        function close() {
+        const prevOverflow = document.body.style.overflow;
+        const onKey = e => { if (e.key === "Escape") close(); };
+        const close = openModalHistory("exerciseEditor", () => {
             overlay.remove();
             document.body.style.overflow = prevOverflow;
             document.removeEventListener("keydown", onKey);
-        }
-        const prevOverflow = document.body.style.overflow;
-        const onKey = e => { if (e.key === "Escape") close(); };
+        });
 
         $(".ee-close").addEventListener("click", close);
         $("#eeCancel").addEventListener("click", close);

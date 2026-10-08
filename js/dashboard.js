@@ -93,7 +93,7 @@ function capitalize(s) {
 ===================================================== */
 function renderCycleGrid(data) {
     if (!data.programData || !data.programData.sessions) {
-        return `<p style="padding:16px; color:#9ca3af;">برنامه فعالی بارگذاری نشده است.</p>`;
+        return `<p class="gl-empty-pad">برنامه فعالی بارگذاری نشده است.</p>`;
     }
 
     const sessionKeys = Object.keys(data.programData.sessions).sort((a, b) => Number(a) - Number(b));
@@ -169,7 +169,7 @@ function renderWorkoutsTableSnippet(workoutsList) {
         return `
             <tr class="${isW1S1 ? 'w1s1-row' : ''}">
                 <td>
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="gl-cell-flex">
                         <span>${dStr}</span>
                         ${badgeHtml}
                     </div>
@@ -178,7 +178,7 @@ function renderWorkoutsTableSnippet(workoutsList) {
                 <td>جلسه ${w.session || 1}</td>
                 <td>${(w.exercises || []).length} حرکت</td>
                 <td>${totalSets} ست</td>
-                <td><strong>${Math.round(vol).toLocaleString("fa-IR")}</strong> <small style="color:#9ca3af;">kg×reps</small></td>
+                <td><strong>${Math.round(vol).toLocaleString("fa-IR")}</strong> <small class="gl-unit">kg×reps</small></td>
                 <td>
                     <button type="button" class="dash-table-action-btn view-workout-detail-btn" data-id="${w.id}">
                         مشاهده جزئیات
@@ -232,6 +232,7 @@ function showWorkoutDetailModal(workout) {
             <div class="dv-detail-ex">
                 <h4>${idx + 1}. ${exName}</h4>
                 <div class="dv-detail-sets">${setsHtml}</div>
+                ${ex.note ? `<p class="dv-detail-note">📝 ${esc(ex.note)}</p>` : ""}
             </div>
         `;
     }).join("");
@@ -249,12 +250,13 @@ function showWorkoutDetailModal(workout) {
                 <span>جلسه: <strong>${workout.session}</strong></span>
                 <span>حجم کل: <strong>${Math.round(vol).toLocaleString("fa-IR")} kg×reps</strong></span>
             </div>
+            ${workout.note ? `<p class="dv-detail-note dv-detail-note-session">📝 یادداشت جلسه: ${esc(workout.note)}</p>` : ""}
             <div class="dv-detail-body">${exercisesHtml}</div>
-            <button type="button" class="secondary-btn" style="width:100%;" id="doneDetailModalBtn">بستن</button>
+            <button type="button" class="secondary-btn gl-btn-block" id="doneDetailModalBtn">بستن</button>
         </div>
     `;
 
-    function close() { overlay.remove(); }
+    const close = openModalHistory("workoutDetail", () => overlay.remove());
     overlay.querySelector("#closeDetailModalBtn").addEventListener("click", close);
     overlay.querySelector("#doneDetailModalBtn").addEventListener("click", close);
     overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
@@ -310,10 +312,10 @@ function renderFullHistoryView() {
 
     container.innerHTML = `
         <div class="dash-table-card">
-            <div class="dash-table-header" style="flex-wrap:wrap; gap:12px;">
+            <div class="dash-table-header gl-hist-head">
                 <div>
-                    <h3 style="margin:0 0 4px;">تاریخچه کامل تمرینات (شامل تمام هفته‌ها و جلسات)</h3>
-                    <span style="font-size:12px; color:#6b7280;">
+                    <h3 class="gl-hist-title">تاریخچه کامل تمرینات (شامل تمام هفته‌ها و جلسات)</h3>
+                    <span class="gl-muted-sm">
                         نمایش ${filtered.length.toLocaleString("fa-IR")} جلسه از مجموع ${rawWorkouts.length.toLocaleString("fa-IR")} تمرین ثبت‌شده (بدون حذف هیچ جلسه‌ای از هفته ۱ جلسه ۱ به بعد)
                     </span>
                 </div>
@@ -500,11 +502,11 @@ function renderCalendarView() {
         /* موبایل: نمای یک ماه */
         const monthName = monthNames[calendarState.jm - 1] || `ماه ${calendarState.jm}`;
         container.innerHTML = `
-            <div style="max-width: 400px; margin: 0 auto;">
-                <div class="date-picker-modal" style="width:100%; max-width:100%; border:1px solid #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <div class="gl-cal-mobile">
+                <div class="date-picker-modal gl-cal-mobile-card">
                     <div class="date-picker-header">
                         <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="ماه قبل">‹</button>
-                        <h3 style="margin:0; font-size:15px; font-weight:700;">${monthName} ${calendarState.jy}</h3>
+                        <h3 class="gl-cal-title">${monthName} ${calendarState.jy}</h3>
                         <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="ماه بعد">›</button>
                     </div>
                     <div class="date-picker-weekdays">${weekdays}</div>
@@ -515,7 +517,7 @@ function renderCalendarView() {
                         <span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده
                     </div>
                 </div>
-                <div style="margin-top:16px;">${selectedDayHtml}</div>
+                <div class="gl-cal-day">${selectedDayHtml}</div>
             </div>
         `;
     }
@@ -620,13 +622,13 @@ function renderProgramsView() {
                 .join("");
 
             return `
-                <div class="card" style="margin-bottom:16px; padding:20px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div class="card gl-program-card">
+                    <div class="gl-program-card-head">
                         <div>
-                            <h3 style="margin:0; font-size:18px; font-weight:800;">
+                            <h3 class="gl-program-card-title">
                                 ${month.title} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : ""}
                             </h3>
-                            <span style="font-size:12px; color:#6b7280;">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
+                            <span class="gl-muted-sm">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
                         </div>
                     </div>
                     <div class="dv-prog-sessions">${sessionsHtml}</div>
@@ -636,27 +638,24 @@ function renderProgramsView() {
     }
 
     container.innerHTML = `
-        <!-- Dedicated Program Upload Box with Clear Button & Guide (Requirement 3) -->
-        <div class="program-upload-box" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:24px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-            <div class="program-upload-box-inner" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;">
-                <div class="program-upload-box-content" style="display:flex; align-items:flex-start; gap:16px; max-width:640px;">
-                    <div class="program-upload-box-icon" style="width:48px; height:48px; border-radius:12px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0;">
-                        📥
-                    </div>
-                    <div class="program-upload-box-text">
-                        <h3 style="margin:0 0 6px; font-size:16px; font-weight:800; color:#0f172a;">بارگذاری برنامه تمرینی جدید</h3>
-                        <p style="margin:0 0 10px; font-size:13px; color:#64748b; line-height:1.6;">
+        <div class="gl-upload-box">
+            <div class="gl-upload-inner">
+                <div class="gl-upload-content">
+                    <div class="gl-upload-icon">📥</div>
+                    <div class="gl-upload-text">
+                        <h3>بارگذاری برنامه تمرینی جدید</h3>
+                        <p>
                             فایل برنامه تمرینی مربی یا باشگاه خود را از طریق دکمه زیر بارگذاری کنید. این برنامه به عنوان یک دوره ماهانه به فهرست برنامه‌ها اضافه شده و تمامی سوابق، رکوردهای وزنه و برنامه‌های قبلی شما در پایگاه‌داده محفوظ خواهند ماند.
                         </p>
-                        <div class="program-upload-box-badges" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                            <span class="program-upload-badge" style="padding:4px 8px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:11px; font-weight:600;">📄 فایل با فرمت استاندارد JSON (.json)</span>
-                            <span class="program-upload-badge" style="padding:4px 8px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:11px; font-weight:600;">🔒 ذخیره‌سازی محلی و امن در IndexedDB</span>
-                            <span class="program-upload-badge" style="padding:4px 8px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:11px; font-weight:600;">✨ حفظ کامل دوره‌ها و تاریخچه قبلی</span>
+                        <div class="gl-upload-badges">
+                            <span class="gl-badge">📄 فایل با فرمت استاندارد JSON (.json)</span>
+                            <span class="gl-badge">🔒 ذخیره‌سازی محلی و امن در IndexedDB</span>
+                            <span class="gl-badge">✨ حفظ کامل دوره‌ها و تاریخچه قبلی</span>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <label class="primary-btn file-btn" style="cursor:pointer; padding:12px 24px; font-size:14px; font-weight:700; border-radius:10px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 2px 4px rgba(37,99,235,0.2);">
+                    <label class="primary-btn file-btn gl-upload-btn">
                         📥 بارگذاری فایل برنامه جدید
                         <input type="file" id="programsTabUploadInput" accept=".json" hidden>
                     </label>
@@ -664,8 +663,8 @@ function renderProgramsView() {
             </div>
         </div>
 
-        <div style="margin-bottom:16px;">
-            <h3 style="margin:0; font-size:17px; font-weight:800; color:#0f172a;">فهرست برنامه‌های تمرینی شما</h3>
+        <div class="gl-section-title">
+            <h3>فهرست برنامه‌های تمرینی شما</h3>
         </div>
 
         ${programsCardsHtml}
@@ -797,20 +796,20 @@ function renderBackupView() {
     const lastBackupStr = lastBackup && typeof formatPersianDate === "function" ? formatPersianDate(lastBackup.split("T")[0], true) : "هنوز پشتیبانی گرفته نشده است.";
 
     container.innerHTML = `
-        <div class="card" style="padding:24px; max-width:640px; margin:0 auto;">
-            <h3 style="margin:0 0 6px; font-size:18px; font-weight:700;">پشتیبان‌گیری و بازیابی پایگاه‌داده</h3>
-            <p style="margin:0 0 20px; font-size:13px; color:#6b7280;">اطلاعات شما در مخزن محلی IndexedDB ذخیره می‌شود. برای انتقال یا حفظ امنیت، یک نسخه پشتیبان JSON دانلود کنید.</p>
-            
-            <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; margin-bottom:20px;">
-                <strong style="display:block; font-size:13px; margin-bottom:4px;">آخرین پشتیبان موفق:</strong>
-                <span style="font-size:12px; color:#4b5563;">${lastBackupStr}</span>
+        <div class="card gl-panel">
+            <h3 class="gl-panel-title">پشتیبان‌گیری و بازیابی پایگاه‌داده</h3>
+            <p class="gl-panel-desc">اطلاعات شما در مخزن محلی IndexedDB ذخیره می‌شود. برای انتقال یا حفظ امنیت، یک نسخه پشتیبان JSON دانلود کنید.</p>
+
+            <div class="gl-info-box">
+                <strong>آخرین پشتیبان موفق:</strong>
+                <span>${lastBackupStr}</span>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="gl-grid-2">
                 <button type="button" class="primary-btn" id="dashExportBtn">
                     📥 دریافت فایل پشتیبان (Export)
                 </button>
-                <label class="secondary-btn file-btn" style="cursor:pointer; text-align:center;">
+                <label class="secondary-btn file-btn gl-file-label">
                     📤 بازیابی پشتیبان (Import)
                     <input type="file" id="dashImportFile" accept=".json" hidden>
                 </label>
@@ -842,10 +841,10 @@ function renderSettingsView() {
     if (!container) return;
 
     container.innerHTML = `
-        <div class="card" style="padding:24px; max-width:640px; margin:0 auto; display:flex; flex-direction:column; gap:20px;">
-            <h3 style="margin:0; font-size:18px; font-weight:700;">تنظیمات و نگهداری برنامه</h3>
-            
-            <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
+        <div class="card gl-panel gl-panel-col">
+            <h3 class="gl-panel-title">تنظیمات و نگهداری برنامه</h3>
+
+            <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>ساخت برنامه تمرینی</strong>
                     <span>طراحی برنامه‌ی جدید و ثبت مستقیم در برنامه یا دانلود به‌صورت فایل JSON</span>
@@ -855,7 +854,7 @@ function renderSettingsView() {
                 </button>
             </div>
 
-            <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
+            <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>برنامه‌های تمرینی</strong>
                     <span>مشاهده و بارگذاری برنامه‌ها در بخش برنامه‌های تمرینی</span>
@@ -865,7 +864,7 @@ function renderSettingsView() {
                 </button>
             </div>
 
-            <div class="setting-row" style="border-bottom:1px solid #f3f4f6; padding-bottom:16px;">
+            <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>پاک‌سازی تاریخچه تمرینات</strong>
                     <span>فقط سوابق وزنه‌ها و تکرارها پاک می‌شود و برنامه تمرینی دست‌نخورده می‌ماند.</span>
@@ -877,7 +876,7 @@ function renderSettingsView() {
 
             <div class="setting-row">
                 <div class="setting-info">
-                    <strong style="color:#dc2626;">بازنشانی کامل (Reset All)</strong>
+                    <strong class="gl-danger-text">بازنشانی کامل (Reset All)</strong>
                     <span>تمام اطلاعات از IndexedDB و حافظه دستگاه به طور کامل حذف می‌شود.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashFullResetBtn">

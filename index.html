@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./css/report.css">
     <link rel="stylesheet" href="./css/program-builder.css">
     <link rel="stylesheet" href="./css/exercise-editor.css">
+    <link rel="stylesheet" href="./css/gl-extras.css">
 </head>
 
 <body>
@@ -197,6 +198,14 @@
                     <!-- Exercises -->
                     <main id="exerciseList"></main>
 
+                    <!-- Session note -->
+                    <section class="card session-note-card">
+                        <label for="sessionNote" class="session-note-label">📝 یادداشت جلسه</label>
+                        <div id="sessionPrevNote" class="exercise-prev-note" hidden></div>
+                        <textarea id="sessionNote" class="session-note-input" rows="3" maxlength="2000" placeholder="حال بدن، خواب، انرژی، نکته‌ای برای جلسه‌ی بعد…"></textarea>
+                        <small class="gl-hint">یادداشت‌ها همراه ست‌های ثبت‌شده ذخیره می‌شوند؛ جلسه‌ای که هیچ ستی ندارد ذخیره نمی‌شود.</small>
+                    </section>
+
                     <!-- Workout summary -->
                     <section class="summary-grid">
                         <div class="summary-card">
@@ -237,49 +246,49 @@
              View 3: Programs
         ========================= -->
         <div id="viewPrograms" class="app-view">
-            <div id="viewProgramsContainer" style="padding: 24px;"></div>
+            <div id="viewProgramsContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 4: History
         ========================= -->
         <div id="viewHistory" class="app-view">
-            <div id="viewHistoryContainer" style="padding: 24px;"></div>
+            <div id="viewHistoryContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 5: Bank
         ========================= -->
         <div id="viewBank" class="app-view">
-            <div id="viewBankContainer" style="padding: 24px;"></div>
+            <div id="viewBankContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 6: Calendar
         ========================= -->
         <div id="viewCalendar" class="app-view">
-            <div id="viewCalendarContainer" style="padding: 24px;"></div>
+            <div id="viewCalendarContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 7: User
         ========================= -->
         <div id="viewUser" class="app-view">
-            <div id="viewUserContainer" style="padding: 24px;"></div>
+            <div id="viewUserContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 8: Backup
         ========================= -->
         <div id="viewBackup" class="app-view">
-            <div id="viewBackupContainer" style="padding: 24px;"></div>
+            <div id="viewBackupContainer" class="gl-view-pad"></div>
         </div>
 
         <!-- =========================
              View 9: Settings
         ========================= -->
         <div id="viewSettings" class="app-view">
-            <div id="viewSettingsContainer" style="padding: 24px;"></div>
+            <div id="viewSettingsContainer" class="gl-view-pad"></div>
         </div>
 
     </div>
@@ -449,6 +458,7 @@
 <script src="./js/dashboard-overview.js"></script>
 <script src="./js/program-builder.js"></script>
 <script src="./js/exercise-editor.js"></script>
+<script src="./js/rest-timer.js"></script>
 
 <script>
     (function () {
