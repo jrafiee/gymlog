@@ -94,6 +94,17 @@ function detectNextWeekAndSession(monthKey) {
    مدیریت دکمه Back و بازگشت لایه‌ای مودال‌ها
 ========================================================= */
 
+/* بستن لایه‌ای مودال‌ها: اگر state مربوط به همین مودال است back می‌زند (popstate مودال را برمی‌دارد)، وگرنه مستقیم حذف می‌کند */
+function makeModalCloser(overlay, modalKey) {
+    return function closeOverlay() {
+        if (history.state && history.state.modal === modalKey) {
+            history.back();
+        } else {
+            overlay.remove();
+        }
+    };
+}
+
 function openSettingsPage() {
     if (!settingsPage) return;
     settingsPage.style.display = "";
@@ -141,21 +152,14 @@ window.addEventListener("popstate", () => {
         return;
     }
 
-    // ۳. صفحه بانک حرکات
-    const bankOverlay = document.querySelector(".exercise-bank-overlay");
-    if (bankOverlay) {
-        bankOverlay.remove();
-        return;
-    }
-
-    // ۴. صفحه برنامه‌های من
+    // ۳. صفحه برنامه‌های من
     const myProgramsOverlay = document.querySelector(".my-programs-overlay");
     if (myProgramsOverlay) {
         myProgramsOverlay.remove();
         return;
     }
 
-    // ۵. منوی تنظیمات
+    // ۴. منوی تنظیمات
     if (settingsPage && settingsPage.style.display !== "none") {
         closeSettingsPage(true);
     }
@@ -459,13 +463,7 @@ function showMyProgramsPage() {
         </div>
     `;
 
-    function closeOverlay() {
-        if (history.state && history.state.modal === "myPrograms") {
-            history.back();
-        } else {
-            overlay.remove();
-        }
-    }
+    const closeOverlay = makeModalCloser(overlay, "myPrograms");
 
     overlay.querySelector(".my-programs-close").addEventListener("click", closeOverlay);
 
@@ -484,165 +482,6 @@ function showMyProgramsPage() {
 
 if (openMyProgramsBtn) {
     openMyProgramsBtn.addEventListener("click", showMyProgramsPage);
-}
-
-/* =========================================================
-   بانک حرکات به صورت دسته‌بندی‌شده
-========================================================= */
-
-const EXERCISE_CATEGORIES_MAP = {
-    machine_chest_press: "سینه",
-    incline_dumbbell_press: "سینه",
-    dumbbell_fly: "سینه",
-    elevated_pushup: "سینه",
-    incline_pushup: "سینه",
-    cable_crossover: "سینه",
-    close_grip_dumbbell_press: "سینه",
-
-    wide_lat_pulldown: "پشت",
-    medium_grip_lat_pulldown: "پشت",
-    seated_cable_row: "پشت",
-    chest_supported_row: "پشت",
-    t_bar_row: "پشت",
-    straight_arm_pullover: "پشت",
-
-    dumbbell_shoulder_press: "سرشانه",
-    dumbbell_lateral_raise: "سرشانه",
-    rear_delt_fly: "سرشانه",
-    face_pull: "سرشانه",
-
-    hammer_curl: "جلو بازو",
-    cable_curl: "جلو بازو",
-
-    rope_triceps_pushdown: "پشت بازو",
-    overhead_cable_triceps: "پشت بازو",
-    lying_dumbbell_triceps_extension: "پشت بازو",
-
-    leg_press: "پا",
-    smith_squat: "پا",
-    lying_leg_curl: "پا",
-    leg_extension: "پا",
-    bulgarian_split_squat: "پا",
-    smith_calf_raise: "پا",
-
-    dead_bug: "شکم",
-    crunch: "شکم",
-    cable_crunch: "شکم",
-    side_plank: "شکم",
-    plank: "شکم",
-    pallof_press: "شکم"
-};
-
-function showExerciseBankPage() {
-    const catalog = getEffectiveCatalog();
-    const exerciseKeys = Object.keys(catalog);
-
-    if (exerciseKeys.length === 0) {
-        alert("هیچ حرکتی در کاتالوگ یافت نشد.");
-        return;
-    }
-
-    history.pushState({ modal: "exerciseBank" }, "");
-
-    const groups = {};
-    exerciseKeys.forEach(key => {
-        const item = catalog[key];
-        const category = item.category || EXERCISE_CATEGORIES_MAP[key] || "سایر حرکات";
-        if (!groups[category]) {
-            groups[category] = [];
-        }
-        groups[category].push({ key, ...item });
-    });
-
-    const categoryOrder = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
-    const sortedCategories = Object.keys(groups).sort((a, b) => {
-        const idxA = categoryOrder.indexOf(a);
-        const idxB = categoryOrder.indexOf(b);
-        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-        if (idxA !== -1) return -1;
-        if (idxB !== -1) return 1;
-        return a.localeCompare(b, "fa");
-    });
-
-    let groupsHtml = "";
-    sortedCategories.forEach(catName => {
-        const exercises = groups[catName];
-        const itemsHtml = exercises.map(item => {
-            const hasImg = item.images && item.images.length > 0 && !isVideoSrc(item.images[0]);
-            const thumbHtml = hasImg
-                ? `<img src="${item.images[0]}" alt="${item.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'exercise-bank-thumb-placeholder\\'>🏋️</span>'">`
-                : `<span class="exercise-bank-thumb-placeholder">🏋️</span>`;
-
-            return `
-                <div class="exercise-bank-item" data-exercise-id="${item.key}">
-                    <div class="exercise-bank-thumb">
-                        ${thumbHtml}
-                    </div>
-                    <div class="exercise-bank-info">
-                        <h3 class="exercise-bank-name">${item.name}</h3>
-                        <p class="exercise-bank-id">${item.key}</p>
-                    </div>
-                </div>
-            `;
-        }).join("");
-
-        groupsHtml += `
-            <div class="exercise-bank-category-group collapsed">
-                <button type="button" class="exercise-bank-category-header" aria-expanded="false">
-                    <div class="exercise-bank-category-title">
-                        <span class="exercise-bank-category-badge">${catName}</span>
-                        <span class="exercise-bank-category-count">${exercises.length} حرکت</span>
-                    </div>
-                    <span class="exercise-bank-category-arrow">▾</span>
-                </button>
-                <div class="exercise-bank-category-items">
-                    ${itemsHtml}
-                </div>
-            </div>
-        `;
-    });
-
-    const overlay = document.createElement("div");
-    overlay.className = "exercise-bank-overlay";
-    overlay.innerHTML = `
-        <div class="exercise-bank-page">
-            <div class="exercise-bank-header">
-                <h2>بانک حرکات</h2>
-                <button type="button" class="exercise-guide-close exercise-bank-close" aria-label="بستن">×</button>
-            </div>
-            <div class="exercise-bank-list">
-                ${groupsHtml}
-            </div>
-        </div>
-    `;
-
-    function closeBank() {
-        if (history.state && history.state.modal === "exerciseBank") {
-            history.back();
-        } else {
-            overlay.remove();
-        }
-    }
-
-    overlay.querySelector(".exercise-bank-close").addEventListener("click", closeBank);
-
-    overlay.querySelectorAll(".exercise-bank-category-header").forEach(header => {
-        header.addEventListener("click", () => {
-            const group = header.closest(".exercise-bank-category-group");
-            const isCollapsed = group.classList.contains("collapsed");
-            group.classList.toggle("collapsed");
-            header.setAttribute("aria-expanded", isCollapsed ? "true" : "false");
-        });
-    });
-
-    overlay.querySelectorAll(".exercise-bank-item").forEach(card => {
-        card.addEventListener("click", () => {
-            const exId = card.dataset.exerciseId;
-            showExerciseGuide(exId);
-        });
-    });
-
-    document.body.appendChild(overlay);
 }
 
 if (openExerciseBankBtn) {
@@ -820,13 +659,7 @@ function showExerciseHistory(exerciseId) {
         </div>
     `;
 
-    function closeOverlay() {
-        if (history.state && history.state.modal === "exerciseHistory") {
-            history.back();
-        } else {
-            overlay.remove();
-        }
-    }
+    const closeOverlay = makeModalCloser(overlay, "exerciseHistory");
 
     overlay.querySelector(".exercise-guide-close").addEventListener("click", closeOverlay);
     overlay.querySelector(".exercise-guide-done").addEventListener("click", closeOverlay);
@@ -846,12 +679,6 @@ function formatHistorySets(sets) {
 /* =========================
 رسانه و راهنمای حرکت
 ========================= */
-function isVideoSrc(path) {
-    const p = String(path || "");
-    if (p.startsWith("data:")) return p.startsWith("data:video");
-    return p.split("?")[0].split(".").pop().toLowerCase() === "mp4";
-}
-
 function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
         return `
@@ -861,7 +688,7 @@ function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath)) {
         return `
             <video class="exercise-guide-video" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
-                <source src="${mediaPath}" type="video/mp4">
+                <source src="${mediaPath}" type="${videoMime(mediaPath)}">
                 مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
             </video>
         `;
@@ -927,13 +754,7 @@ function showExerciseGuide(exerciseId) {
         </div>
     `;
 
-    function closeOverlay() {
-        if (history.state && history.state.modal === "exerciseGuide") {
-            history.back();
-        } else {
-            overlay.remove();
-        }
-    }
+    const closeOverlay = makeModalCloser(overlay, "exerciseGuide");
 
     overlay.querySelector(".exercise-guide-close").addEventListener("click", closeOverlay);
     overlay.querySelector(".exercise-guide-done").addEventListener("click", closeOverlay);
@@ -1214,13 +1035,7 @@ function showDatePickerCalendar() {
     const overlay = document.createElement("div");
     overlay.className = "date-picker-overlay";
 
-    function closeOverlay() {
-        if (history.state && history.state.modal === "datePicker") {
-            history.back();
-        } else {
-            overlay.remove();
-        }
-    }
+    const closeOverlay = makeModalCloser(overlay, "datePicker");
 
     function render() {
         overlay.innerHTML = `
@@ -1491,26 +1306,27 @@ function handleBackupFileSelected(file) {
     reader.readAsText(file);
 }
 
-const clearBtn = document.getElementById("clearBtn");
-if (clearBtn) {
-    clearBtn.addEventListener("click", async () => {
-        if (confirm("تاریخچه‌ی تمرین‌ها حذف شود؟ برنامه‌ی تمرینی دست‌نخورده می‌ماند.")) {
-            await deleteAllData();
-            renderAll();
-            showToast("تاریخچه تمرینات پاک شد.");
-        }
-    });
+/* این دو تابع هم در منوی تنظیمات موبایل و هم در صفحه‌ی تنظیمات دسکتاپ استفاده می‌شوند */
+async function confirmClearHistory() {
+    if (!confirm("تاریخچه‌ی تمرین‌ها حذف شود؟ برنامه‌ی تمرینی دست‌نخورده می‌ماند.")) return false;
+    await deleteAllData();
+    renderAll();
+    showToast("تاریخچه تمرینات پاک شد.");
+    return true;
 }
 
-const fullResetBtn = document.getElementById("fullResetBtn");
-if (fullResetBtn) {
-    fullResetBtn.addEventListener("click", async () => {
-        if (confirm("همه‌چیز حذف شود؟ برنامه به حالت اولیه بازمی‌گردد.")) {
-            await fullResetStorage();
-            location.reload();
-        }
-    });
+async function confirmFullReset() {
+    if (!confirm("همه‌چیز حذف شود؟ تمام برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند.")) return false;
+    await fullResetStorage();
+    location.reload();
+    return true;
 }
+
+const clearBtn = document.getElementById("clearBtn");
+if (clearBtn) clearBtn.addEventListener("click", confirmClearHistory);
+
+const fullResetBtn = document.getElementById("fullResetBtn");
+if (fullResetBtn) fullResetBtn.addEventListener("click", confirmFullReset);
 
 /* =========================
 Dark Mode
@@ -1539,7 +1355,7 @@ if (themeToggleBtn) {
 }
 
 /* =========================================================
-   پیشنهاد برنامه‌ی پیش‌فرض هنگام اولین اجرا
+   برنامه‌ی پیش‌فرض (استفاده در صفحه‌ی خوش‌آمدگویی داشبورد)
 ========================================================= */
 
 function hasDefaultProgramPackage() {
@@ -1550,29 +1366,6 @@ function hasDefaultProgramPackage() {
     );
 }
 
-function maybeShowDefaultProgramSuggestion() {
-    const suggestion = document.getElementById("defaultProgramSuggestion");
-    if (!suggestion) return;
-    suggestion.style.display = hasDefaultProgramPackage() ? "" : "none";
-}
-
-const onboardingUploadBtn = document.getElementById("onboardingUploadBtn");
-if (onboardingUploadBtn) {
-    onboardingUploadBtn.addEventListener("click", () => {
-        const input = document.getElementById("programImportInput");
-        if (input) input.click();
-    });
-}
-
-const loadDefaultProgramBtn = document.getElementById("loadDefaultProgramBtn");
-if (loadDefaultProgramBtn) {
-    loadDefaultProgramBtn.addEventListener("click", async () => {
-        await importProgramPackage(defaultProgramPackage);
-        await cacheAndReport("برنامه‌ی پیش‌فرض با موفقیت بارگذاری شد.");
-        location.reload();
-    });
-}
-
 /* =========================
 رندر کلی رابط کاربری
 ========================= */
@@ -1580,10 +1373,7 @@ function renderAll() {
     const hasAnyProgram = Object.keys(workoutPrograms).length > 0;
     if (emptyProgramState) emptyProgramState.style.display = hasAnyProgram ? "none" : "";
     if (programContent) programContent.style.display = hasAnyProgram ? "" : "none";
-    if (!hasAnyProgram) {
-        maybeShowDefaultProgramSuggestion();
-        return;
-    }
+    if (!hasAnyProgram) return;
 
     renderSessionButtons();
     renderExercises();

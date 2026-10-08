@@ -11,19 +11,13 @@
 (function () {
     "use strict";
 
-    const CATS = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
+    const CATS = MUSCLE_GROUP_ORDER;
     const MAX_VIDEO = 12 * 1024 * 1024;
     const MAX_RAW_IMAGE = 3 * 1024 * 1024;
     const ID_RE = /^[a-z][a-z0-9_]{2,40}$/;
 
-    const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => (
-        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-    ));
 
-    function isVideo(p) {
-        p = String(p || "");
-        return p.startsWith("data:") ? p.startsWith("data:video") : /\.(mp4|webm|mov)(\?|$)/i.test(p);
-    }
+    const isVideo = isVideoSrc;
 
     function slugify(s) {
         return String(s || "").toLowerCase().trim()
@@ -31,11 +25,6 @@
             .replace(/[^a-z0-9_]/g, "")
             .replace(/^[0-9_]+/, "")
             .replace(/_+$/, "");
-    }
-
-    function toast(msg, type) {
-        if (typeof showToast === "function") showToast(msg, type || "success");
-        else alert(msg);
     }
 
     function readAsDataURL(file) {
@@ -111,22 +100,10 @@
         });
     }
 
-    function downloadBlob(blob, fileName) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
-    }
-
     /* ---------- خروجی exercise-catalog.js ---------- */
     function buildCatalogJs() {
         const catalog = getEffectiveCatalog();
-        const map = typeof EXERCISE_CATEGORIES_MAP !== "undefined" ? EXERCISE_CATEGORIES_MAP : {};
+        const map = EXERCISE_CATEGORIES_MAP;
         const groups = {};
         Object.keys(catalog).forEach(id => {
             const cat = catalog[id].category || map[id] || "سایر";
@@ -205,7 +182,7 @@ ${blocks.join(",\n\n\n")}
         const catalog = getEffectiveCatalog();
         const isEdit = !!editId && !!catalog[editId];
         const src = isEdit ? catalog[editId] : {};
-        const mapCat = (typeof EXERCISE_CATEGORIES_MAP !== "undefined" && EXERCISE_CATEGORIES_MAP[editId]) || "";
+        const mapCat = EXERCISE_CATEGORIES_MAP[editId] || "";
         const bwSet = (window.DashAnalytics && window.DashAnalytics.BODYWEIGHT_IDS) || new Set();
         const forcedBw = isEdit && bwSet.has(editId);
         const isBuiltIn = isEdit && typeof exerciseCatalog !== "undefined" && !!exerciseCatalog[editId];
@@ -422,7 +399,7 @@ ${blocks.join(",\n\n\n")}
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
         renderMedia();
-        (isEdit ? field("nameFa") : field("nameFa")).focus();
+        field("nameFa").focus();
     }
 
     window.openExerciseEditor = openExerciseEditor;

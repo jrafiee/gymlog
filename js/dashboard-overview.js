@@ -20,9 +20,6 @@
     /* =========================
        ابزارهای نمایش
     ========================= */
-    const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => (
-        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-    ));
     const fa = A.fa;
     const setHtml = s => `<bdi class="dv-num">${fa(s.weight)}×${fa(s.reps, 0)}</bdi>`;
     const pDate = (iso, long) => (typeof formatPersianDate === "function" ? formatPersianDate(iso, !!long) : iso);
@@ -189,7 +186,6 @@
         return { range, months };
     }
 
-    /* نمودار خطی: compact = کارت کوچک، غیر compact = نسخه‌ی مودال با tooltip */
     /* نمودار خطی: compact = کارت کوچک، غیر compact = نسخه‌ی مودال با tooltip
        list = فهرست ثبت‌ها (پیش‌فرض: کل سابقه).
        وقتی چند برنامه در نمودار هست: ثبت‌های دوره‌ی انتخاب‌شده پررنگ، برنامه‌های قبلی کم‌رنگ،
@@ -350,7 +346,7 @@
     }
 
     /* یک بخش مودال: نمودار + داده‌ی ثبت‌شده + تفسیر */
-    function modalBlock(item, title, list, stats, interp, withTip) {
+    function modalBlock(item, title, list, stats, interp) {
         if (!list.length) {
             return `<section class="dv-mblock"><h4 class="dv-mblock-title">${esc(title)}</h4>
                 <div class="dv-empty">برای این بخش ثبتی وجود ندارد.</div></section>`;
@@ -361,7 +357,7 @@
             <h4 class="dv-mblock-title">${esc(title)}</h4>
             <div class="dv-chart">
                 ${chartSvg(item, false, list)}
-                ${withTip ? `<div class="dv-tip" hidden></div>` : `<div class="dv-tip" hidden></div>`}
+                <div class="dv-tip" hidden></div>
             </div>
             <dl class="dv-observed">
                 <div><dt>جلسات</dt><dd>${fa(stats.count, 0)}</dd></div>
@@ -391,9 +387,9 @@
             body = `
                 ${modalBlock(item,
                     multi ? `کل روند در ${fa(item.programCount, 0)} برنامه` : "کل روند",
-                    item.sessions, item.stats, item.interpretation, true)}
+                    item.sessions, item.stats, item.interpretation)}
                 ${hasCycle ? `<p class="dv-note dv-mlegend-note">نقطه‌های پررنگ مربوط به «${esc(cTitle)}» و نقطه‌های کم‌رنگ مربوط به برنامه‌های قبلی‌اند؛ خط‌چین مرز دو برنامه را نشان می‌دهد.</p>` : ""}
-                ${hasCycle ? modalBlock(item, `عملکرد ${cTitle}`, item.cycle.sessions, item.cycle.stats, item.cycle.interpretation, true) : ""}
+                ${hasCycle ? modalBlock(item, `عملکرد ${cTitle}`, item.cycle.sessions, item.cycle.stats, item.cycle.interpretation) : ""}
                 <div class="dv-legend">${legend}</div>
                 <p class="dv-note">${isLoad
                     ? "نوع ست (گرم‌کردن یا کاری) در داده ثبت نمی‌شود؛ پس همه‌ی ست‌های ثبت‌شده بررسی شده‌اند و بهترین ست، ست با بیشترین وزنه است. سابقه‌ی حرکت بر اساس شناسه‌ی حرکت از همه‌ی برنامه‌ها جمع می‌شود، حتی اگر شماره‌ی جلسه‌اش فرق کرده باشد."
@@ -756,11 +752,6 @@
         { icon: "📈", label: "۳ · مشاهده پیشرفت", title: "پیشرفتت را دنبال کن", desc: "عملکرد جلسات قبلی را ببین و تغییرات تمرینی خودت را دنبال کن." }
     ];
 
-    function hasDefaultProgram() {
-        return typeof defaultProgramPackage !== "undefined" && defaultProgramPackage &&
-            (defaultProgramPackage.programsRaw || defaultProgramPackage.catalogAdditions);
-    }
-
     function welcomeHtml() {
         return `
         <section class="dv-welcome">
@@ -769,7 +760,7 @@
                 <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده.</p>
                 <div class="dv-welcome-actions">
                     <button type="button" class="primary-btn" id="dvWelcomeUpload">بارگذاری برنامه تمرینی</button>
-                    ${hasDefaultProgram() ? `
+                    ${hasDefaultProgramPackage() ? `
                     <div class="dv-welcome-default">
                         <button type="button" class="secondary-btn" id="dvWelcomeDefault">شروع با برنامه‌ی پیش‌فرض</button>
                         <small>برای آشنایی سریع با محیط برنامه؛ بعداً می‌توانی برنامه‌ی خودت را اضافه کنی.</small>

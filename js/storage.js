@@ -31,13 +31,6 @@ const LEGACY_FIRST_USE_KEY = "gymProgressTracker_firstUseAt";
 const LEGACY_THEME_KEY = "gymTrackerTheme";
 const LEGACY_PROFILE_KEY = "gymProgressTracker_userProfile";
 
-// For backward-compatibility with code that references STORAGE_KEY
-const STORAGE_KEY = LEGACY_STORAGE_KEY;
-const CATALOG_OVERRIDES_KEY = LEGACY_CATALOG_KEY;
-const PROGRAM_OVERRIDES_KEY = LEGACY_PROGRAM_KEY;
-const LAST_BACKUP_KEY = LEGACY_LAST_BACKUP_KEY;
-const FIRST_USE_KEY = LEGACY_FIRST_USE_KEY;
-
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 /* =====================================================
@@ -140,8 +133,13 @@ function openDatabase() {
    Transactional Helpers
 ===================================================== */
 
-function getTransaction(db, storeNames, mode = "readonly") {
-    return db.transaction(storeNames, mode);
+/* منتظر ماندن برای پایان قطعی یک تراکنش */
+function txDone(tx) {
+    return new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
+    });
 }
 
 function getAllFromStore(db, storeName) {
@@ -423,11 +421,7 @@ async function checkAndRunMigration(db) {
 
         settingsStore.put({ key: "migrationStatus", value: migrationReport, updatedAt: new Date().toISOString() });
 
-        await new Promise((resolve, reject) => {
-            tx.oncomplete = resolve;
-            tx.onerror = () => reject(tx.error);
-            tx.onabort = () => reject(tx.error || new Error("Migration transaction aborted"));
-        });
+        await txDone(tx);
 
         _storeCache.migrationResult = migrationReport;
 
@@ -630,7 +624,7 @@ async function addWorkout(workout) {
         console.warn("[GymLog DB] اخطار در به‌روزرسانی حافظه رزرو:", lsErr);
     }
 
-    return dbSuccess || true;
+    return true;
 }
 
 /**
@@ -846,6 +840,7 @@ async function importProgramPackage(pkg) {
                         updatedAt: new Date().toISOString()
                     });
                 });
+                await txDone(tx);
             } catch (err) {
                 console.error("[GymLog DB] خطا در ذخیره حرکات برنامه جدید:", err);
             }
@@ -872,6 +867,7 @@ async function importProgramPackage(pkg) {
                         updatedAt: new Date().toISOString()
                     });
                 });
+                await txDone(tx);
             } catch (err) {
                 console.error("[GymLog DB] خطا در ذخیره جلسات برنامه جدید:", err);
             }
@@ -1008,21 +1004,10 @@ function exportData(options) {
             }).catch(e => console.warn("[GymLog DB] ذخیره سابقه پشتیبان با خطا مواجه شد:", e));
         }
 
-        const blob = new Blob(
-            [JSON.stringify(backupData, null, 2)],
-            { type: "application/json" }
+        downloadBlob(
+            new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" }),
+            (options && options.fileName) || buildBackupFileName()
         );
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = (options && options.fileName) || buildBackupFileName();
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
 
         setLastBackupAt(new Date().toISOString());
         return true;
@@ -1121,16 +1106,18 @@ async function restoreBackup(data) {
                 });
             }
 
-            await new Promise((resolve, reject) => {
-                tx.oncomplete = resolve;
-                tx.onerror = () => reject(tx.error);
-            });
+            await txDone(tx);
         }
 
         // Update in-memory cache
         _storeCache.workouts = cleanWorkouts;
         _storeCache.programsRaw = programsObj;
         _storeCache.catalogOverrides = exercisesObj;
+        if (Array.isArray(data.settings)) {
+            data.settings.forEach(item => {
+                if (item && item.key) _storeCache.settings[item.key] = item.value;
+            });
+        }
 
         // Keep localStorage fallback updated
         saveDataToKey(LEGACY_STORAGE_KEY, { workouts: cleanWorkouts });

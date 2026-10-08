@@ -19,7 +19,7 @@
     /* =========================
        ثابت‌ها
     ========================= */
-    const CAT_ORDER = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
+    const CAT_ORDER = MUSCLE_GROUP_ORDER;
 
     const UNIT_OPTS = [
         ["reps", "تکرار"],
@@ -49,32 +49,17 @@
     /* =========================
        ابزارها
     ========================= */
-    const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => (
-        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
-    ));
-
-    const toFa = v => String(v).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
     /* ورودی فارسی/عربی/انگلیسی → عدد */
     function normNum(v) {
-        const t = String(v == null ? "" : v)
-            .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
-            .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
-            .replace(/[٫,]/g, ".")
-            .trim();
+        const t = toLatinDigits(v).replace(/[٫,]/g, ".").trim();
         if (t === "") return NaN;
         const n = Number(t);
         return isFinite(n) ? n : NaN;
     }
 
-    function toast(msg, type) {
-        if (typeof showToast === "function") showToast(msg, type || "success");
-        else alert(msg);
-    }
-
     function catOf(id, item) {
-        const map = typeof EXERCISE_CATEGORIES_MAP !== "undefined" ? EXERCISE_CATEGORIES_MAP : {};
-        return (item && item.category) || map[id] || "سایر";
+        return (item && item.category) || EXERCISE_CATEGORIES_MAP[id] || "سایر";
     }
 
     function isDesktopLayout() {
@@ -810,7 +795,6 @@
 
     /* ---------- مرحله ۴: خروجی ---------- */
     function renderStepOutput(body) {
-        const catalog = getEffectiveCatalog();
         const summary = Array.from({ length: PB.days }, (_, i) => i + 1).map(d => `
             <li><b>روز ${toFa(d)}</b><span>${esc(dayTitleOf(d))}</span><em>${toFa(PB.plan[d].length)} حرکت</em></li>`).join("");
 
@@ -846,7 +830,6 @@
                 renderSteps();
             });
         });
-        void catalog;
     }
 
     /* ---------- ساخت خروجی ---------- */
@@ -889,16 +872,7 @@
         const d = new Date();
         const p = x => String(x).padStart(2, "0");
         const name = `gymlog-program-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
-        const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = name;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        downloadBlob(new Blob([JSON.stringify(pkg, null, 2)], { type: "application/json" }), name);
     }
 
     async function submit() {
@@ -916,8 +890,6 @@
         try {
             await importProgramPackage({ programsRaw: pkg.programsRaw });
             await saveUserProfile(PB.profile);
-            /* فرصت کوتاه برای نهایی شدن تراکنش IndexedDB */
-            await new Promise(r => setTimeout(r, 250));
         } catch (err) {
             console.error("[GymLog Builder] خطا در ثبت برنامه:", err);
             nextBtn.disabled = false;

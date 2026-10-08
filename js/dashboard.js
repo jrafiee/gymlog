@@ -89,48 +89,6 @@ function capitalize(s) {
 }
 
 /* =====================================================
-   Program Upload Handler (In dedicated Programs View box)
-===================================================== */
-
-function handleProgramUploadFile(file) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-        let data;
-        try {
-            data = JSON.parse(reader.result);
-        } catch {
-            alert("فایل معتبر نیست (فرمت JSON قابل خواندن نیست).");
-            return;
-        }
-
-        const isProgram = data && (data.programsRaw || data.catalogAdditions || data.programs || data.sessions);
-        const isWorkoutBackup = data && Array.isArray(data.workouts);
-
-        if (isProgram || isWorkoutBackup) {
-            try {
-                if (typeof restoreBackup === "function") {
-                    await restoreBackup(data);
-                } else if (typeof importProgramPackage === "function") {
-                    await importProgramPackage(data);
-                }
-                if (typeof showToast === "function") {
-                    showToast("برنامه تمرینی با موفقیت بارگذاری و در پایگاه‌داده ذخیره شد.");
-                } else {
-                    alert("برنامه تمرینی با موفقیت بارگذاری شد.");
-                }
-                location.reload();
-            } catch (err) {
-                alert("خطا در بارگذاری برنامه: " + (err.message || "فایل نامعتبر است."));
-            }
-        } else {
-            alert("این فایل، یک فایل برنامه تمرینی یا پشتیبان معتبر نیست.");
-        }
-    };
-    reader.readAsText(file);
-}
-
-/* =====================================================
    Render Cycle Progress Grid (Week 1..4 Tracker)
 ===================================================== */
 function renderCycleGrid(data) {
@@ -445,7 +403,7 @@ function renderCalendarView() {
 
     const allWorkouts = typeof getWorkouts === "function" ? getWorkouts() : [];
     const datesSet = new Set(allWorkouts.map(w => w.date));
-    const todayIso = typeof getToday === "function" ? getToday() : "2026-10-04";
+    const todayIso = getToday();
     const fmt = (iso, long) => (typeof formatPersianDate === "function" ? formatPersianDate(iso, long) : iso);
     const vol = w => Math.round(typeof calculateVolume === "function" ? calculateVolume(w) : 0).toLocaleString("fa-IR");
 
@@ -715,7 +673,11 @@ function renderProgramsView() {
 
     const uploadInput = container.querySelector("#programsTabUploadInput");
     if (uploadInput) {
-        uploadInput.addEventListener("change", e => handleProgramUploadFile(e.target.files[0]));
+        uploadInput.addEventListener("change", e => {
+            const file = e.target.files[0];
+            if (file) handleBackupFileSelected(file);
+            e.target.value = "";
+        });
     }
 }
 
@@ -733,12 +695,12 @@ function renderBankView() {
     const groups = {};
     keys.forEach(k => {
         const item = catalog[k];
-        const cat = item.category || (typeof EXERCISE_CATEGORIES_MAP !== "undefined" && EXERCISE_CATEGORIES_MAP[k]) || "سایر";
+        const cat = item.category || EXERCISE_CATEGORIES_MAP[k] || "سایر";
         if (!groups[cat]) groups[cat] = [];
         groups[cat].push({ key: k, ...item });
     });
 
-    const order = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
+    const order = MUSCLE_GROUP_ORDER;
     const categories = Object.keys(groups).sort((a, b) => {
         const ia = order.indexOf(a), ib = order.indexOf(b);
         if (ia !== -1 && ib !== -1) return ia - ib;
@@ -933,19 +895,10 @@ function renderSettingsView() {
     }
 
     container.querySelector("#dashClearHistoryBtn").addEventListener("click", async () => {
-        if (confirm("تاریخچه‌ی تمرین‌ها حذف شود؟ برنامه‌ی تمرینی دست‌نخورده می‌ماند.")) {
-            if (typeof deleteAllData === "function") await deleteAllData();
-            if (typeof renderAll === "function") renderAll();
-            switchView("dashboard");
-        }
+        if (await confirmClearHistory()) switchView("dashboard");
     });
 
-    container.querySelector("#dashFullResetBtn").addEventListener("click", async () => {
-        if (confirm("همه‌چیز حذف شود؟ تمام برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند.")) {
-            if (typeof fullResetStorage === "function") await fullResetStorage();
-            location.reload();
-        }
-    });
+    container.querySelector("#dashFullResetBtn").addEventListener("click", confirmFullReset);
 }
 
 /* =====================================================

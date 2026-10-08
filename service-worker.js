@@ -3,7 +3,7 @@
    (مثلاً v17). تغییر همین فایل باعث می‌شود مرورگر نسخه‌ی جدید را
    پیدا کند و دکمه‌ی «به‌روزرسانی» در تنظیمات فعال شود.
 */
-const CACHE_NAME = "gym-tracker-v23";
+const CACHE_NAME = "gym-tracker-v24";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
 const MEDIA_CACHE = "gym-media-v1";
@@ -21,6 +21,7 @@ const FILES_TO_CACHE = [
     "./css/program-builder.css",
     "./css/exercise-editor.css",
 
+    "./js/utils.js",
     "./js/app.js",
     "./js/dashboard.js",
     "./js/dashboard-analytics.js",
@@ -118,7 +119,7 @@ async function handleFetch(request) {
     const url = new URL(request.url);
 
     // برای فایل‌های جاوااسکریپت و صفحات، ابتدا از شبکه می‌خواند تا تغییرات کدهای ذخیره‌سازی فوراً اعمال شوند
-    if (url.origin === self.location.origin && (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname === "/")) {
+    if (url.origin === self.location.origin && (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith("/"))) {
         try {
             const networkResponse = await fetch(request);
             if (networkResponse && networkResponse.status === 200) {

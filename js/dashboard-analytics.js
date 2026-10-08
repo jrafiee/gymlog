@@ -35,11 +35,7 @@
     /* =========================
        ابزارهای عمومی
     ========================= */
-    function normDigits(v) {
-        return String(v == null ? "" : v)
-            .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0))
-            .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660));
-    }
+    const normDigits = toLatinDigits;
 
     function num(v) {
         if (v === "" || v === null || v === undefined) return null;
@@ -127,10 +123,11 @@
        ست معتبر = وزن و تکرار هر دو عدد مثبت.
        ست ناقص = فقط یکی پر شده یا نامعتبر است (حذف نمی‌شود، فقط شمرده می‌شود).
     ========================= */
-    function entryFromWorkout(workout, ex) {
+    /* bodyMode=false: حرکات وزنه‌دار — ست معتبر = وزن و تکرار هر دو مثبت، بهترین ست = بیشترین وزن
+       bodyMode=true : حرکات وزن‌بدنی/زمانی — ست معتبر = تکرار (یا ثانیه) مثبت، بهترین ست = بیشترین تکرار */
+    function buildEntry(workout, ex, bodyMode) {
         const valid = [];
         let logged = 0;
-        let incomplete = 0;
 
         (ex.sets || []).forEach(s => {
             const hasW = s.weight !== "" && s.weight != null;
@@ -139,14 +136,18 @@
             logged += 1;
             const w = num(s.weight);
             const r = num(s.reps);
-            if (w !== null && r !== null && w > 0 && r > 0) valid.push({ weight: w, reps: r });
-            else incomplete += 1;
+            if (bodyMode) {
+                if (r !== null && r > 0) valid.push({ weight: w !== null && w > 0 ? w : 0, reps: r });
+            } else if (w !== null && r !== null && w > 0 && r > 0) {
+                valid.push({ weight: w, reps: r });
+            }
         });
 
+        const better = bodyMode
+            ? (s, b) => s.reps > b.reps || (s.reps === b.reps && s.weight > b.weight)
+            : (s, b) => s.weight > b.weight || (s.weight === b.weight && s.reps > b.reps);
         let best = null;
-        valid.forEach(s => {
-            if (!best || s.weight > best.weight || (s.weight === best.weight && s.reps > best.reps)) best = s;
-        });
+        valid.forEach(s => { if (!best || better(s, best)) best = s; });
 
         return {
             workoutId: workout.id,
@@ -156,22 +157,27 @@
             month: workout.month,
             sets: valid,
             logged,
-            incomplete,
+            incomplete: logged - valid.length,
             best,
-            topSets: best ? valid.filter(s => s.weight === best.weight) : []
+            topSets: best ? valid.filter(s => (bodyMode ? s.reps === best.reps : s.weight === best.weight)) : []
         };
     }
 
-    function exerciseSessions(workouts, exerciseId) {
+    const entryFromWorkout = (workout, ex) => buildEntry(workout, ex, false);
+    const bodyEntry = (workout, ex) => buildEntry(workout, ex, true);
+
+    function exerciseSessions(workouts, exerciseId, bodyMode) {
         const out = [];
         sortWorkouts(workouts).forEach(w => {
             const ex = (w.exercises || []).find(e => e.id === exerciseId);
             if (!ex) return;
-            const entry = entryFromWorkout(w, ex);
+            const entry = buildEntry(w, ex, bodyMode);
             if (entry.sets.length > 0) out.push(entry);
         });
         return out;
     }
+
+    const bodySessions = (workouts, exerciseId) => exerciseSessions(workouts, exerciseId, true);
 
     /* همه‌ی ست‌های هدف در یک وزن (بالاترین وزن جلسه) به سقف محدوده رسیده‌اند؟ */
     function isCeilingReached(entry, target) {
@@ -532,49 +538,6 @@
         return "تکرار";
     }
 
-    function bodyEntry(workout, ex) {
-        const sets = [];
-        let logged = 0;
-        (ex.sets || []).forEach(s => {
-            const hasW = s.weight !== "" && s.weight != null;
-            const hasR = s.reps !== "" && s.reps != null;
-            if (!hasW && !hasR) return;
-            logged += 1;
-            const r = num(s.reps);
-            const w = num(s.weight);
-            if (r !== null && r > 0) sets.push({ weight: w !== null && w > 0 ? w : 0, reps: r });
-        });
-
-        let best = null;
-        sets.forEach(s => {
-            if (!best || s.reps > best.reps || (s.reps === best.reps && s.weight > best.weight)) best = s;
-        });
-
-        return {
-            workoutId: workout.id,
-            date: workout.date,
-            week: workout.week,
-            session: workout.session,
-            month: workout.month,
-            sets,
-            logged,
-            incomplete: logged - sets.length,
-            best,
-            topSets: best ? sets.filter(s => s.reps === best.reps) : []
-        };
-    }
-
-    function bodySessions(workouts, exerciseId) {
-        const out = [];
-        sortWorkouts(workouts).forEach(w => {
-            const ex = (w.exercises || []).find(e => e.id === exerciseId);
-            if (!ex) return;
-            const entry = bodyEntry(w, ex);
-            if (entry.sets.length > 0) out.push(entry);
-        });
-        return out;
-    }
-
     function interpretBody(sessions, target, unit) {
         const n = sessions.length;
         if (n === 0) return { level: "none", text: "برای این حرکت در بازه‌ی انتخاب‌شده ثبتی وجود ندارد." };
@@ -715,23 +678,8 @@
        ۷) تعداد ست هر گروه عضلانی (برای نمودار عنکبوتی)
        هر ستی که وزنه یا تکرارش ثبت شده یک ست حساب می‌شود.
     ========================= */
-    const MUSCLE_ORDER = ["سینه", "پشت", "سرشانه", "جلو بازو", "پشت بازو", "پا", "شکم"];
-    const MUSCLE_MAP = {
-        machine_chest_press: "سینه", incline_dumbbell_press: "سینه", dumbbell_fly: "سینه",
-        elevated_pushup: "سینه", incline_pushup: "سینه", cable_crossover: "سینه",
-        close_grip_dumbbell_press: "سینه",
-        wide_lat_pulldown: "پشت", medium_grip_lat_pulldown: "پشت", seated_cable_row: "پشت",
-        chest_supported_row: "پشت", t_bar_row: "پشت", straight_arm_pullover: "پشت",
-        dumbbell_shoulder_press: "سرشانه", dumbbell_lateral_raise: "سرشانه",
-        rear_delt_fly: "سرشانه", face_pull: "سرشانه",
-        hammer_curl: "جلو بازو", cable_curl: "جلو بازو",
-        rope_triceps_pushdown: "پشت بازو", overhead_cable_triceps: "پشت بازو",
-        lying_dumbbell_triceps_extension: "پشت بازو",
-        leg_press: "پا", smith_squat: "پا", lying_leg_curl: "پا", leg_extension: "پا",
-        bulgarian_split_squat: "پا", smith_calf_raise: "پا",
-        dead_bug: "شکم", crunch: "شکم", cable_crunch: "شکم", side_plank: "شکم",
-        plank: "شکم", pallof_press: "شکم"
-    };
+    const MUSCLE_ORDER = MUSCLE_GROUP_ORDER;
+    const MUSCLE_MAP = EXERCISE_CATEGORIES_MAP;
 
     function computeMuscleSets(ctx, range) {
         const { workouts, catalog, today } = ctx;
