@@ -550,6 +550,7 @@ function renderExercises() {
     program.exercises.forEach((exercise, index) => {
         const previousExercise = previous?.exercises?.find(item => item.id === exercise.id);
         const currentExercise = currentWorkout?.exercises?.find(item => item.id === exercise.id);
+        const refSets = getReferenceSets(exercise.id, previousExercise);
         const restSec = parseRestSeconds(exercise.rest);
         const exNote = (currentExercise && currentExercise.note) || "";
         const prevExNote = (previousExercise && previousExercise.note) || "";
@@ -576,7 +577,7 @@ function renderExercises() {
                 ${restSec ? `<button type="button" class="exercise-rest-btn" data-seconds="${restSec}" data-exercise-name="${esc(exercise.name)}">⏱ استراحت</button>` : ""}
             </div>
             <div class="sets-container" data-exercise="${exercise.id}">
-                ${createSetRows(exercise, previousExercise, currentExercise)}
+                ${createSetRows(exercise, previousExercise, currentExercise, refSets)}
             </div>
             <details class="exercise-note" ${exNote ? "open" : ""}>
                 <summary>📝 یادداشت این حرکت</summary>
@@ -803,16 +804,80 @@ function showExerciseGuide(exerciseId) {
 /* =========================
 ساخت ست‌ها
 ========================= */
-function createSetRows(exercise, previousExercise, currentExercise) {
+/* ست‌های مرجع برای مقایسه: جلسه‌ی قبلِ همین جلسه‌ی برنامه، وگرنه آخرین سابقه‌ی همان حرکت */
+function getReferenceSets(exerciseId, previousExercise) {
+    const hasData = sets => Array.isArray(sets) && sets.some(s => s.weight !== "" || s.reps !== "");
+    if (previousExercise && hasData(previousExercise.sets)) return previousExercise.sets;
+    const hist = getExerciseHistory(exerciseId).find(r => r.date < workoutDate.value && hasData(r.sets));
+    return hist ? hist.sets : [];
+}
+
+/* آستانه‌ی هشدار: وزنه ≥ ۳۰٪ تغییر، تکرار ≥ ۵۰٪ و دست‌کم ۴ تکرار تغییر */
+const WARN_WEIGHT_RATIO = 0.3;
+const WARN_REPS_RATIO = 0.5;
+const WARN_REPS_ABS = 4;
+
+/* وضعیت پر بودن فیلدهای یک ست. در حرکات وزن‌بدنی/زمانی خالی بودن وزنه ایرادی ندارد. */
+function getSetRowState(row) {
+    const hasW = toLatinDigits(row.querySelector(".weight-input").value).trim() !== "";
+    const hasR = toLatinDigits(row.querySelector(".reps-input").value).trim() !== "";
+    const bw = row.dataset.bw === "1";
+    return { hasW, hasR, bw, complete: hasR && (hasW || bw), partial: (hasW || hasR) && !(hasR && (hasW || bw)) };
+}
+
+/* final=true: کاربر از ست خارج شده (یا بارگذاری اولیه)؛ فقط آن‌وقت خالی‌بودن فیلد هشدار می‌دهد */
+function checkSetWarning(row, final) {
+    if (!row) return;
+    const warnEl = row.querySelector(".set-warning");
+    if (!warnEl) return;
+
+    const st = getSetRowState(row);
+    const msgs = [];
+
+    if (st.complete) {
+        /* مقایسه با سابقه فقط وقتی اطلاعات کل ست وارد شده */
+        const w = parseFloat(toLatinDigits(row.querySelector(".weight-input").value));
+        const r = parseFloat(toLatinDigits(row.querySelector(".reps-input").value));
+        const pw = parseFloat(row.dataset.refW);
+        const pr = parseFloat(row.dataset.refR);
+
+        if (isFinite(w) && w > 0 && isFinite(pw) && pw > 0) {
+            const ch = (w - pw) / pw;
+            if (Math.abs(ch) >= WARN_WEIGHT_RATIO) {
+                msgs.push(`وزنه ${toFa(Math.round(Math.abs(ch) * 100))}٪ ${ch > 0 ? "بیشتر" : "کمتر"} از قبل است (${toFa(pw)} ← ${toFa(w)} kg)`);
+            }
+        }
+        if (isFinite(r) && r > 0 && isFinite(pr) && pr > 0) {
+            const diff = r - pr;
+            if (Math.abs(diff) >= WARN_REPS_ABS && Math.abs(diff) / pr >= WARN_REPS_RATIO) {
+                msgs.push(`تکرار ${diff > 0 ? "بیشتر" : "کمتر"} از قبل است (${toFa(pr)} ← ${toFa(r)})`);
+            }
+        }
+        if (msgs.length) msgs.push("مطمئنی درست وارد کرده‌ای؟");
+    } else if (st.partial && final) {
+        msgs.push(!st.hasR ? "تکرار این ست خالی مانده است." : "وزنه این ست خالی مانده است.");
+    }
+
+    warnEl.textContent = msgs.length ? "⚠️ " + msgs.join(" — ") : "";
+    row.classList.toggle("has-warning", msgs.length > 0);
+}
+
+function createSetRows(exercise, previousExercise, currentExercise, refSets) {
     let html = "";
+    const isBw = !!((window.DashAnalytics && window.DashAnalytics.BODYWEIGHT_IDS.has(exercise.id)) ||
+        (getEffectiveCatalog()[exercise.id] && getEffectiveCatalog()[exercise.id].bodyweight));
+    const refList = (refSets || []).filter(s => s && (s.weight !== "" || s.reps !== ""));
     for (let i = 0; i < exercise.sets; i++) {
         const previousSet = previousExercise?.sets?.[i];
+        const refSet = (refSets && refSets[i] && (refSets[i].weight !== "" || refSets[i].reps !== ""))
+            ? refSets[i]
+            : (refList.length ? refList[refList.length - 1] : null);
         const currentSet = currentExercise?.sets?.[i];
         const currentWeight = currentSet?.weight || "";
         const currentReps = currentSet?.reps || "";
 
         html += `
-            <div class="set-row" data-set="${i}">
+            <div class="set-row" data-set="${i}" data-bw="${isBw ? 1 : 0}" data-ref-w="${refSet ? esc(refSet.weight) : ""}" data-ref-r="${refSet ? esc(refSet.reps) : ""}">
                 <div class="set-label">ست ${i + 1}</div>
                 <div>
                     <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" step="0.5" inputmode="decimal" value="${currentWeight}">
@@ -825,6 +890,7 @@ function createSetRows(exercise, previousExercise, currentExercise) {
                         ? `جلسه قبل: ${previousSet.weight || "—"}kg × ${previousSet.reps || "—"}`
                         : ""}
                 </div>
+                <div class="set-warning" role="alert"></div>
             </div>
         `;
     }
@@ -936,6 +1002,13 @@ if (finishWorkoutBtn) {
         if (!workoutHasData(workout)) {
             alert("هنوز اطلاعاتی برای این جلسه ثبت نشده است.");
             return;
+        }
+
+        // هشدار ست‌های ناقص (فقط وزنه یا فقط تکرار)
+        const partialRows = Array.from(document.querySelectorAll(".set-row")).filter(r => getSetRowState(r).partial);
+        if (partialRows.length > 0) {
+            partialRows.forEach(r => checkSetWarning(r, true));
+            if (!confirm(`${toFa(partialRows.length)} ست ناقص ثبت شده (وزنه یا تکرار خالی است). با همین حالت جلسه ذخیره شود؟`)) return;
         }
 
         // ۱) عملیات اصلی: ذخیره قطعی در پایگاه‌داده IndexedDB
@@ -1146,8 +1219,17 @@ if (sessionNote) sessionNote.addEventListener("input", scheduleNoteSave);
 function attachInputEvents() {
     document.querySelectorAll(".weight-input, .reps-input").forEach(input => {
         input.addEventListener("input", () => {
+            checkSetWarning(input.closest(".set-row"), false);
             updateSummary();
             autoSaveWorkout();
+        });
+    });
+    document.querySelectorAll(".set-row").forEach(row => {
+        checkSetWarning(row, true);
+        /* هشدار فیلد خالی فقط وقتی فوکوس کاملاً از ست خارج شد */
+        row.addEventListener("focusout", e => {
+            if (e.relatedTarget && row.contains(e.relatedTarget)) return;
+            checkSetWarning(row, true);
         });
     });
     document.querySelectorAll(".exercise-note-input").forEach(input => {

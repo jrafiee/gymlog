@@ -456,23 +456,30 @@ function renderCalendarView() {
     const monthNames = typeof PERSIAN_MONTH_NAMES !== "undefined" ? PERSIAN_MONTH_NAMES : [];
     const wide = isWideCalendar();
 
-    if (wide) {
-        /* دسکتاپ: نمای یک‌ساله، ۱۲ ماه کنار هم */
+        if (wide) {
+        /* دسکتاپ: دو ماه قبل، ماه جاری، یک ماه بعد؛ با قبل/بعد یک ماه جابه‌جا می‌شود */
         const todayJ = typeof isoToJalali === "function" ? isoToJalali(todayIso) : { jy: 0, jm: 0 };
-        const jy = calendarState.jy;
-        let yearCount = 0;
+        const shift = off => {
+            let m = calendarState.jm + off, y = calendarState.jy;
+            while (m < 1) { m += 12; y -= 1; }
+            while (m > 12) { m -= 12; y += 1; }
+            return { jy: y, jm: m };
+        };
+        const months = [-2, -1, 0, 1].map(shift);
+        let rangeCount = 0;
 
-        const cards = Array.from({ length: 12 }, (_, i) => i + 1).map(jm => {
+        const cards = months.map(({ jy, jm }) => {
             const len = jalaliMonthLength(jy, jm);
             const start = jalaliToIsoDate(jy, jm, 1);
             const end = jalaliToIsoDate(jy, jm, len);
             const count = allWorkouts.filter(w => w.date >= start && w.date <= end).length;
-            yearCount += count;
+            rangeCount += count;
             const isCurrent = todayJ.jy === jy && todayJ.jm === jm;
+            const yFa = jy.toLocaleString("fa-IR", { useGrouping: false });
             return `
                 <section class="cal-month-card ${isCurrent ? "current" : ""}">
                     <header>
-                        <h4>${monthNames[jm - 1] || jm}</h4>
+                        <h4>${monthNames[jm - 1] || jm} ${yFa}</h4>
                         <span>${count ? count.toLocaleString("fa-IR") + " جلسه" : ""}</span>
                     </header>
                     <div class="date-picker-weekdays">${weekdays}</div>
@@ -480,17 +487,21 @@ function renderCalendarView() {
                 </section>`;
         }).join("");
 
+        const first = months[0], last = months[3];
+        const fa4 = n => n.toLocaleString("fa-IR", { useGrouping: false });
+        const rangeTitle = `${monthNames[first.jm - 1]} ${fa4(first.jy)} تا ${monthNames[last.jm - 1]} ${fa4(last.jy)}`;
+
         container.innerHTML = `
             <div class="cal-wide">
                 <div class="cal-wide-main">
                     <div class="cal-wide-bar">
                         <div class="cal-wide-nav">
-                            <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="سال قبل">‹</button>
-                            <h3>سال ${jy.toLocaleString("fa-IR", { useGrouping: false })}</h3>
-                            <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="سال بعد">›</button>
+                            <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="ماه قبل">‹</button>
+                            <h3>${rangeTitle}</h3>
+                            <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="ماه بعد">›</button>
                             <button type="button" class="secondary-btn cal-today-btn" id="calTodayBtn">امروز</button>
                         </div>
-                        <span class="cal-wide-count">${yearCount.toLocaleString("fa-IR")} جلسه در این سال</span>
+                        <span class="cal-wide-count">${rangeCount.toLocaleString("fa-IR")} جلسه در این بازه</span>
                     </div>
                     <div class="cal-year-grid">${cards}</div>
                     <div class="date-picker-legend"><span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده</div>
@@ -498,6 +509,7 @@ function renderCalendarView() {
                 <aside class="cal-wide-side">${selectedDayHtml}</aside>
             </div>
         `;
+    
     } else {
         /* موبایل: نمای یک ماه */
         const monthName = monthNames[calendarState.jm - 1] || `ماه ${calendarState.jm}`;
@@ -523,22 +535,14 @@ function renderCalendarView() {
     }
 
     container.querySelector("#calPrevBtn").addEventListener("click", () => {
-        if (wide) {
-            calendarState.jy -= 1;
-        } else {
-            calendarState.jm -= 1;
-            if (calendarState.jm < 1) { calendarState.jm = 12; calendarState.jy -= 1; }
-        }
+        calendarState.jm -= 1;
+        if (calendarState.jm < 1) { calendarState.jm = 12; calendarState.jy -= 1; }
         renderCalendarView();
     });
 
     container.querySelector("#calNextBtn").addEventListener("click", () => {
-        if (wide) {
-            calendarState.jy += 1;
-        } else {
-            calendarState.jm += 1;
-            if (calendarState.jm > 12) { calendarState.jm = 1; calendarState.jy += 1; }
-        }
+        calendarState.jm += 1;
+        if (calendarState.jm > 12) { calendarState.jm = 1; calendarState.jy += 1; }
         renderCalendarView();
     });
 

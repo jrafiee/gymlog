@@ -21,6 +21,7 @@
 </head>
 
 <body>
+<script>try{if(localStorage.getItem("gymSidebarCollapsed")==="1")document.body.classList.add("sidebar-collapsed");}catch(e){}</script>
 
 <div class="app-shell">
 
@@ -34,48 +35,51 @@
                 <h1>GymLog</h1>
                 <span>مرکز مدیریت و تحلیل تمرین</span>
             </div>
+            <button type="button" class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="جمع کردن منو" aria-expanded="true" title="جمع/باز کردن منو">
+                <span class="sidebar-toggle-icon" aria-hidden="true">❯</span>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
-            <button type="button" class="sidebar-nav-item active" data-nav="dashboard">
+            <button type="button" class="sidebar-nav-item active" data-nav="dashboard" title="داشبورد">
                 <span class="sidebar-nav-icon">📊</span>
-                داشبورد
+                <span class="sidebar-nav-label">داشبورد</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="workout">
+            <button type="button" class="sidebar-nav-item" data-nav="workout" title="تمرین امروز">
                 <span class="sidebar-nav-icon">🏋️‍♂️</span>
-                تمرین امروز
+                <span class="sidebar-nav-label">تمرین امروز</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="programs">
+            <button type="button" class="sidebar-nav-item" data-nav="programs" title="برنامه‌های تمرینی">
                 <span class="sidebar-nav-icon">📋</span>
-                برنامه‌های تمرینی
+                <span class="sidebar-nav-label">برنامه‌های تمرینی</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="history">
+            <button type="button" class="sidebar-nav-item" data-nav="history" title="تاریخچه تمرینات">
                 <span class="sidebar-nav-icon">🕒</span>
-                تاریخچه تمرینات
+                <span class="sidebar-nav-label">تاریخچه تمرینات</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="bank">
+            <button type="button" class="sidebar-nav-item" data-nav="bank" title="بانک حرکات">
                 <span class="sidebar-nav-icon">📚</span>
-                بانک حرکات
+                <span class="sidebar-nav-label">بانک حرکات</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="calendar">
+            <button type="button" class="sidebar-nav-item" data-nav="calendar" title="تقویم تمرین">
                 <span class="sidebar-nav-icon">📅</span>
-                تقویم تمرین
+                <span class="sidebar-nav-label">تقویم تمرین</span>
             </button>
 
-            <button type="button" class="sidebar-nav-item" data-nav="user">
+            <button type="button" class="sidebar-nav-item" data-nav="user" title="کاربر">
                 <span class="sidebar-nav-icon">👤</span>
-                کاربر
+                <span class="sidebar-nav-label">کاربر</span>
             </button>
 
             <div class="sidebar-divider"></div>
 
-            <button type="button" class="sidebar-nav-item" data-nav="backup">
+            <button type="button" class="sidebar-nav-item" data-nav="backup" title="پشتیبان‌گیری">
                 <span class="sidebar-nav-icon">💾</span>
-                پشتیبان‌گیری
+                <span class="sidebar-nav-label">پشتیبان‌گیری</span>
             </button>
-            <button type="button" class="sidebar-nav-item" data-nav="settings">
+            <button type="button" class="sidebar-nav-item" data-nav="settings" title="تنظیمات">
                 <span class="sidebar-nav-icon">⚙️</span>
-                تنظیمات
+                <span class="sidebar-nav-label">تنظیمات</span>
             </button>
         </nav>
 
@@ -460,6 +464,24 @@
 <script src="./js/program-builder.js"></script>
 <script src="./js/exercise-editor.js"></script>
 <script src="./js/rest-timer.js"></script>
+
+<script>
+    (function () {
+        const btn = document.getElementById("sidebarToggleBtn");
+        if (!btn) return;
+        function sync() {
+            const c = document.body.classList.contains("sidebar-collapsed");
+            btn.setAttribute("aria-expanded", String(!c));
+            btn.setAttribute("aria-label", c ? "باز کردن منو" : "جمع کردن منو");
+        }
+        btn.addEventListener("click", () => {
+            const c = document.body.classList.toggle("sidebar-collapsed");
+            try { localStorage.setItem("gymSidebarCollapsed", c ? "1" : "0"); } catch (e) {}
+            sync();
+        });
+        sync();
+    })();
+</script>
 
 <script>
     (function () {

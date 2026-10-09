@@ -758,9 +758,10 @@
         <section class="dv-welcome">
             <div class="dv-welcome-hero">
                 <h2>به GymLog خوش آمدید</h2>
-                <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده.</p>
+                <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده. برای شروع یکی از سه روش زیر را انتخاب کن.</p>
                 <div class="dv-welcome-actions">
                     <button type="button" class="primary-btn" id="dvWelcomeUpload">بارگذاری برنامه تمرینی</button>
+                    <button type="button" class="secondary-btn" id="dvWelcomeBuilder">ساخت برنامه تمرینی</button>
                     ${hasDefaultProgramPackage() ? `
                     <div class="dv-welcome-default">
                         <button type="button" class="secondary-btn" id="dvWelcomeDefault">شروع با برنامه‌ی پیش‌فرض</button>
@@ -787,6 +788,10 @@
         if (up) up.addEventListener("click", () => {
             const input = document.getElementById("programImportInput");
             if (input) input.click();
+        });
+        const builder = root.querySelector("#dvWelcomeBuilder");
+        if (builder) builder.addEventListener("click", () => {
+            if (typeof openProgramBuilder === "function") openProgramBuilder();
         });
         const def = root.querySelector("#dvWelcomeDefault");
         if (def) def.addEventListener("click", async () => {

@@ -38,7 +38,7 @@
 
     const REST_OPTS = ["30 ثانیه", "45 ثانیه", "60 ثانیه", "90 ثانیه", "2 دقیقه", "3 دقیقه", "4 دقیقه"];
 
-    const STEPS = ["روزها", "حرکات", "مشخصات", "خروجی"];
+    const STEP_LABELS = { days: "روزها", exercises: "حرکات", profile: "مشخصات", output: "خروجی" };
 
     const RANGES = {
         height: [100, 250, "قد"],
@@ -280,8 +280,12 @@
 
     function freshState() {
         const profile = getUserProfile() || {};
+        /* اگر مشخصات کاربر قبلاً ثبت شده، مرحله‌ی «مشخصات» حذف می‌شود */
+        const needsProfile = !(profile && profile.fullName);
         return {
             step: 1,
+            needsProfile,
+            steps: needsProfile ? ["days", "exercises", "profile", "output"] : ["days", "exercises", "output"],
             days: 3,
             day: 1,
             title: "",
@@ -376,7 +380,7 @@
     window.addEventListener("popstate", () => { if (overlay) removeOverlay(); });
 
     function renderSteps() {
-        overlay.querySelector("#pbSteps").innerHTML = STEPS.map((label, i) => {
+        overlay.querySelector("#pbSteps").innerHTML = PB.steps.map(k => STEP_LABELS[k]).map((label, i) => {
             const n = i + 1;
             const cls = n === PB.step ? "active" : n < PB.step ? "done" : "";
             return `<li class="${cls}"><span>${toFa(n)}</span>${label}</li>`;
@@ -384,7 +388,7 @@
 
         overlay.querySelector("#pbPrev").style.visibility = PB.step === 1 ? "hidden" : "visible";
         const next = overlay.querySelector("#pbNext");
-        next.textContent = PB.step < 4 ? "بعدی"
+        next.textContent = PB.step < PB.steps.length ? "بعدی"
             : PB.output === "save" ? "ثبت در برنامه" : "دانلود فایل JSON";
     }
 
@@ -392,14 +396,15 @@
         renderSteps();
         const body = overlay.querySelector("#pbBody");
         body.scrollTop = 0;
-        if (PB.step === 1) renderStepDays(body);
-        else if (PB.step === 2) renderStepExercises(body);
-        else if (PB.step === 3) renderStepProfile(body);
+        const key = PB.steps[PB.step - 1];
+        if (key === "days") renderStepDays(body);
+        else if (key === "exercises") renderStepExercises(body);
+        else if (key === "profile") renderStepProfile(body);
         else renderStepOutput(body);
     }
 
     function goStep(n, free) {
-        if (n < 1 || n > 4) return;
+        if (n < 1 || n > PB.steps.length) return;
         if (!free && n > PB.step && !validateStep(PB.step)) return;
         PB.step = n;
         PB.sheetOpen = false;
@@ -407,13 +412,14 @@
     }
 
     function onNext() {
-        if (PB.step < 4) goStep(PB.step + 1, false);
+        if (PB.step < PB.steps.length) goStep(PB.step + 1, false);
         else submit();
     }
 
     function validateStep(step) {
-        if (step === 2) return validatePlan();
-        if (step === 3) {
+        const key = PB.steps[step - 1];
+        if (key === "exercises") return validatePlan();
+        if (key === "profile") {
             const form = overlay.querySelector("#pbProfileForm");
             const r = readProfileFields(form);
             const errEl = overlay.querySelector("#pbProfileError");
@@ -881,6 +887,9 @@
 
         if (PB.output === "download") {
             downloadJson(pkg);
+            if (PB.needsProfile) {
+                try { await saveUserProfile(PB.profile); renderUserChip(); } catch (e) { console.error(e); }
+            }
             closeBuilder(true);
             toast("فایل برنامه دانلود شد.");
             return;
@@ -889,7 +898,7 @@
         nextBtn.disabled = true;
         try {
             await importProgramPackage({ programsRaw: pkg.programsRaw });
-            await saveUserProfile(PB.profile);
+            if (PB.needsProfile) await saveUserProfile(PB.profile);
         } catch (err) {
             console.error("[GymLog Builder] خطا در ثبت برنامه:", err);
             nextBtn.disabled = false;

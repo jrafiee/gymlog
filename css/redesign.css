@@ -215,3 +215,114 @@ body:not(.rd) {
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
 }
+/* =====================================================
+   موبایل: نوار پایین باریک‌تر و کم‌رنگ‌تر
+===================================================== */
+@media (max-width: 1023px) {
+    body:not(.rd) {
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+
+        .mobile-tab-switch {
+            gap: 8px;
+            padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top-width: 1px;
+        }
+        .mobile-tab-btn {
+            min-height: 40px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            background: transparent;
+            color: var(--rd-sub);
+            border: 1px solid var(--rd-line);
+        }
+        .mobile-tab-btn.active {
+            background: var(--rd-soft);
+            color: var(--rd-accent);
+            border-color: var(--rd-accent);
+        }
+        .rest-timer { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+        .app-toast  { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+    }
+}
+
+/* =====================================================
+   دسکتاپ: اندازه‌های متعادل (نه درشت)
+===================================================== */
+@media (min-width: 1024px) {
+    #viewWorkout .container { max-width: 720px; margin: 20px auto; }
+
+    body:not(.rd) {
+        font-size: 15px;
+
+        button, .secondary-btn { min-height: 40px; border-radius: 10px; font-size: 14px; }
+        input, select, .date-picker-btn { min-height: 42px; border-width: 1px; border-radius: 10px; font-size: 14px; }
+
+        .card, .exercise-card, .summary-card, .dv-card, .dv-kpi,
+        .dash-overview-card, .dash-cycle-card, .dash-table-card,
+        .dv-ex-card, .dv-welcome, .dv-prog-session {
+            border-width: 1px;
+            border-radius: 12px;
+        }
+
+        /* انتخاب جلسه */
+        .session-btn { min-height: 60px; border-width: 1px; border-radius: 10px; }
+        .session-btn strong { font-size: 13.5px; }
+        .session-btn span { font-size: 11.5px; }
+
+        /* حرکت */
+        .exercise-header { padding: 12px 14px; gap: 8px; }
+        .exercise-header h2 { font-size: 17px; font-weight: 700; }
+        .exercise-number { width: 30px; height: 30px; font-size: 13px; }
+        .exercise-meta { font-size: 12.5px; }
+        .exercise-help-btn, .exercise-history-btn, .exercise-rest-btn {
+            flex: 0 0 auto; min-height: 36px; padding: 4px 12px;
+            font-size: 13px; font-weight: 600; border-width: 1px; border-radius: 8px;
+        }
+
+        /* ست‌ها */
+        .sets-container { padding: 10px 12px; }
+        .set-row { grid-template-columns: 56px 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .set-label { font-size: 13.5px; }
+        .set-row input { height: 42px; min-height: 42px; font-size: 16px; font-weight: 700; border-radius: 10px; }
+        .set-row input::placeholder { font-size: 12.5px; }
+        .set-difference { font-size: 12px; }
+
+        /* خلاصه و ذخیره */
+        .summary-card strong { font-size: 20px; }
+        .summary-card span { font-size: 12px; }
+        #finishWorkoutBtn { min-height: 46px; font-size: 15px; }
+
+        /* منو و جدول‌ها */
+        .sidebar-nav-item { font-size: 13.5px; padding: 10px 14px; }
+        .history-table, .dash-table { font-size: 13px; }
+
+        /* تقویم انتخاب تاریخ و مودال‌ها */
+        .date-picker-day { font-size: 13px; height: 40px; }
+        .date-picker-nav, .exercise-guide-close { width: 34px; height: 34px; min-height: 34px; }
+        .date-picker-weekdays, .date-picker-legend { font-size: 12px; }
+        .exercise-guide-instructions { font-size: 15px; }
+        .exercise-guide-header h2 { font-size: 20px; }
+
+        /* تایمر */
+        .rest-timer { border-width: 1px; }
+        .rest-timer-time { font-size: 28px; }
+        .rest-timer-label { font-size: 13px; }
+        .rest-timer-track { height: 6px; }
+        .rest-timer-actions button { min-height: 38px; font-size: 13px; border-width: 1px; }
+    }
+
+    /* تنظیمات: دکمه‌ها هم‌اندازه */
+    #viewSettingsContainer .setting-row > button,
+    #viewSettingsContainer .setting-row > .secondary-btn,
+    #viewSettingsContainer .setting-row > .danger-btn {
+        flex: 0 0 170px;
+        width: 170px;
+        min-height: 40px;
+        padding: 8px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+        text-align: center;
+    }
+}

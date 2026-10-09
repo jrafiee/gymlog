@@ -1387,10 +1387,10 @@ body.dark-mode .dash-cycle-session-item.active-next:hover {
 }
 
 .cal-wide-nav h3 {
-    min-width: 90px;
+    min-width: 220px;
     margin: 0;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
     color: #111827;
 }
