@@ -71,6 +71,11 @@
                 <span class="sidebar-nav-label">کاربران</span>
             </button>
 
+            <button type="button" class="sidebar-nav-item" data-nav="help" title="راهنما و سوالات متداول">
+                <span class="sidebar-nav-icon">❓</span>
+                <span class="sidebar-nav-label">راهنما</span>
+            </button>
+
             <div class="sidebar-divider"></div>
 
             <button type="button" class="sidebar-nav-item" data-nav="backup" title="پشتیبان‌گیری">
@@ -292,6 +297,13 @@
         </div>
 
         <!-- =========================
+             View 10: Help / FAQ
+        ========================= -->
+        <div id="viewHelp" class="app-view">
+            <div id="viewHelpContainer" class="gl-view-pad"></div>
+        </div>
+
+        <!-- =========================
              View 9: Settings
         ========================= -->
         <div id="viewSettings" class="app-view">
@@ -328,6 +340,17 @@
                 </div>
                 <button class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(); switchView('dashboard');">
                     مشاهده داشبورد
+                </button>
+            </div>
+
+            <!-- Help -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <strong>راهنما و سوالات متداول</strong>
+                    <span>معرفی امکانات برنامه، نحوه‌ی ذخیره‌سازی و پشتیبان‌گیری، و راه‌های تماس</span>
+                </div>
+                <button class="secondary-btn setting-btn" type="button" onclick="closeSettingsPage(true); switchView('help');">
+                    مشاهده راهنما
                 </button>
             </div>
 
