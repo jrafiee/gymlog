@@ -66,9 +66,9 @@
                 <span class="sidebar-nav-label">تقویم تمرین</span>
             </button>
 
-            <button type="button" class="sidebar-nav-item" data-nav="user" title="کاربر">
+            <button type="button" class="sidebar-nav-item" data-nav="user" title="کاربران">
                 <span class="sidebar-nav-icon">👤</span>
-                <span class="sidebar-nav-label">کاربر</span>
+                <span class="sidebar-nav-label">کاربران</span>
             </button>
 
             <div class="sidebar-divider"></div>
@@ -100,6 +100,7 @@
                     داشبورد مدیریت و تحلیل تمرین
                 </div>
                 <button type="button" class="user-chip" id="desktopUserChip" hidden></button>
+                <select class="user-select" id="desktopUserSelect" aria-label="انتخاب کاربر" hidden></select>
             </div>
             <div class="desktop-topbar-actions">
                 <button type="button" class="desktop-theme-icon-btn" id="desktopThemeIconBtn" aria-label="تغییر حالت تیره/روشن" title="تغییر ظاهر برنامه (تیره / روشن)">
@@ -113,6 +114,7 @@
             <div class="mobile-nav-id">
                 <span class="mobile-nav-brand">GymLog</span>
                 <button type="button" class="user-chip" id="mobileUserChip" hidden></button>
+                <select class="user-select" id="mobileUserSelect" aria-label="انتخاب کاربر" hidden></select>
             </div>
             <div class="mobile-tab-switch">
                 <button type="button" class="mobile-tab-btn active" data-nav="workout">ثبت تمرین</button>
@@ -332,8 +334,8 @@
             <!-- User -->
             <div class="setting-row">
                 <div class="setting-info">
-                    <strong>کاربر</strong>
-                    <span>مشاهده و ویرایش نام، سن، قد، دور کمر و وزن</span>
+                    <strong>کاربران</strong>
+                    <span>مشاهده، افزودن و حذف کاربران؛ ویرایش مشخصات و به‌روزرسانی اطلاعات هر کاربر</span>
                 </div>
                 <button class="secondary-btn setting-btn" type="button" onclick="closeSettingsPage(true); switchView('user');">
                     مشاهده
@@ -398,7 +400,7 @@
             <div class="setting-row backup-setting">
                 <div class="setting-info">
                     <strong>پشتیبان اطلاعات</strong>
-                    <span>دانلود یا بازیابی فایل پشتیبان تمرینات و برنامه‌ها.</span>
+                    <span>دانلود یا بازیابی فایل پشتیبان تمرینات و برنامه‌های همه‌ی کاربران.</span>
                 </div>
                 <div class="backup-actions">
                     <button id="exportBtn" class="secondary-btn" type="button">
@@ -429,7 +431,7 @@
             <div class="setting-row danger-setting">
                 <div class="setting-info">
                     <strong>حذف تاریخچه‌ی تمرین‌ها</strong>
-                    <span>فقط وزنه/تکرارهای ثبت‌شده پاک می‌شود؛ برنامه دست‌نخورده می‌ماند.</span>
+                    <span>فقط وزنه/تکرارهای کاربر فعال پاک می‌شود؛ برنامه و سایر کاربران دست‌نخورده می‌مانند.</span>
                 </div>
                 <button id="clearBtn" class="danger-btn" type="button">
                     حذف تاریخچه
@@ -440,7 +442,7 @@
             <div class="setting-row danger-setting">
                 <div class="setting-info">
                     <strong>بازنشانی کامل</strong>
-                    <span>همه‌چیز از IndexedDB و حافظه دستگاه پاک می‌شود.</span>
+                    <span>همه‌چیز (شامل همه‌ی کاربران) از IndexedDB و حافظه دستگاه پاک می‌شود.</span>
                 </div>
                 <button id="fullResetBtn" class="danger-btn" type="button">
                     حذف همه‌چیز

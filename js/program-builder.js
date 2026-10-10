@@ -6,8 +6,9 @@
         مرحله ۲: انتخاب حرکات هر روز (دسکتاپ: درگ و دراپ، موبایل: انتخاب از پنجره‌ی پایین)
         مرحله ۳: مشخصات کاربر (نام، سن، قد، دور کمر، وزن)
         مرحله ۴: خروجی (ثبت مستقیم در برنامه یا دانلود فایل JSON)
-   ۲) renderUserView()      صفحه‌ی «کاربر» در منو
-   ۳) renderUserChip()      نمایش نام کاربر کنار عنوان بالای صفحه
+   ۲) renderUserView()      صفحه‌ی «کاربران»: فهرست کاربران، افزودن/حذف، ویرایش مشخصات،
+                            ساخت برنامه و «به‌روزرسانی اطلاعات تمرین» برای هر کاربر
+   ۳) renderUserChip()      انتخاب کاربر فعال در نوار بالا (با یک کاربر: فقط نام)
 
    نیازمند: storage.js (getUserProfile, saveUserProfile, importProgramPackage,
    getEffectiveCatalog, getEffectiveProgramsRaw) و app.js / dashboard.js
@@ -66,8 +67,8 @@
         return window.matchMedia && window.matchMedia("(min-width: 900px)").matches;
     }
 
-    function nextMonthKey() {
-        const keys = Object.keys(getEffectiveProgramsRaw() || {});
+    function nextMonthKey(userId) {
+        const keys = Object.keys(getEffectiveProgramsRaw(userId) || {});
         let max = 0;
         keys.forEach(k => {
             const n = parseInt(String(k).replace(/\D/g, ""), 10);
@@ -133,26 +134,66 @@
         return { profile: out };
     }
 
+    /* =====================================================
+       کاربر فعال در نوار بالا
+    ===================================================== */
+    function reloadAfterUserChange() {
+        try {
+            if (typeof currentDesktopView !== "undefined") sessionStorage.setItem("gymReturnView", currentDesktopView);
+        } catch (e) { /* ignore */ }
+        location.reload();
+    }
+
     function renderUserChip() {
-        const p = typeof getUserProfile === "function" ? getUserProfile() : null;
-        const name = p && p.fullName ? p.fullName : "";
-        ["desktopUserChip", "mobileUserChip"].forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (name) {
-                el.textContent = name;
-                el.hidden = false;
-                el.title = "مشاهده‌ی مشخصات کاربر";
-            } else {
-                el.hidden = true;
+        const users = typeof getUsers === "function" ? getUsers() : [];
+        const activeId = typeof getActiveUserId === "function" ? getActiveUserId() : null;
+
+        ["desktop", "mobile"].forEach(prefix => {
+            const chip = document.getElementById(prefix + "UserChip");
+            const sel = document.getElementById(prefix + "UserSelect");
+            if (!chip) return;
+
+            if (!users.length) {
+                chip.hidden = true;
+                if (sel) sel.hidden = true;
+                return;
             }
+
+            if (users.length === 1 || !sel) {
+                chip.textContent = getUserDisplayName(users[0]);
+                chip.title = "مدیریت کاربران";
+                chip.hidden = false;
+                if (sel) sel.hidden = true;
+                return;
+            }
+
+            chip.hidden = true;
+            sel.innerHTML = users.map(u =>
+                `<option value="${esc(u.id)}" ${u.id === activeId ? "selected" : ""}>${esc(getUserDisplayName(u))}</option>`
+            ).join("") + `<option value="__manage">⚙ مدیریت کاربران…</option>`;
+            sel.value = activeId;
+            sel.hidden = false;
         });
     }
 
     function initUserChip() {
-        ["desktopUserChip", "mobileUserChip"].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.addEventListener("click", () => switchView("user"));
+        ["desktop", "mobile"].forEach(prefix => {
+            const chip = document.getElementById(prefix + "UserChip");
+            if (chip) chip.addEventListener("click", () => switchView("user"));
+
+            const sel = document.getElementById(prefix + "UserSelect");
+            if (sel) {
+                sel.addEventListener("change", async () => {
+                    const activeId = getActiveUserId();
+                    if (sel.value === "__manage") {
+                        sel.value = activeId;
+                        switchView("user");
+                        return;
+                    }
+                    if (sel.value === activeId) return;
+                    if (await setActiveUser(sel.value)) reloadAfterUserChange();
+                });
+            }
         });
         renderUserChip();
         const cache = window.GymLogStoreCache;
@@ -160,9 +201,10 @@
     }
 
     /* =====================================================
-       صفحه‌ی «کاربر»
+       صفحه‌ی «کاربران»
     ===================================================== */
-    let userEditing = false;
+    let editingUserId = null;   // null = فهرست، "new" = کاربر جدید، یا شناسه‌ی کاربرِ در حال ویرایش
+    let mergeTargetId = null;
 
     function tile(label, value, unit) {
         return `
@@ -172,103 +214,274 @@
         </div>`;
     }
 
-    function renderUserView() {
-        const container = document.getElementById("viewUserContainer");
-        if (!container) return;
-
-        const p = getUserProfile();
-        const workouts = typeof getWorkouts === "function" ? getWorkouts() : [];
-        const prog = typeof workoutPrograms !== "undefined" && typeof currentMonth !== "undefined"
-            ? workoutPrograms[currentMonth] : null;
-        const pDate = iso => (typeof formatPersianDate === "function" ? formatPersianDate(iso, true) : iso);
-
-        if (!p || userEditing) {
-            container.innerHTML = `
-            <div class="pb-user-wrap">
-                <section class="card pb-user-card">
-                    <div class="pb-form-head">
-                        <span class="pb-form-icon" aria-hidden="true">👤</span>
-                        <div>
-                            <h3 class="pb-user-title">${p ? "ویرایش مشخصات" : "مشخصات کاربر"}</h3>
-                            <p class="pb-muted">${p ? "اطلاعات خودت را به‌روز کن." : "هنوز مشخصاتی ثبت نشده. نام، سال تولد و اندازه‌های بدنت را وارد کن."}</p>
-                        </div>
-                    </div>
-                    <div id="pbUserForm">${profileFieldsHtml(p)}</div>
-                    <p class="pb-error" id="pbUserError" role="alert"></p>
-                    <div class="pb-actions">
-                        <button type="button" class="primary-btn" id="pbUserSave">ذخیره مشخصات</button>
-                        ${p ? `<button type="button" class="secondary-btn" id="pbUserCancel">انصراف</button>` : ""}
-                    </div>
-                </section>
-            </div>`;
-
-            container.querySelector("#pbUserSave").addEventListener("click", async () => {
-                const r = readProfileFields(container.querySelector("#pbUserForm"));
-                const errEl = container.querySelector("#pbUserError");
-                if (r.error) {
-                    errEl.textContent = r.error;
-                    const f = container.querySelector(`[name="${r.field}"]`);
-                    if (f) f.focus();
-                    return;
-                }
-                await saveUserProfile(r.profile);
-                userEditing = false;
-                renderUserChip();
-                renderUserView();
-                toast("مشخصات کاربر ذخیره شد.");
-            });
-            const cancel = container.querySelector("#pbUserCancel");
-            if (cancel) cancel.addEventListener("click", () => { userEditing = false; renderUserView(); });
-            return;
-        }
-
-        const h = p.height / 100;
-        const bmi = h > 0 ? Math.round((p.weight / (h * h)) * 10) / 10 : null;
-        const whtr = p.height > 0 ? Math.round((p.waist / p.height) * 100) / 100 : null;
+    function userCardHtml(u, activeId) {
+        const p = u.profile;
+        const isActive = u.id === activeId;
+        const name = getUserDisplayName(u);
         const cy = currentJalaliYear();
-        const ageText = p.birthYear
+        const meta = p && p.birthYear
             ? `متولد ${toFa(p.birthYear)} · ${toFa(cy - p.birthYear)} ساله`
-            : (p.age ? `${toFa(p.age)} ساله` : "");
-        const initial = (p.fullName || "؟").trim().charAt(0);
-        const firstUse = typeof getFirstUseAt === "function" ? getFirstUseAt() : null;
+            : "مشخصات ثبت نشده است";
+
+        let tiles = "";
+        if (p && p.height && p.weight && p.waist) {
+            const h = p.height / 100;
+            const bmi = Math.round((p.weight / (h * h)) * 10) / 10;
+            const whtr = Math.round((p.waist / p.height) * 100) / 100;
+            tiles += tile("قد", toFa(p.height), "cm") +
+                tile("وزن", toFa(p.weight), "kg") +
+                tile("دور کمر", toFa(p.waist), "cm") +
+                tile("شاخص توده‌ی بدنی", toFa(bmi), "") +
+                tile("نسبت دور کمر به قد", toFa(whtr), "");
+        }
+        tiles += tile("جلسات ثبت‌شده", toFa(getUserWorkoutCount(u.id)), "") +
+            tile("برنامه‌ها", toFa(getUserProgramCount(u.id)), "");
+
+        return `
+        <section class="card pb-user-card pb-user-item ${isActive ? "active" : ""}" data-uid="${esc(u.id)}">
+            <div class="pb-user-head">
+                <span class="pb-avatar" aria-hidden="true">${esc((name.trim().charAt(0)) || "؟")}</span>
+                <div>
+                    <h3 class="pb-user-title">${esc(name)}${isActive ? ' <span class="pb-badge-active">کاربر فعال</span>' : ""}</h3>
+                    <span class="pb-muted">${meta}</span>
+                </div>
+            </div>
+            <div class="pb-tiles">${tiles}</div>
+            <div class="pb-user-btns">
+                ${isActive ? "" : `<button type="button" class="primary-btn" data-act="select">انتخاب این کاربر</button>`}
+                <button type="button" class="secondary-btn" data-act="edit">ویرایش مشخصات</button>
+                <button type="button" class="secondary-btn" data-act="build">ساخت برنامه تمرینی</button>
+                <button type="button" class="secondary-btn" data-act="merge">به‌روزرسانی اطلاعات تمرین</button>
+                <button type="button" class="secondary-btn" data-act="export">پشتیبان این کاربر</button>
+                <button type="button" class="danger-btn" data-act="delete">حذف کاربر</button>
+            </div>
+        </section>`;
+    }
+
+    function renderUserForm(container, users) {
+        const isNew = editingUserId === "new";
+        const u = isNew ? null : users.find(x => x.id === editingUserId);
+        if (!isNew && !u) { editingUserId = null; renderUserView(); return; }
+        const p = u ? u.profile : null;
 
         container.innerHTML = `
         <div class="pb-user-wrap">
             <section class="card pb-user-card">
-                <div class="pb-user-head">
-                    <span class="pb-avatar" aria-hidden="true">${esc(initial)}</span>
+                <div class="pb-form-head">
+                    <span class="pb-form-icon" aria-hidden="true">👤</span>
                     <div>
-                        <h3 class="pb-user-title">${esc(p.fullName)}</h3>
-                        <span class="pb-muted">${ageText}</span>
+                        <h3 class="pb-user-title">${isNew ? "افزودن کاربر جدید" : (p ? "ویرایش مشخصات" : "مشخصات کاربر")}</h3>
+                        <p class="pb-muted">${isNew
+                            ? "نام و اندازه‌های بدنی کاربر جدید را وارد کن. تمرین‌ها و برنامه‌ی هر کاربر جدا نگه‌داری می‌شود."
+                            : (p ? "اطلاعات را به‌روز کن." : "هنوز مشخصاتی ثبت نشده. نام، سال تولد و اندازه‌های بدنی را وارد کن.")}</p>
                     </div>
                 </div>
-                <div class="pb-tiles">
-                    ${tile("قد", toFa(p.height), "cm")}
-                    ${tile("وزن", toFa(p.weight), "kg")}
-                    ${tile("دور کمر", toFa(p.waist), "cm")}
-                    ${tile("شاخص توده‌ی بدنی", bmi === null ? "—" : toFa(bmi), "")}
-                    ${tile("نسبت دور کمر به قد", whtr === null ? "—" : toFa(whtr), "")}
-                </div>
-                <p class="pb-note">شاخص توده‌ی بدنی و نسبت دور کمر به قد از روی همین اعداد محاسبه می‌شوند و فقط یک مرجع تقریبی‌اند.</p>
+                <div id="pbUserForm">${profileFieldsHtml(p)}</div>
+                <p class="pb-error" id="pbUserError" role="alert"></p>
                 <div class="pb-actions">
-                    <button type="button" class="secondary-btn" id="pbUserEdit">ویرایش مشخصات</button>
-                    <button type="button" class="primary-btn" id="pbUserBuild">ساخت برنامه تمرینی</button>
-                </div>
-            </section>
-
-            <section class="card pb-user-card">
-                <h3 class="pb-user-title">وضعیت تمرین</h3>
-                <div class="pb-tiles">
-                    ${tile("برنامه فعال", prog ? esc(prog.title) : "—", "")}
-                    ${tile("جلسات ثبت‌شده", toFa(workouts.length), "")}
-                    ${tile("اولین استفاده", firstUse ? esc(pDate(firstUse.slice(0, 10))) : "—", "")}
-                    ${tile("آخرین به‌روزرسانی مشخصات", p.updatedAt ? esc(pDate(p.updatedAt.slice(0, 10))) : "—", "")}
+                    <button type="button" class="primary-btn" id="pbUserSave">${isNew ? "افزودن کاربر" : "ذخیره مشخصات"}</button>
+                    <button type="button" class="secondary-btn" id="pbUserCancel">انصراف</button>
                 </div>
             </section>
         </div>`;
 
-        container.querySelector("#pbUserEdit").addEventListener("click", () => { userEditing = true; renderUserView(); });
-        container.querySelector("#pbUserBuild").addEventListener("click", openProgramBuilder);
+        container.querySelector("#pbUserSave").addEventListener("click", async () => {
+            const r = readProfileFields(container.querySelector("#pbUserForm"));
+            const errEl = container.querySelector("#pbUserError");
+            if (r.error) {
+                errEl.textContent = r.error;
+                const f = container.querySelector(`[name="${r.field}"]`);
+                if (f) f.focus();
+                return;
+            }
+            if (isNew) {
+                const nu = await createUser(r.profile);
+                toast(`کاربر «${getUserDisplayName(nu)}» اضافه شد.`);
+            } else {
+                await saveUserProfile(r.profile, editingUserId);
+                toast("مشخصات کاربر ذخیره شد.");
+            }
+            editingUserId = null;
+            renderUserChip();
+            renderUserView();
+        });
+        container.querySelector("#pbUserCancel").addEventListener("click", () => {
+            editingUserId = null;
+            renderUserView();
+        });
+    }
+
+    function renderUserView() {
+        const container = document.getElementById("viewUserContainer");
+        if (!container) return;
+
+        const users = getUsers();
+        const activeId = getActiveUserId();
+
+        if (!users.length) {
+            container.innerHTML = `<div class="pb-user-wrap"><p class="pb-muted">در حال بارگذاری اطلاعات…</p></div>`;
+            return;
+        }
+        if (editingUserId) { renderUserForm(container, users); return; }
+
+        container.innerHTML = `
+        <div class="pb-user-wrap">
+            <div class="pb-users-head">
+                <div>
+                    <h3 class="pb-user-title">کاربران (${toFa(users.length)})</h3>
+                    <p class="pb-muted">تمرین‌ها و برنامه‌ی هر کاربر جدا ذخیره می‌شود. کاربر فعال را از نوار بالا یا همین‌جا عوض کن.</p>
+                </div>
+                <button type="button" class="primary-btn" id="pbUserAdd">+ افزودن کاربر جدید</button>
+            </div>
+            <div class="pb-user-list">${users.map(u => userCardHtml(u, activeId)).join("")}</div>
+            <p class="pb-note">«به‌روزرسانی اطلاعات تمرین»: فایل پشتیبان یک کاربر را انتخاب می‌کنی و تمرین‌ها و برنامه‌های آن به اطلاعات همین کاربر اضافه می‌شود؛ موارد تکراری دوباره ثبت نمی‌شوند و چیزی حذف نمی‌شود. «پشتیبان این کاربر» فقط اطلاعات همان کاربر را می‌دهد؛ پشتیبان همه‌ی کاربران از بخش «پشتیبان‌گیری» گرفته می‌شود. شاخص توده‌ی بدنی و نسبت دور کمر به قد فقط مرجع تقریبی‌اند.</p>
+            <input type="file" id="pbMergeFile" accept=".json" hidden>
+        </div>`;
+
+        container.querySelector("#pbUserAdd").addEventListener("click", () => {
+            editingUserId = "new";
+            renderUserView();
+        });
+
+        const fileInput = container.querySelector("#pbMergeFile");
+        fileInput.addEventListener("change", async e => {
+            const file = e.target.files[0];
+            e.target.value = "";
+            if (file && mergeTargetId) await mergeFromFile(file, mergeTargetId);
+        });
+
+        container.querySelector(".pb-user-list").addEventListener("click", async e => {
+            const btn = e.target.closest("[data-act]");
+            if (!btn) return;
+            const card = btn.closest("[data-uid]");
+            const uid = card.dataset.uid;
+            const act = btn.dataset.act;
+
+            if (act === "select") {
+                if (await setActiveUser(uid)) reloadAfterUserChange();
+            } else if (act === "edit") {
+                editingUserId = uid;
+                renderUserView();
+            } else if (act === "build") {
+                openProgramBuilder(uid);
+            } else if (act === "merge") {
+                mergeTargetId = uid;
+                fileInput.click();
+            } else if (act === "export") {
+                const ok = exportData({
+                    userId: uid,
+                    fileName: buildBackupFileName().replace("gymlog-backup-", "gymlog-user-backup-")
+                });
+                toast(ok ? "فایل پشتیبان این کاربر دانلود شد." : "تهیه‌ی پشتیبان انجام نشد.", ok ? "success" : "warning");
+            } else if (act === "delete") {
+                await deleteUserFlow(uid);
+            }
+        });
+    }
+
+    async function deleteUserFlow(uid) {
+        const u = getUserById(uid);
+        if (!u) return;
+        const name = getUserDisplayName(u);
+        const isLast = getUsers().length === 1;
+        const wasActive = uid === getActiveUserId();
+
+        let msg = `کاربر «${name}» با تمام تمرین‌ها و برنامه‌هایش حذف شود؟\nاین کار قابل بازگشت نیست؛ اگر پشتیبان نگرفته‌ای، اول «پشتیبان این کاربر» یا پشتیبان کامل را بگیر.`;
+        if (isLast) msg += "\n\nاین تنها کاربر برنامه است؛ بعد از حذف، یک کاربر خالی جدید ساخته می‌شود.";
+        if (!confirm(msg)) return;
+
+        await deleteUser(uid);
+        if (wasActive) {
+            reloadAfterUserChange();
+        } else {
+            renderUserChip();
+            renderUserView();
+            toast(`کاربر «${name}» حذف شد.`);
+        }
+    }
+
+    /* ---------- به‌روزرسانی اطلاعات تمرین از فایل پشتیبان ---------- */
+    function pickBackupSource(sources) {
+        return new Promise(resolve => {
+            const ov = document.createElement("div");
+            ov.className = "dv-modal-overlay";
+            ov.innerHTML = `
+            <div class="dv-modal pb-pick" role="dialog" aria-modal="true" aria-label="انتخاب کاربر فایل پشتیبان">
+                <div class="dv-modal-head">
+                    <div>
+                        <h3>اطلاعات کدام کاربر؟</h3>
+                        <p>این فایل اطلاعات چند کاربر دارد. یکی را انتخاب کن.</p>
+                    </div>
+                    <button type="button" class="exercise-guide-close pb-pick-x" aria-label="بستن">×</button>
+                </div>
+                <div class="pb-pick-list">
+                    ${sources.map((src, i) => `
+                    <button type="button" class="secondary-btn pb-pick-item" data-i="${i}">
+                        <strong>${esc(src.name)}</strong>
+                        <span>${toFa(src.workouts)} جلسه</span>
+                    </button>`).join("")}
+                </div>
+            </div>`;
+            const done = v => { ov.remove(); resolve(v); };
+            ov.addEventListener("click", e => {
+                if (e.target === ov || e.target.closest(".pb-pick-x")) return done(undefined);
+                const b = e.target.closest(".pb-pick-item");
+                if (b) done(sources[Number(b.dataset.i)].id);
+            });
+            document.body.appendChild(ov);
+        });
+    }
+
+    async function mergeFromFile(file, uid) {
+        const target = getUserById(uid);
+        if (!target) return;
+
+        let data;
+        try {
+            data = JSON.parse(await file.text());
+        } catch (err) {
+            alert("فایل معتبر نیست (JSON قابل خواندن نیست).");
+            return;
+        }
+        if (!data || typeof data !== "object" ||
+            (!Array.isArray(data.workouts) && !data.programsRaw && !Array.isArray(data.programs))) {
+            alert("این فایل، پشتیبان معتبر GymLog نیست.");
+            return;
+        }
+
+        const sources = getBackupSources(data);
+        let sourceId = sources[0].id;
+        if (sources.length > 1) {
+            sourceId = await pickBackupSource(sources);
+            if (sourceId === undefined) return;
+        }
+        const srcName = (sources.find(x => x.id === sourceId) || sources[0]).name;
+
+        if (!confirm(
+            `اطلاعات «${srcName}» از این فایل به اطلاعات «${getUserDisplayName(target)}» اضافه شود؟\n\n` +
+            "تمرین‌های جدید اضافه می‌شوند و تمرین‌های تکراری فقط اگر نسخه‌ی فایل جدیدتر باشد به‌روز می‌شوند. هیچ‌چیز حذف نمی‌شود."
+        )) return;
+
+        try {
+            const r = await mergeBackupIntoUser(data, uid, sourceId);
+            alert(
+                "به‌روزرسانی انجام شد.\n" +
+                `تمرین جدید: ${toFa(r.added)}\n` +
+                `تمرین به‌روزشده: ${toFa(r.updated)}\n` +
+                `بدون تغییر (تکراری): ${toFa(r.skipped)}\n` +
+                `برنامه‌ی جدید: ${toFa(r.programsAdded)}\n` +
+                `حرکت جدید در بانک حرکات: ${toFa(r.exercisesAdded)}`
+            );
+            if (uid === getActiveUserId()) {
+                reloadAfterUserChange();
+            } else {
+                renderUserChip();
+                renderUserView();
+            }
+        } catch (err) {
+            console.error("[GymLog] به‌روزرسانی اطلاعات کاربر ناموفق بود:", err);
+            alert("به‌روزرسانی انجام نشد: " + (err.message || "خطای نامشخص"));
+        }
     }
 
     /* =====================================================
@@ -278,12 +491,13 @@
     let PB = null;
     let onKey = null;
 
-    function freshState() {
-        const profile = getUserProfile() || {};
+    function freshState(userId) {
+        const profile = getUserProfile(userId) || {};
         /* اگر مشخصات کاربر قبلاً ثبت شده، مرحله‌ی «مشخصات» حذف می‌شود */
         const needsProfile = !(profile && profile.fullName);
         return {
             step: 1,
+            userId,
             needsProfile,
             steps: needsProfile ? ["days", "exercises", "profile", "output"] : ["days", "exercises", "output"],
             days: 3,
@@ -319,9 +533,10 @@
     }
 
     /* ---------- بدنه‌ی اصلی / چارچوب ---------- */
-    function openProgramBuilder() {
+    function openProgramBuilder(userId) {
         if (overlay) return;
-        PB = freshState();
+        const uid = typeof userId === "string" && getUserById(userId) ? userId : getActiveUserId();
+        PB = freshState(uid);
 
         overlay = document.createElement("div");
         overlay.className = "pb-overlay";
@@ -331,7 +546,7 @@
         overlay.innerHTML = `
         <div class="pb-page">
             <header class="pb-head">
-                <h2>ساخت برنامه تمرینی</h2>
+                <h2>ساخت برنامه تمرینی${getUsers().length > 1 ? " · " + esc(getUserDisplayName(getUserById(PB.userId))) : ""}</h2>
                 <button type="button" class="exercise-guide-close pb-close" aria-label="بستن">×</button>
             </header>
             <ol class="pb-steps" id="pbSteps"></ol>
@@ -846,7 +1061,7 @@
     }
 
     function buildPackage() {
-        const { key, n } = nextMonthKey();
+        const { key, n } = nextMonthKey(PB.userId);
         const sessions = {};
         for (let d = 1; d <= PB.days; d++) {
             sessions[String(d)] = {
@@ -884,21 +1099,26 @@
     async function submit() {
         const nextBtn = overlay.querySelector("#pbNext");
         const pkg = buildPackage();
+        const uid = PB.userId;
+        const isActive = uid === getActiveUserId();
+        const userName = getUserDisplayName(getUserById(uid));
+        const onUserPage = () => typeof currentDesktopView !== "undefined" && currentDesktopView === "user";
 
         if (PB.output === "download") {
             downloadJson(pkg);
             if (PB.needsProfile) {
-                try { await saveUserProfile(PB.profile); renderUserChip(); } catch (e) { console.error(e); }
+                try { await saveUserProfile(PB.profile, uid); renderUserChip(); } catch (e) { console.error(e); }
             }
             closeBuilder(true);
             toast("فایل برنامه دانلود شد.");
+            if (onUserPage()) renderUserView();
             return;
         }
 
         nextBtn.disabled = true;
         try {
-            await importProgramPackage({ programsRaw: pkg.programsRaw });
-            if (PB.needsProfile) await saveUserProfile(PB.profile);
+            await importProgramPackage({ programsRaw: pkg.programsRaw }, uid);
+            if (PB.needsProfile) await saveUserProfile(PB.profile, uid);
         } catch (err) {
             console.error("[GymLog Builder] خطا در ثبت برنامه:", err);
             nextBtn.disabled = false;
@@ -907,6 +1127,14 @@
         }
 
         closeBuilder(true);
+
+        /* برنامه برای کاربری غیر از کاربر فعال ساخته شده: وضعیت زنده‌ی برنامه دست نمی‌خورد */
+        if (!isActive) {
+            renderUserChip();
+            if (onUserPage()) renderUserView();
+            toast(`برنامه‌ی جدید برای «${userName}» ثبت شد. برای استفاده از آن، این کاربر را انتخاب کن.`);
+            return;
+        }
 
         try {
             workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
@@ -933,6 +1161,7 @@
     /* در دسکتاپ فرم داخل چارچوب برنامه است؛ با کلیک روی منو، فرم بسته می‌شود و صفحه‌ی انتخاب‌شده باز می‌شود */
     const originalSwitchView = window.switchView;
     window.switchView = function () {
+        editingUserId = null;
         if (overlay && window.matchMedia("(min-width: 1024px)").matches) {
             if (isDirty() && !confirm("برنامه‌ی ذخیره‌نشده از بین می‌رود. فرم بسته شود؟")) return;
             closeBuilder(true);

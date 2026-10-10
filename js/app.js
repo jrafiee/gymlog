@@ -1420,6 +1420,11 @@ function handleBackupFileSelected(file) {
 
         try {
             // restoreBackup supports both new versioned schema and legacy format
+            // پشتیبان کامل، همه‌ی اطلاعات فعلی را جایگزین می‌کند؛ پس قبلش تأیید می‌گیریم
+            if (Array.isArray(data.workouts) && hasBackableData() && !confirm(
+                "بازیابی پشتیبان، همه‌ی اطلاعات فعلی (همه‌ی کاربران، تمرین‌ها و برنامه‌ها) را با محتوای این فایل جایگزین می‌کند. ادامه می‌دهی؟\n\n" +
+                "اگر فقط می‌خواهی اطلاعات تمرین یک کاربر را به داده‌های فعلی اضافه کنی، از صفحه‌ی «کاربران» دکمه‌ی «به‌روزرسانی اطلاعات تمرین» را بزن."
+            )) return;
             const res = await restoreBackup(data);
             if (res.type === "program") {
                 await cacheAndReport("برنامه با موفقیت اضافه شد.");
@@ -1437,7 +1442,7 @@ function handleBackupFileSelected(file) {
 
 /* این دو تابع هم در منوی تنظیمات موبایل و هم در صفحه‌ی تنظیمات دسکتاپ استفاده می‌شوند */
 async function confirmClearHistory() {
-    if (!confirm("تاریخچه‌ی تمرین‌ها حذف شود؟ برنامه‌ی تمرینی دست‌نخورده می‌ماند.")) return false;
+    if (!confirm("تاریخچه‌ی تمرین‌های کاربر فعال حذف شود؟ برنامه‌ی تمرینی و سایر کاربران دست‌نخورده می‌مانند.")) return false;
     await deleteAllData();
     renderAll();
     showToast("تاریخچه تمرینات پاک شد.");
@@ -1445,7 +1450,7 @@ async function confirmClearHistory() {
 }
 
 async function confirmFullReset() {
-    if (!confirm("همه‌چیز حذف شود؟ تمام برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند.")) return false;
+    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند.")) return false;
     await fullResetStorage();
     location.reload();
     return true;

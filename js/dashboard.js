@@ -25,7 +25,7 @@ const VIEW_TITLES = {
     history: "تاریخچه کامل تمرینات",
     bank: "بانک جامع حرکات ورزشی",
     calendar: "تقویم تمرینات",
-    user: "کاربر",
+    user: "کاربران",
     backup: "پشتیبان‌گیری و بازیابی داده‌ها",
     settings: "تنظیمات برنامه"
 };
@@ -802,7 +802,7 @@ function renderBackupView() {
     container.innerHTML = `
         <div class="card gl-panel">
             <h3 class="gl-panel-title">پشتیبان‌گیری و بازیابی پایگاه‌داده</h3>
-            <p class="gl-panel-desc">اطلاعات شما در مخزن محلی IndexedDB ذخیره می‌شود. برای انتقال یا حفظ امنیت، یک نسخه پشتیبان JSON دانلود کنید.</p>
+            <p class="gl-panel-desc">اطلاعات شما فقط در مخزن محلی IndexedDB همین دستگاه ذخیره می‌شود. این پشتیبان شامل اطلاعات همه‌ی کاربران (${typeof getUsers === "function" ? getUsers().length.toLocaleString("fa-IR") : "—"} کاربر)، برنامه‌ها و بانک حرکات است؛ آن را جای امن نگه دارید. برای پشتیبان یک کاربر خاص، از صفحه‌ی «کاربران» استفاده کنید.</p>
 
             <div class="gl-info-box">
                 <strong>آخرین پشتیبان موفق:</strong>
@@ -871,7 +871,7 @@ function renderSettingsView() {
             <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>پاک‌سازی تاریخچه تمرینات</strong>
-                    <span>فقط سوابق وزنه‌ها و تکرارها پاک می‌شود و برنامه تمرینی دست‌نخورده می‌ماند.</span>
+                    <span>فقط سوابق وزنه‌ها و تکرارهای کاربر فعال پاک می‌شود؛ برنامه تمرینی و سایر کاربران دست‌نخورده می‌مانند.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashClearHistoryBtn">
                     حذف تاریخچه
@@ -881,7 +881,7 @@ function renderSettingsView() {
             <div class="setting-row">
                 <div class="setting-info">
                     <strong class="gl-danger-text">بازنشانی کامل (Reset All)</strong>
-                    <span>تمام اطلاعات از IndexedDB و حافظه دستگاه به طور کامل حذف می‌شود.</span>
+                    <span>تمام اطلاعات همه‌ی کاربران از IndexedDB و حافظه دستگاه به طور کامل حذف می‌شود.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashFullResetBtn">
                     حذف همه‌چیز
@@ -955,7 +955,18 @@ function initDashboardShell() {
     const isDesktop = window.innerWidth >= 1024;
     const hasProgram = typeof getEffectiveProgramsRaw === "function" &&
         Object.keys(getEffectiveProgramsRaw() || {}).length > 0;
-    switchView(isDesktop || !hasProgram ? "dashboard" : "workout");
+    /* بعد از تغییر کاربر فعال، صفحه‌ی قبلی دوباره باز می‌شود */
+    let returnView = null;
+    try {
+        returnView = sessionStorage.getItem("gymReturnView");
+        sessionStorage.removeItem("gymReturnView");
+    } catch (e) { /* ignore */ }
+
+    if (returnView && VIEW_TITLES[returnView]) {
+        switchView(returnView);
+    } else {
+        switchView(isDesktop || !hasProgram ? "dashboard" : "workout");
+    }
 }
 
 // Start dashboard once DOM is ready

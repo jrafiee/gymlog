@@ -1073,3 +1073,123 @@ body.dark-mode .pb-error {
         box-shadow: 0 0 0 1px #334155;
     }
 }
+
+/* =====================================================
+   چند کاربره: انتخاب کاربر در نوار بالا، فهرست کاربران
+===================================================== */
+html body select.user-select {
+    width: auto;
+    height: 36px;
+    min-height: 36px;
+    max-width: 220px;
+    padding: 2px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+html body select.user-select[hidden] {
+    display: none !important;
+}
+
+html body .mobile-nav-id select.user-select {
+    height: 34px;
+    min-height: 34px;
+    max-width: 120px;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-width: 1px;
+}
+
+body.dark-mode select.user-select {
+    background: #1f2937;
+    border-color: #475569;
+    color: #93c5fd;
+}
+
+.pb-users-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pb-users-head .pb-muted {
+    margin: 4px 0 0;
+}
+
+.pb-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pb-user-item.active {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+.pb-badge-active {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.pb-user-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.pb-user-btns button {
+    min-height: 40px;
+    padding: 6px 14px;
+    font-size: 13px;
+}
+
+.pb-pick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pb-pick-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: right;
+}
+
+.pb-pick-item span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+body.dark-mode .pb-user-item.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+body.dark-mode .pb-badge-active {
+    background: #1e3a8a;
+    color: #dbeafe;
+}
+
+body.dark-mode .pb-pick-item span {
+    color: #9ca3af;
+}
