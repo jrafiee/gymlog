@@ -205,6 +205,7 @@
     ===================================================== */
     let editingUserId = null;   // null = فهرست، "new" = کاربر جدید، یا شناسه‌ی کاربرِ در حال ویرایش
     let mergeTargetId = null;
+    let expandedUserId = null;  // در حالت فهرست (بیش از ۲ کاربر): کاربرِ بازشده
 
     function tile(label, value, unit) {
         return `
@@ -214,7 +215,147 @@
         </div>`;
     }
 
-    function userCardHtml(u, activeId) {
+    /* ---------- روند اندازه‌ها و یادداشت ---------- */
+    const METRICS = {
+        weight: { label: "وزن", unit: "kg", color: "#2563eb" },
+        waist: { label: "دور کمر", unit: "cm", color: "#ea580c" }
+    };
+    const trendMetric = {};        // uid → "weight" | "waist"
+    const openTables = new Set();  // کاربرانی که جدول اندازه‌هایشان باز است
+    const noteTimers = {};
+
+    function dayNum(iso) {
+        const [y, m, d] = iso.split("-").map(Number);
+        return Math.round(Date.UTC(y, m - 1, d) / 86400000);
+    }
+    const fmtNum = v => toFa(Math.round(v * 10) / 10);
+    const faDate = iso => (typeof formatPersianDate === "function" ? formatPersianDate(iso) : iso);
+
+    function trendSvg(pts, metric) {
+        const M = METRICS[metric];
+        const W = 560, H = 240, pl = 46, pr = 24, pt = 30, pb = 44;
+        const n = pts.length;
+        const vals = pts.map(p => p.v);
+        let lo = Math.min(...vals), hi = Math.max(...vals);
+        if (lo === hi) { lo -= 1; hi += 1; } else { const pad = (hi - lo) * 0.25; lo -= pad; hi += pad; }
+        const t0 = dayNum(pts[0].date);
+        const span = dayNum(pts[n - 1].date) - t0;
+        const x = i => (n === 1 || span === 0 ? pl + (W - pl - pr) / 2 : pl + ((dayNum(pts[i].date) - t0) / span) * (W - pl - pr));
+        const y = v => H - pb - ((v - lo) / (hi - lo)) * (H - pt - pb);
+
+        const grid = [0, 0.5, 1].map(f => {
+            const v = lo + f * (hi - lo);
+            const yy = y(v);
+            return `<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W - pr}" y2="${yy.toFixed(1)}" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="3 3"/>
+                    <text x="${pl - 6}" y="${(yy + 3).toFixed(1)}" font-size="10" fill="#9ca3af" text-anchor="end">${fmtNum(v)}</text>`;
+        }).join("");
+
+        const line = n > 1
+            ? `<polyline points="${pts.map((p, i) => x(i).toFixed(1) + "," + y(p.v).toFixed(1)).join(" ")}" fill="none" stroke="${M.color}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`
+            : "";
+
+        const valStep = n > 12 ? Math.ceil(n / 10) : 1;
+        let lastLabelX = -999;
+        const dots = pts.map((p, i) => {
+            const cx = x(i), cy = y(p.v);
+            const showVal = i % valStep === 0 || i === n - 1;
+            let dateLbl = "";
+            if (showVal && cx - lastLabelX >= 62) {
+                lastLabelX = cx;
+                dateLbl = `<text x="${cx.toFixed(1)}" y="${H - 16}" font-size="9.5" fill="#9ca3af" text-anchor="middle">${faDate(p.date)}</text>`;
+            }
+            const valLbl = showVal
+                ? `<text x="${cx.toFixed(1)}" y="${(cy - 10).toFixed(1)}" font-size="10.5" font-weight="700" fill="currentColor" text-anchor="middle">${fmtNum(p.v)}</text>`
+                : "";
+            return `${valLbl}${dateLbl}<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5.5" fill="${M.color}" stroke="#fff" stroke-width="2"><title>${faDate(p.date)} — ${fmtNum(p.v)} ${M.unit}</title></circle>`;
+        }).join("");
+
+        return `<svg viewBox="0 0 ${W} ${H}" class="pb-trend-svg" role="img" aria-label="روند ${M.label}">${grid}${line}${dots}</svg>`;
+    }
+
+    function trendSummary(pts, unit) {
+        if (pts.length < 2) return "برای دیدن روند، دست‌کم دو اندازه‌گیری در تاریخ‌های مختلف لازم است.";
+        const f = pts[0], l = pts[pts.length - 1];
+        const d = Math.round((l.v - f.v) * 10) / 10;
+        const days = dayNum(l.date) - dayNum(f.date);
+        const sign = d > 0 ? "+" : d < 0 ? "\u2212" : "";
+        return `از ${faDate(f.date)} تا ${faDate(l.date)} (${toFa(days)} روز): ${fmtNum(f.v)} ← ${fmtNum(l.v)} ${unit} · تغییر <bdi class="pb-delta" dir="ltr">${sign}${fmtNum(Math.abs(d))} ${unit}</bdi>`;
+    }
+
+    function trendBlockHtml(u) {
+        const list = getUserMeasurements(u.id);
+        const metric = trendMetric[u.id] || "weight";
+        const M = METRICS[metric];
+        const pts = list.filter(m => m[metric] !== undefined).map(m => ({ date: m.date, v: m[metric] }));
+
+        const pills = list.length
+            ? `<div class="pb-chips pb-trend-pills">${Object.keys(METRICS).map(k =>
+                `<button type="button" class="pb-chip pb-chip-sm ${k === metric ? "active" : ""}" data-act="metric" data-metric="${k}">${METRICS[k].label}</button>`).join("")}</div>`
+            : "";
+
+        let body;
+        if (!list.length) {
+            body = `<div class="pb-empty">هنوز اندازه‌گیری‌ای ثبت نشده.<br>با «ثبت اندازه‌گیری جدید» وزن و دور کمر را به‌مرور ثبت کن تا روند تغییرات اینجا دیده شود.</div>`;
+        } else if (!pts.length) {
+            body = `<div class="pb-empty">برای «${M.label}» هنوز مقداری ثبت نشده است.</div>`;
+        } else {
+            body = `<p class="pb-trend-sum">${trendSummary(pts, M.unit)}</p>
+                    <div class="pb-trend">${trendSvg(pts, metric)}</div>`;
+        }
+
+        const rows = list.slice().reverse().map(m => `
+            <tr>
+                <td>${faDate(m.date)}</td>
+                <td>${m.weight !== undefined ? fmtNum(m.weight) : "—"}</td>
+                <td>${m.waist !== undefined ? fmtNum(m.waist) : "—"}</td>
+                <td><button type="button" class="pb-mini-btn" data-act="del-measure" data-date="${esc(m.date)}" aria-label="حذف این اندازه‌گیری">🗑</button></td>
+            </tr>`).join("");
+        const table = list.length ? `
+            <details class="pb-m-details" ${openTables.has(u.id) ? "open" : ""}>
+                <summary>جدول اندازه‌گیری‌ها (${toFa(list.length)})</summary>
+                <div class="pb-m-table-wrap">
+                    <table class="pb-m-table">
+                        <thead><tr><th>تاریخ</th><th>وزن (kg)</th><th>دور کمر (cm)</th><th></th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </details>` : "";
+
+        return `
+        <div class="pb-block">
+            <div class="pb-block-head">
+                <h4 class="pb-block-title">📈 روند تغییر مشخصات</h4>
+                <button type="button" class="secondary-btn pb-sm-btn" data-act="add-measure">+ ثبت اندازه‌گیری جدید</button>
+            </div>
+            ${pills}
+            ${body}
+            ${table}
+        </div>`;
+    }
+
+    function notesBlockHtml(u) {
+        const id = "pbNotes_" + esc(u.id);
+        return `
+        <div class="pb-block pb-notes">
+            <label class="pb-block-title" for="${id}">📝 یادداشت</label>
+            <textarea id="${id}" class="session-note-input pb-notes-input" data-notes="${esc(u.id)}" rows="4" maxlength="5000" placeholder="توضیحات مربوط به این کاربر: هدف تمرین، محدودیت‌ها یا مصدومیت‌ها، نکته‌های مربی…">${esc(u.notes || "")}</textarea>
+            <small class="gl-hint">به‌صورت خودکار ذخیره می‌شود. <span class="pb-notes-status"></span></small>
+        </div>`;
+    }
+
+    function rowMeta(u) {
+        const p = u.profile;
+        const parts = [];
+        if (p && p.birthYear) parts.push(`${toFa(currentJalaliYear() - p.birthYear)} ساله`);
+        const list = getUserMeasurements(u.id);
+        const last = list[list.length - 1];
+        if (last && last.weight !== undefined) parts.push(`وزن ${fmtNum(last.weight)} kg`);
+        if (last && last.waist !== undefined) parts.push(`کمر ${fmtNum(last.waist)} cm`);
+        parts.push(`${toFa(getUserWorkoutCount(u.id))} جلسه`);
+        return parts.join(" · ");
+    }
+
+    function userCardHtml(u, activeId, compact, open) {
         const p = u.profile;
         const isActive = u.id === activeId;
         const name = getUserDisplayName(u);
@@ -222,6 +363,8 @@
         const meta = p && p.birthYear
             ? `متولد ${toFa(p.birthYear)} · ${toFa(cy - p.birthYear)} ساله`
             : "مشخصات ثبت نشده است";
+        const badge = isActive ? ' <span class="pb-badge-active">کاربر فعال</span>' : "";
+        const initial = esc((name.trim().charAt(0)) || "؟");
 
         let tiles = "";
         if (p && p.height && p.weight && p.waist) {
@@ -237,16 +380,10 @@
         tiles += tile("جلسات ثبت‌شده", toFa(getUserWorkoutCount(u.id)), "") +
             tile("برنامه‌ها", toFa(getUserProgramCount(u.id)), "");
 
-        return `
-        <section class="card pb-user-card pb-user-item ${isActive ? "active" : ""}" data-uid="${esc(u.id)}">
-            <div class="pb-user-head">
-                <span class="pb-avatar" aria-hidden="true">${esc((name.trim().charAt(0)) || "؟")}</span>
-                <div>
-                    <h3 class="pb-user-title">${esc(name)}${isActive ? ' <span class="pb-badge-active">کاربر فعال</span>' : ""}</h3>
-                    <span class="pb-muted">${meta}</span>
-                </div>
-            </div>
+        const details = `
             <div class="pb-tiles">${tiles}</div>
+            ${trendBlockHtml(u)}
+            ${notesBlockHtml(u)}
             <div class="pb-user-btns">
                 ${isActive ? "" : `<button type="button" class="primary-btn" data-act="select">انتخاب این کاربر</button>`}
                 <button type="button" class="secondary-btn" data-act="edit">ویرایش مشخصات</button>
@@ -254,7 +391,33 @@
                 <button type="button" class="secondary-btn" data-act="merge">به‌روزرسانی اطلاعات تمرین</button>
                 <button type="button" class="secondary-btn" data-act="export">پشتیبان این کاربر</button>
                 <button type="button" class="danger-btn" data-act="delete">حذف کاربر</button>
+            </div>`;
+
+        if (compact) {
+            return `
+            <section class="card pb-user-card pb-user-item pb-user-row ${isActive ? "active" : ""} ${open ? "open" : ""}" data-uid="${esc(u.id)}">
+                <button type="button" class="pb-user-row-head" data-act="toggle" aria-expanded="${open}">
+                    <span class="pb-avatar pb-avatar-sm" aria-hidden="true">${initial}</span>
+                    <span class="pb-user-row-main">
+                        <strong>${esc(name)}${badge}</strong>
+                        <small>${esc(rowMeta(u))}</small>
+                    </span>
+                    <span class="pb-user-row-chev" aria-hidden="true">▾</span>
+                </button>
+                ${open ? `<div class="pb-user-row-body">${details}</div>` : ""}
+            </section>`;
+        }
+
+        return `
+        <section class="card pb-user-card pb-user-item ${isActive ? "active" : ""}" data-uid="${esc(u.id)}">
+            <div class="pb-user-head">
+                <span class="pb-avatar" aria-hidden="true">${initial}</span>
+                <div>
+                    <h3 class="pb-user-title">${esc(name)}${badge}</h3>
+                    <span class="pb-muted">${meta}</span>
+                </div>
             </div>
+            ${details}
         </section>`;
     }
 
@@ -296,6 +459,7 @@
             }
             if (isNew) {
                 const nu = await createUser(r.profile);
+                expandedUserId = nu.id;
                 toast(`کاربر «${getUserDisplayName(nu)}» اضافه شد.`);
             } else {
                 await saveUserProfile(r.profile, editingUserId);
@@ -324,17 +488,23 @@
         }
         if (editingUserId) { renderUserForm(container, users); return; }
 
+        /* بیش از ۲ کاربر: فهرست جمع‌شونده؛ با کلیک روی هر کاربر، مشخصاتش باز می‌شود */
+        const compact = users.length > 2;
+        if (expandedUserId && !users.some(u => u.id === expandedUserId)) expandedUserId = null;
+
         container.innerHTML = `
         <div class="pb-user-wrap">
             <div class="pb-users-head">
                 <div>
                     <h3 class="pb-user-title">کاربران (${toFa(users.length)})</h3>
-                    <p class="pb-muted">تمرین‌ها و برنامه‌ی هر کاربر جدا ذخیره می‌شود. کاربر فعال را از نوار بالا یا همین‌جا عوض کن.</p>
+                    <p class="pb-muted">${compact
+                        ? "برای دیدن مشخصات، روند وزن و دور کمر و یادداشت هر کاربر، روی نام او بزن. "
+                        : ""}تمرین‌ها و برنامه‌ی هر کاربر جدا ذخیره می‌شود. کاربر فعال را از نوار بالا یا همین‌جا عوض کن.</p>
                 </div>
                 <button type="button" class="primary-btn" id="pbUserAdd">+ افزودن کاربر جدید</button>
             </div>
-            <div class="pb-user-list">${users.map(u => userCardHtml(u, activeId)).join("")}</div>
-            <p class="pb-note">«به‌روزرسانی اطلاعات تمرین»: فایل پشتیبان یک کاربر را انتخاب می‌کنی و تمرین‌ها و برنامه‌های آن به اطلاعات همین کاربر اضافه می‌شود؛ موارد تکراری دوباره ثبت نمی‌شوند و چیزی حذف نمی‌شود. «پشتیبان این کاربر» فقط اطلاعات همان کاربر را می‌دهد؛ پشتیبان همه‌ی کاربران از بخش «پشتیبان‌گیری» گرفته می‌شود. شاخص توده‌ی بدنی و نسبت دور کمر به قد فقط مرجع تقریبی‌اند.</p>
+            <div class="pb-user-list ${compact ? "pb-user-list-compact" : ""}">${users.map(u => userCardHtml(u, activeId, compact, compact && u.id === expandedUserId)).join("")}</div>
+            <p class="pb-note">«به‌روزرسانی اطلاعات تمرین»: فایل پشتیبان یک کاربر را انتخاب می‌کنی و تمرین‌ها، برنامه‌ها و اندازه‌گیری‌های وزن و دور کمر آن به اطلاعات همین کاربر اضافه می‌شود؛ موارد تکراری دوباره ثبت نمی‌شوند و چیزی حذف نمی‌شود. «پشتیبان این کاربر» فقط اطلاعات همان کاربر را می‌دهد؛ پشتیبان همه‌ی کاربران از بخش «پشتیبان‌گیری» گرفته می‌شود. روند وزن و دور کمر از اندازه‌گیری‌هایی ساخته می‌شود که ثبت می‌کنی؛ با هر بار ویرایش مشخصات هم، اگر مقدار عوض شده باشد، یک اندازه‌گیری تازه ثبت می‌شود. شاخص توده‌ی بدنی و نسبت دور کمر به قد فقط مرجع تقریبی‌اند.</p>
             <input type="file" id="pbMergeFile" accept=".json" hidden>
         </div>`;
 
@@ -350,6 +520,31 @@
             if (file && mergeTargetId) await mergeFromFile(file, mergeTargetId);
         });
 
+        /* یادداشت هر کاربر: ذخیره‌ی خودکار با تأخیر کوتاه و هنگام خروج از کادر */
+        container.querySelectorAll("textarea[data-notes]").forEach(ta => {
+            const uid = ta.dataset.notes;
+            const status = ta.closest(".pb-notes").querySelector(".pb-notes-status");
+            const flush = () => {
+                clearTimeout(noteTimers[uid]);
+                noteTimers[uid] = null;
+                saveUserNotes(uid, ta.value).then(() => { if (status) status.textContent = "ذخیره شد ✓"; });
+            };
+            ta.addEventListener("input", () => {
+                if (status) status.textContent = "…";
+                clearTimeout(noteTimers[uid]);
+                noteTimers[uid] = setTimeout(flush, 600);
+            });
+            ta.addEventListener("blur", () => { if (noteTimers[uid]) flush(); });
+        });
+
+        container.querySelectorAll(".pb-m-details").forEach(d => {
+            d.addEventListener("toggle", () => {
+                const card = d.closest("[data-uid]");
+                if (!card) return;
+                if (d.open) openTables.add(card.dataset.uid); else openTables.delete(card.dataset.uid);
+            });
+        });
+
         container.querySelector(".pb-user-list").addEventListener("click", async e => {
             const btn = e.target.closest("[data-act]");
             if (!btn) return;
@@ -357,7 +552,21 @@
             const uid = card.dataset.uid;
             const act = btn.dataset.act;
 
-            if (act === "select") {
+            if (act === "toggle") {
+                expandedUserId = expandedUserId === uid ? null : uid;
+                renderUserView();
+                const el = container.querySelector(`[data-uid="${uid}"]`);
+                if (expandedUserId && el && el.scrollIntoView) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            } else if (act === "metric") {
+                trendMetric[uid] = btn.dataset.metric;
+                renderUserView();
+            } else if (act === "add-measure") {
+                openMeasurementModal(uid);
+            } else if (act === "del-measure") {
+                if (!confirm("این اندازه‌گیری حذف شود؟")) return;
+                await deleteUserMeasurement(uid, btn.dataset.date);
+                renderUserView();
+            } else if (act === "select") {
                 if (await setActiveUser(uid)) reloadAfterUserChange();
             } else if (act === "edit") {
                 editingUserId = uid;
@@ -377,6 +586,106 @@
                 await deleteUserFlow(uid);
             }
         });
+    }
+
+    /* ---------- ثبت اندازه‌گیری جدید (وزن / دور کمر) ---------- */
+    function openMeasurementModal(uid) {
+        if (document.querySelector(".pb-m-overlay")) return;
+        const u = getUserById(uid);
+        if (!u) return;
+
+        const today = getToday();
+        const list = getUserMeasurements(uid);
+        let lastW, lastC;
+        list.forEach(m => { if (m.weight !== undefined) lastW = m.weight; if (m.waist !== undefined) lastC = m.waist; });
+
+        const ov = document.createElement("div");
+        ov.className = "dv-modal-overlay pb-m-overlay";
+        ov.innerHTML = `
+        <div class="dv-modal pb-pick" role="dialog" aria-modal="true" aria-label="ثبت اندازه‌گیری جدید">
+            <div class="dv-modal-head">
+                <div>
+                    <h3>ثبت اندازه‌گیری جدید</h3>
+                    <p>${esc(getUserDisplayName(u))}</p>
+                </div>
+                <button type="button" class="exercise-guide-close pb-m-x" aria-label="بستن">×</button>
+            </div>
+            <div class="pb-form-grid">
+                <label class="pb-field pb-field-wide">
+                    <span class="pb-label">تاریخ</span>
+                    <input type="date" name="mDate" max="${today}" value="${today}">
+                    <small class="pb-hint" id="pbMDateFa">${esc(formatPersianDate(today, true))}</small>
+                </label>
+                ${fieldHtml("weight", "وزن", "kg", lastW === undefined ? "" : toFa(lastW), { mode: "decimal" })}
+                ${fieldHtml("waist", "دور کمر", "cm", lastC === undefined ? "" : toFa(lastC), { mode: "decimal" })}
+            </div>
+            <p class="pb-hint">هر کدام را که اندازه گرفتی وارد کن؛ خالی‌گذاشتن یکی از دو مورد اشکالی ندارد. اگر برای همین تاریخ قبلاً اندازه‌ای ثبت شده باشد، جایگزین می‌شود.</p>
+            <p class="pb-error" id="pbMError" role="alert"></p>
+            <div class="pb-actions">
+                <button type="button" class="primary-btn" id="pbMSave">ثبت</button>
+                <button type="button" class="secondary-btn" id="pbMCancel">انصراف</button>
+            </div>
+        </div>`;
+
+        const q = sel => ov.querySelector(sel);
+        const errEl = q("#pbMError");
+        const onKey = e => { if (e.key === "Escape") close(); };
+        const close = openModalHistory("addMeasurement", () => {
+            ov.remove();
+            document.removeEventListener("keydown", onKey);
+        });
+
+        ov.addEventListener("mousedown", e => { if (e.target === ov) close(); });
+        q(".pb-m-x").addEventListener("click", close);
+        q("#pbMCancel").addEventListener("click", close);
+        q('[name="mDate"]').addEventListener("input", e => {
+            q("#pbMDateFa").textContent = e.target.value ? formatPersianDate(e.target.value, true) : "";
+        });
+
+        function readOptional(name) {
+            const raw = q(`[name="${name}"]`).value.trim();
+            if (!raw) return { v: undefined };
+            const n = normNum(raw);
+            const [min, max, label] = RANGES[name];
+            if (isNaN(n) || n < min || n > max) {
+                return { error: `${label} باید بین ${toFa(min)} تا ${toFa(max)} باشد.`, field: name };
+            }
+            return { v: Math.round(n * 10) / 10 };
+        }
+
+        q("#pbMSave").addEventListener("click", async () => {
+            errEl.textContent = "";
+            const date = q('[name="mDate"]').value;
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errEl.textContent = "تاریخ را انتخاب کن."; return; }
+            if (date > today) { errEl.textContent = "تاریخ نمی‌تواند در آینده باشد."; return; }
+
+            const w = readOptional("weight");
+            if (w.error) { errEl.textContent = w.error; q(`[name="${w.field}"]`).focus(); return; }
+            const c = readOptional("waist");
+            if (c.error) { errEl.textContent = c.error; q(`[name="${c.field}"]`).focus(); return; }
+            if (w.v === undefined && c.v === undefined) { errEl.textContent = "دست‌کم وزن یا دور کمر را وارد کن."; return; }
+
+            const entry = { date };
+            if (w.v !== undefined) entry.weight = w.v;
+            if (c.v !== undefined) entry.waist = c.v;
+
+            q("#pbMSave").disabled = true;
+            try {
+                await addUserMeasurement(uid, entry);
+            } catch (err) {
+                console.error("[GymLog] ثبت اندازه‌گیری ناموفق بود:", err);
+                q("#pbMSave").disabled = false;
+                errEl.textContent = "ثبت انجام نشد. دوباره تلاش کن.";
+                return;
+            }
+            close();
+            toast("اندازه‌گیری ثبت شد.");
+            renderUserView();
+        });
+
+        document.addEventListener("keydown", onKey);
+        document.body.appendChild(ov);
+        q('[name="weight"]').focus();
     }
 
     async function deleteUserFlow(uid) {
@@ -470,7 +779,8 @@
                 `تمرین به‌روزشده: ${toFa(r.updated)}\n` +
                 `بدون تغییر (تکراری): ${toFa(r.skipped)}\n` +
                 `برنامه‌ی جدید: ${toFa(r.programsAdded)}\n` +
-                `حرکت جدید در بانک حرکات: ${toFa(r.exercisesAdded)}`
+                `حرکت جدید در بانک حرکات: ${toFa(r.exercisesAdded)}\n` +
+                `اندازه‌گیری جدید (وزن / دور کمر): ${toFa(r.measurementsAdded || 0)}`
             );
             if (uid === getActiveUserId()) {
                 reloadAfterUserChange();

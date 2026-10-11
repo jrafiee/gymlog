@@ -499,6 +499,7 @@ function makeUser(name, profile) {
         id: newUserId(),
         name: name || "کاربر ۱",
         profile: profile && typeof profile === "object" ? profile : null,
+        notes: "",
         createdAt: new Date().toISOString()
     };
 }
@@ -1165,7 +1166,14 @@ function exportData(options) {
             backupType: onlyUser ? "user" : "all",
             exportedAt: new Date().toISOString(),
             activeUserId: _storeCache.activeUserId,
-            users: users.map(u => ({ id: u.id, name: u.name, profile: u.profile || null, createdAt: u.createdAt })),
+            users: users.map(u => ({
+                id: u.id,
+                name: u.name,
+                profile: u.profile || null,
+                notes: u.notes || "",
+                measurements: getUserMeasurements(u.id),
+                createdAt: u.createdAt
+            })),
             workouts: workoutsList,
             programs: programsArray,
             exercises: exercisesArray,
@@ -1236,6 +1244,10 @@ async function restoreBackup(data) {
             id: String(u.id),
             name: String(u.name || (u.profile && u.profile.fullName) || "کاربر"),
             profile: u.profile && typeof u.profile === "object" ? u.profile : null,
+            notes: typeof u.notes === "string" ? u.notes.slice(0, 5000) : "",
+            ...(Array.isArray(u.measurements)
+                ? { measurements: u.measurements.map(cleanMeasurement).filter(Boolean) }
+                : {}),
             createdAt: u.createdAt || nowIso
         }))
         : [];
@@ -1412,7 +1424,12 @@ async function mergeBackupIntoUser(data, targetUserId, sourceUserId) {
     }
     const catalogAdd = normalized.catalogAdditions || {};
 
-    if (!srcWorkouts.length && !Object.keys(srcPrograms).length) {
+    const srcUserRec = srcUsers.find(u => String(u.id) === String(sourceUserId));
+    const srcMeasurements = srcUserRec && Array.isArray(srcUserRec.measurements)
+        ? srcUserRec.measurements.map(cleanMeasurement).filter(Boolean)
+        : [];
+
+    if (!srcWorkouts.length && !Object.keys(srcPrograms).length && !srcMeasurements.length) {
         throw new Error("این فایل اطلاعات تمرین یا برنامه‌ای برای این کاربر ندارد.");
     }
 
@@ -1502,8 +1519,28 @@ async function mergeBackupIntoUser(data, targetUserId, sourceUserId) {
     mirrorProgramsToLocalStorage();
     mirrorCatalogToLocalStorage();
 
+    /* اندازه‌های وزن/دور کمر: فقط تاریخ‌هایی که در کاربر مقصد نیست اضافه می‌شود */
+    let measurementsAdded = 0;
+    if (srcMeasurements.length) {
+        const mList = _ensureMeasurements(target);
+        const haveDates = new Set(mList.map(m => m.date));
+        srcMeasurements.forEach(m => {
+            if (haveDates.has(m.date)) return;
+            mList.push(m);
+            haveDates.add(m.date);
+            measurementsAdded += 1;
+        });
+        if (measurementsAdded) {
+            target.measurements = _sortMeasurements(mList);
+            _syncProfileFromMeasurements(target);
+            _storeCache.users = _storeCache.users.slice();
+            await persistUsers();
+        }
+    }
+
     return {
         added: added.length,
+        measurementsAdded,
         updated: replaceMap.size,
         skipped,
         programsAdded: newProgramKeys.length,
@@ -1648,6 +1685,7 @@ async function createUser(profile) {
         : null;
     const name = clean && clean.fullName ? clean.fullName : "کاربر " + (_storeCache.users.length + 1);
     const user = makeUser(name, clean);
+    _recordMeasurementFromProfile(user);
     _storeCache.users = [..._storeCache.users, user];
     await persistUsers();
     return user;
@@ -1694,6 +1732,128 @@ async function deleteUser(id) {
     return true;
 }
 
+/* ---------- یادداشت و روند اندازه‌ها (وزن / دور کمر) ----------
+   user.notes        : یادداشت آزاد درباره‌ی کاربر
+   user.measurements : [{date: "YYYY-MM-DD", weight?, waist?}]  (مرتب بر اساس تاریخ)
+   اگر measurements هنوز ساخته نشده باشد (کاربران قدیمی)، از روی پروفایل یک نقطه‌ی آغازین ساخته می‌شود. */
+
+function _isoFromDate(d) {
+    const p = n => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+}
+
+function _todayLocalIso() {
+    return _isoFromDate(new Date());
+}
+
+function _localIsoFromStamp(stamp) {
+    const d = new Date(stamp);
+    return isNaN(d.getTime()) ? _todayLocalIso() : _isoFromDate(d);
+}
+
+function cleanMeasurement(m) {
+    if (!m || typeof m !== "object") return null;
+    const date = typeof m.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(m.date) ? m.date : null;
+    if (!date) return null;
+    const out = { date };
+    const ok = v => v !== undefined && v !== null && v !== "" && isFinite(Number(v)) && Number(v) > 0;
+    if (ok(m.weight)) out.weight = Math.round(Number(m.weight) * 10) / 10;
+    if (ok(m.waist)) out.waist = Math.round(Number(m.waist) * 10) / 10;
+    if (out.weight === undefined && out.waist === undefined) return null;
+    return out;
+}
+
+function _sortMeasurements(list) {
+    return list.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function _seedMeasurements(user) {
+    const p = user.profile;
+    if (!p || (p.weight == null && p.waist == null)) return [];
+    const m = cleanMeasurement({
+        date: _localIsoFromStamp(p.updatedAt || user.createdAt),
+        weight: p.weight,
+        waist: p.waist
+    });
+    return m ? [m] : [];
+}
+
+/* فقط‌خواندنی: فهرست مرتب‌شده‌ی اندازه‌های یک کاربر */
+function getUserMeasurements(userId) {
+    const user = getUserById(userId);
+    if (!user) return [];
+    const list = Array.isArray(user.measurements) ? user.measurements : _seedMeasurements(user);
+    return _sortMeasurements(list.slice());
+}
+
+/* فهرست اندازه‌ها را (در صورت نبودن) می‌سازد و روی خودِ کاربر می‌گذارد */
+function _ensureMeasurements(user) {
+    if (!Array.isArray(user.measurements)) user.measurements = _seedMeasurements(user);
+    return _sortMeasurements(user.measurements);
+}
+
+/* آخرین وزن و دور کمر ثبت‌شده را در پروفایل هم نگه می‌دارد */
+function _syncProfileFromMeasurements(user) {
+    if (!user.profile) return;
+    let w, c;
+    _sortMeasurements((user.measurements || []).slice()).forEach(m => {
+        if (m.weight !== undefined) w = m.weight;
+        if (m.waist !== undefined) c = m.waist;
+    });
+    user.profile = {
+        ...user.profile,
+        ...(w !== undefined ? { weight: w } : {}),
+        ...(c !== undefined ? { waist: c } : {}),
+        updatedAt: new Date().toISOString()
+    };
+}
+
+/* با هر ذخیره‌ی پروفایل، اگر وزن یا دور کمر عوض شده باشد یک نقطه‌ی امروز اضافه می‌شود */
+function _recordMeasurementFromProfile(user) {
+    const list = _ensureMeasurements(user);
+    const p = user.profile;
+    if (!p) return;
+    const entry = cleanMeasurement({ date: _todayLocalIso(), weight: p.weight, waist: p.waist });
+    if (!entry) return;
+    const last = list[list.length - 1];
+    if (last && last.weight === entry.weight && last.waist === entry.waist) return;
+    const idx = list.findIndex(m => m.date === entry.date);
+    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    user.measurements = _sortMeasurements(list);
+}
+
+async function addUserMeasurement(userId, entry) {
+    const user = getUserById(userId);
+    const clean = cleanMeasurement(entry);
+    if (!user || !clean) return false;
+    const list = _ensureMeasurements(user);
+    const idx = list.findIndex(m => m.date === clean.date);
+    if (idx >= 0) list[idx] = { ...list[idx], ...clean }; else list.push(clean);
+    user.measurements = _sortMeasurements(list);
+    _syncProfileFromMeasurements(user);
+    _storeCache.users = _storeCache.users.slice();
+    await persistUsers();
+    return true;
+}
+
+async function deleteUserMeasurement(userId, date) {
+    const user = getUserById(userId);
+    if (!user) return false;
+    user.measurements = _ensureMeasurements(user).filter(m => m.date !== date);
+    _syncProfileFromMeasurements(user);
+    _storeCache.users = _storeCache.users.slice();
+    await persistUsers();
+    return true;
+}
+
+async function saveUserNotes(userId, text) {
+    const user = getUserById(userId);
+    if (!user) return false;
+    user.notes = String(text == null ? "" : text).slice(0, 5000);   /* همزمان در حافظه ثبت می‌شود */
+    await persistUsers();
+    return true;
+}
+
 function getUserProfile(userId) {
     const id = userId || _storeCache.activeUserId || fallbackActiveUserId();
     const user = getUserById(id);
@@ -1712,8 +1872,10 @@ async function saveUserProfile(profile, userId) {
     if (!user) return false;
 
     const clean = { ...profile, updatedAt: new Date().toISOString() };
+    _ensureMeasurements(user);          /* پروفایل قبلی پیش از بازنویسی، نقطه‌ی آغازین روند می‌شود */
     user.profile = clean;
     if (clean.fullName) user.name = clean.fullName;
+    _recordMeasurementFromProfile(user);
     _storeCache.users = _storeCache.users.slice();
     await persistUsers();
     return true;
