@@ -64,7 +64,7 @@ const exerciseCatalog = {
 
     incline_pushup: {
         name: "شنا شیب‌دار",
-        images: ["assets/exercises/incline-pushup.mp4"],
+        images: ["assets/exercises/incline_pushup.mp4"],
         instructions: [
             "دست‌ها را روی سطحی مرتفع‌تر از زمین قرار بده.",
             "بدن را از سر تا پاشنه در یک خط نگه دار.",
@@ -75,7 +75,7 @@ const exerciseCatalog = {
 
     cable_crossover: {
         name: "کراس اور سیم‌کش",
-        images: ["assets/exercises/cable-crossover.gif"],
+        images: ["assets/exercises/cable-crossover.jpg"],
         instructions: [
             "دسته‌های سیم‌کش را در ارتفاع مناسب تنظیم کن.",
             "یک قدم جلو برو و بدن را پایدار نگه دار.",
@@ -86,7 +86,7 @@ const exerciseCatalog = {
 
     close_grip_dumbbell_press: {
         name: "پرس سینه دمبل دست جمع",
-        images: ["assets/exercises/close-grip-dumbbell-press.mp4"],
+        images: ["assets/exercises/close_grip_dumbbell_press.mp4"],
         instructions: [
             "دمبل‌ها را نزدیک یکدیگر بالای سینه نگه دار.",
             "آرنج‌ها را نسبتاً نزدیک بدن نگه دار.",
@@ -124,7 +124,7 @@ const exerciseCatalog = {
 
     lying_dumbbell_triceps_extension: {
         name: "پشت بازو دمبل خوابیده",
-        images: ["assets/exercises/lying-dumbbell-triceps-extension.mp4"],
+        images: ["assets/exercises/lying_dumbbell_triceps_extension.mp4"],
         instructions: [
             "روی نیمکت به پشت دراز بکش و دمبل‌ها را بالای سینه نگه دار.",
             "آرنج‌ها را ثابت نگه دار.",
@@ -160,7 +160,7 @@ const exerciseCatalog = {
 
     cable_crunch: {
         name: "کرانچ کابل",
-        images: ["assets/exercises/cable-crunch.mp4"],
+        images: ["assets/exercises/cable_crunch.mp4"],
         instructions: [
             "طناب را به قسمت بالایی سیم‌کش وصل کن.",
             "روی زانو قرار بگیر و طناب را کنار سر نگه دار.",
@@ -171,7 +171,7 @@ const exerciseCatalog = {
 
     side_plank: {
         name: "پلانک بغل",
-        images: ["assets/exercises/side-plank.mp4"],
+        images: ["assets/exercises/side_plank.mp4"],
         instructions: [
             "روی یک ساعد و لبه خارجی پا قرار بگیر.",
             "بدن را از سر تا پا در یک خط نگه دار.",
@@ -219,7 +219,7 @@ const exerciseCatalog = {
 
     medium_grip_lat_pulldown: {
         name: "زیربغل سیم‌کش دست متوسط",
-        images: ["assets/exercises/lat_pulldown_medium.mp4"],
+        images: ["assets/exercises/medium_grip_lat_pulldown.mp4"],
         instructions: [
             "دسته را با فاصله‌ای حدود عرض شانه بگیر.",
             "سینه را کمی بالا و کمر را خنثی نگه دار.",
@@ -252,7 +252,7 @@ const exerciseCatalog = {
 
     t_bar_row: {
         name: "تی‌بار رو / دستگاه روئینگ",
-        images: ["assets/exercises/t-bar-row.mp4"],
+        images: ["assets/exercises/t_bar_row.mp4"],
         instructions: [
             "پاها را ثابت و کمر را در وضعیت خنثی نگه دار.",
             "دسته را با کنترل به سمت بالای شکم بکش.",
@@ -312,7 +312,7 @@ const exerciseCatalog = {
 
     face_pull: {
         name: "فیس پول سیم‌کش",
-        images: ["assets/exercises/face-pull.mp4"],
+        images: ["assets/exercises/face_pull.mp4"],
         instructions: [
             "طناب را تقریباً در ارتفاع صورت تنظیم کن.",
             "طناب را به سمت صورت بکش.",
@@ -372,7 +372,7 @@ const exerciseCatalog = {
 
     bulgarian_split_squat: {
         name: "بلغارین اسپلیت اسکوات دمبل",
-        images: ["assets/exercises/db-bulgarian-split-squat.mp4"],
+        images: ["assets/exercises/bulgarian_split_squat.mp4"],
         instructions: [
             "پای عقب را روی نیمکت قرار بده.",
             "پای جلویی را در فاصله‌ای قرار بده که تعادل داشته باشی.",
@@ -391,6 +391,21 @@ const exerciseCatalog = {
             "حرکت را بدون جهش و با دامنه کنترل‌شده انجام بده."
         ]
     },
+	
+	    dumbbell_romanian_deadlift: {
+        name: "ددلیفت رومانیایی دمبل",
+        images: ["assets/exercises/dumbbell_romanian_deadlift.mp4"],
+        instructions: [
+            "مبل‌های خود را انتخاب و جلوی ران‌ها نگه دارید",
+            "شانه‌ها باید متمایل به عقب، کمر کمی قوس و زانوها کمی خم باشند؛ این نقطه شروع حرکت خواهد بود",
+            "با حرکت دادن باسن خود به سمت عقب، وزنه را پایین بیاورید",
+            "هنگام پایین رفتن کمی باسن نیز به سمت پایین حرکت کنید",
+			"وزنه را نزدیک بدن نگاه دارید",
+			"وزنه را نزدیک بدن نگاه دارید"
+			
+        ]
+    },
+
 
 
     /* =================================================

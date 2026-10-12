@@ -100,6 +100,7 @@ const EXERCISE_CATEGORIES_MAP = {
     leg_extension: "پا",
     bulgarian_split_squat: "پا",
     smith_calf_raise: "پا",
+	dumbbell_romanian_deadlift: "پا",
 
     dead_bug: "شکم",
     crunch: "شکم",
