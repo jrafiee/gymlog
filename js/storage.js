@@ -1883,6 +1883,46 @@ async function saveUserProfile(profile, userId) {
 
 
 /* =====================================================
+   حذف برنامه
+   - برنامه‌ی کاربر (پیش‌فرض: کاربر فعال) حذف می‌شود.
+   - اگر withWorkouts=true باشد، سوابق تمرین همان برنامه هم پاک می‌شود؛
+     در غیر این صورت سوابق نگه داشته می‌شوند.
+===================================================== */
+async function deleteProgram(monthKey, userId, withWorkouts) {
+    const uid = userId || _storeCache.activeUserId;
+    const progs = { ...((_storeCache.programsByUser || {})[uid] || {}) };
+    if (!progs[monthKey]) return false;
+
+    const removed = withWorkouts
+        ? _storeCache.workouts.filter(w => w.userId === uid && w.month === monthKey)
+        : [];
+
+    if (_storeCache.db) {
+        try {
+            const tx = _storeCache.db.transaction(["programs", "workouts"], "readwrite");
+            tx.objectStore("programs").delete(programRecordId(uid, monthKey));
+            const wStore = tx.objectStore("workouts");
+            removed.forEach(w => wStore.delete(w.id));
+            await txDone(tx);
+        } catch (err) {
+            console.error("[GymLog DB] خطا در حذف برنامه:", err);
+            throw err;
+        }
+    }
+
+    delete progs[monthKey];
+    _storeCache.programsByUser = { ..._storeCache.programsByUser, [uid]: progs };
+    if (removed.length) {
+        const ids = new Set(removed.map(w => w.id));
+        _storeCache.workouts = _storeCache.workouts.filter(w => !ids.has(w.id));
+        mirrorWorkoutsToLocalStorage();
+    }
+    mirrorProgramsToLocalStorage();
+    return true;
+}
+
+
+/* =====================================================
    Catalog Exercise Editing (add / edit / reset)
    - حرکت جدید یا ویرایش‌شده در store «exercises» ذخیره می‌شود و روی
      کاتالوگ پیش‌فرض (exercise-catalog.js) override می‌شود.

@@ -801,13 +801,35 @@
     let PB = null;
     let onKey = null;
 
-    function freshState(userId) {
-        const profile = getUserProfile(userId) || {};
-        /* اگر مشخصات کاربر قبلاً ثبت شده، مرحله‌ی «مشخصات» حذف می‌شود */
-        const needsProfile = !(profile && profile.fullName);
+    function parseTargetString(str, fallbackSets) {
+        const t = toLatinDigits(str || "").replace(/[–—]/g, "-");
+        const m = t.match(/(\d+)\s*[×xX*]\s*(\d+)(?:\s*-\s*(\d+))?\s*(.*)$/);
+        if (!m) return { sets: Number(fallbackSets) || 3, min: 8, max: 12, unit: "reps" };
+        const rest = m[4] || "";
+        const timed = /ثانیه/.test(rest);
+        const side = /هر\s*طرف|هر\s*پا/.test(rest);
+        const unit = timed ? (side ? "sec_side" : "sec") : (side ? "reps_side" : "reps");
         return {
+            sets: Number(fallbackSets) || Number(m[1]),
+            min: Number(m[2]),
+            max: m[3] ? Number(m[3]) : "",
+            unit
+        };
+    }
+
+    function freshState(userId, editKey) {
+        const profile = getUserProfile(userId) || {};
+        let raw = null;
+        if (editKey) {
+            raw = (getEffectiveProgramsRaw(userId) || {})[editKey] || null;
+            if (!raw || !raw.sessions) { raw = null; editKey = null; }
+        }
+        /* اگر مشخصات کاربر قبلاً ثبت شده (یا در حالت ویرایش)، مرحله‌ی «مشخصات» حذف می‌شود */
+        const needsProfile = !editKey && !(profile && profile.fullName);
+        const st = {
             step: 1,
             userId,
+            editKey: editKey || null,
             needsProfile,
             steps: needsProfile ? ["days", "exercises", "profile", "output"] : ["days", "exercises", "output"],
             days: 3,
@@ -821,6 +843,22 @@
             search: "",
             sheetOpen: false
         };
+        if (raw) {
+            const keys = Object.keys(raw.sessions).sort((a, b) => Number(a) - Number(b)).slice(0, 7);
+            st.days = Math.max(1, keys.length);
+            st.plan = {};
+            keys.forEach((k, i) => {
+                const sess = raw.sessions[k] || {};
+                const d = i + 1;
+                st.plan[d] = (sess.exercises || []).map(ex => {
+                    const t = parseTargetString(ex.target, ex.sets);
+                    return { id: ex.id, sets: t.sets, min: t.min, max: t.max, unit: t.unit, rest: ex.rest || "90 ثانیه" };
+                });
+                st.dayTitles[d] = sess.title || "";
+            });
+            st.title = raw.title || "";
+        }
+        return st;
     }
 
     function isDirty() {
@@ -843,10 +881,10 @@
     }
 
     /* ---------- بدنه‌ی اصلی / چارچوب ---------- */
-    function openProgramBuilder(userId) {
+    function openProgramBuilder(userId, editKey) {
         if (overlay) return;
         const uid = typeof userId === "string" && getUserById(userId) ? userId : getActiveUserId();
-        PB = freshState(uid);
+        PB = freshState(uid, editKey);
 
         overlay = document.createElement("div");
         overlay.className = "pb-overlay";
@@ -856,7 +894,7 @@
         overlay.innerHTML = `
         <div class="pb-page">
             <header class="pb-head">
-                <h2>ساخت برنامه تمرینی${getUsers().length > 1 ? " · " + esc(getUserDisplayName(getUserById(PB.userId))) : ""}</h2>
+                <h2>${PB.editKey ? "ویرایش برنامه" : "ساخت برنامه تمرینی"}${getUsers().length > 1 ? " · " + esc(getUserDisplayName(getUserById(PB.userId))) : ""}</h2>
                 <button type="button" class="exercise-guide-close pb-close" aria-label="بستن">×</button>
             </header>
             <ol class="pb-steps" id="pbSteps"></ol>
@@ -878,7 +916,7 @@
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
         const topTitle = document.getElementById("desktopTopbarTitle");
-        if (topTitle) topTitle.textContent = "ساخت برنامه تمرینی";
+        if (topTitle) topTitle.textContent = PB.editKey ? "ویرایش برنامه تمرینی" : "ساخت برنامه تمرینی";
         renderStep();
     }
 
@@ -914,7 +952,7 @@
         overlay.querySelector("#pbPrev").style.visibility = PB.step === 1 ? "hidden" : "visible";
         const next = overlay.querySelector("#pbNext");
         next.textContent = PB.step < PB.steps.length ? "بعدی"
-            : PB.output === "save" ? "ثبت در برنامه" : "دانلود فایل JSON";
+            : PB.editKey ? "ذخیره تغییرات" : PB.output === "save" ? "ثبت در برنامه" : "دانلود فایل JSON";
     }
 
     function renderStep() {
@@ -1123,7 +1161,7 @@
                 </label>
                 <label>استراحت
                     <select data-f="rest">
-                        ${REST_OPTS.map(r => `<option value="${r}" ${r === ex.rest ? "selected" : ""}>${toFa(r)}</option>`).join("")}
+                        ${(REST_OPTS.includes(ex.rest) ? REST_OPTS : REST_OPTS.concat([ex.rest])).map(r => `<option value="${r}" ${r === ex.rest ? "selected" : ""}>${toFa(r)}</option>`).join("")}
                     </select>
                 </label>
             </div>
@@ -1332,7 +1370,7 @@
         body.innerHTML = `
         <section class="pb-section">
             <h3>خلاصه‌ی برنامه</h3>
-            <p class="pb-muted">${esc(PB.profile.fullName || "")} · ${toFa(PB.days)} روز در هفته</p>
+            <p class="pb-muted">${esc(PB.editKey ? (PB.title || "") : (PB.profile.fullName || ""))} · ${toFa(PB.days)} روز در هفته</p>
             <ul class="pb-summary">${summary}</ul>
 
             <h3 class="pb-out-title">خروجی را انتخاب کن</h3>
@@ -1354,6 +1392,13 @@
             </div>
         </section>`;
 
+        if (PB.editKey) {
+            const t = body.querySelector(".pb-out-title");
+            const o = body.querySelector(".pb-outputs");
+            if (t) t.remove();
+            if (o) o.remove();
+        }
+
         body.querySelectorAll('input[name="pbOutput"]').forEach(r => {
             r.addEventListener("change", () => {
                 PB.output = r.value;
@@ -1371,7 +1416,15 @@
     }
 
     function buildPackage() {
-        const { key, n } = nextMonthKey(PB.userId);
+        let key, n;
+        if (PB.editKey) {
+            key = PB.editKey;
+            n = parseInt(String(key).replace(/\D/g, ""), 10) || 1;
+        } else {
+            const nk = nextMonthKey(PB.userId);
+            key = nk.key;
+            n = nk.n;
+        }
         const sessions = {};
         for (let d = 1; d <= PB.days; d++) {
             sessions[String(d)] = {
@@ -1412,9 +1465,10 @@
         const uid = PB.userId;
         const isActive = uid === getActiveUserId();
         const userName = getUserDisplayName(getUserById(uid));
+        const editing = !!PB.editKey;
         const onUserPage = () => typeof currentDesktopView !== "undefined" && currentDesktopView === "user";
 
-        if (PB.output === "download") {
+        if (!PB.editKey && PB.output === "download") {
             downloadJson(pkg);
             if (PB.needsProfile) {
                 try { await saveUserProfile(PB.profile, uid); renderUserChip(); } catch (e) { console.error(e); }
@@ -1462,7 +1516,7 @@
 
         renderUserChip();
         switchView("programs");
-        toast("برنامه‌ی جدید ثبت شد و برنامه‌ی فعال است.");
+        toast(editing ? "تغییرات برنامه ذخیره شد." : "برنامه‌ی جدید ثبت شد و برنامه‌ی فعال است.");
     }
 
     /* =========================
@@ -1480,6 +1534,7 @@
     };
 
     window.openProgramBuilder = openProgramBuilder;
+    window.openProgramEditor = function (monthKey) { openProgramBuilder(getActiveUserId(), monthKey); };
     window.renderUserView = renderUserView;
     window.renderUserChip = renderUserChip;
 

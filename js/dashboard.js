@@ -610,6 +610,41 @@ if (window.matchMedia) {
 /* =====================================================
    Programs View with Dedicated Clear Box (Requirement 3)
 ===================================================== */
+async function deleteProgramFlow(mKey) {
+    const month = workoutPrograms[mKey];
+    if (!month) return;
+
+    if (!confirm(`برنامه «${month.title}» حذف شود؟\nاین کار قابل بازگشت نیست؛ بهتر است قبلش پشتیبان بگیری.`)) return;
+
+    const count = getWorkouts().filter(w => w.month === mKey).length;
+    let withWorkouts = false;
+    if (count > 0) {
+        withWorkouts = confirm(
+            `${count.toLocaleString("fa-IR")} جلسه‌ی تمرین برای این برنامه ثبت شده است.\n\n` +
+            "تأیید = سوابق این جلسه‌ها هم حذف شود\nانصراف = فقط برنامه حذف شود و سوابق بماند"
+        );
+    }
+
+    try {
+        await deleteProgram(mKey, null, withWorkouts);
+    } catch (err) {
+        toast("حذف برنامه انجام نشد. دوباره تلاش کن.", "warning");
+        return;
+    }
+
+    workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
+    currentMonth = getLatestMonthKey();
+    viewingMonth = currentMonth;
+    if (currentMonth) {
+        const d = detectNextWeekAndSession(currentMonth);
+        currentSession = d.session;
+        if (weekNumber) weekNumber.value = d.week;
+    }
+    renderAll();
+    renderProgramsView();
+    toast("برنامه حذف شد.");
+}
+
 function renderProgramsView() {
     const container = document.getElementById("viewProgramsContainer");
     if (!container) return;
@@ -636,6 +671,10 @@ function renderProgramsView() {
                                 ${month.title} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : ""}
                             </h3>
                             <span class="gl-muted-sm">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
+                        </div>
+                        <div class="gl-program-card-actions">
+                            <button type="button" class="secondary-btn" data-prog-edit="${esc(mKey)}">✏️ ویرایش برنامه</button>
+                            <button type="button" class="danger-btn" data-prog-delete="${esc(mKey)}">🗑 حذف برنامه</button>
                         </div>
                     </div>
                     <div class="dv-prog-sessions">${sessionsHtml}</div>
@@ -676,6 +715,15 @@ function renderProgramsView() {
 
         ${programsCardsHtml}
     `;
+
+    container.querySelectorAll("[data-prog-edit]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (typeof openProgramEditor === "function") openProgramEditor(btn.dataset.progEdit);
+        });
+    });
+    container.querySelectorAll("[data-prog-delete]").forEach(btn => {
+        btn.addEventListener("click", () => deleteProgramFlow(btn.dataset.progDelete));
+    });
 
     const uploadInput = container.querySelector("#programsTabUploadInput");
     if (uploadInput) {
