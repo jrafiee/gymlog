@@ -160,3 +160,78 @@ function parseRestSeconds(str) {
     const sec = Math.round(parseFloat(m[1]) * mult);
     return sec > 0 ? sec : null;
 }
+
+
+/* ---------- روشن ماندن صفحه (Screen Wake Lock) ----------
+   GymLogWakeLock.request(reason) / release(reason)
+   تا وقتی حداقل یک «دلیل» فعال باشد صفحه قفل نمی‌شود.
+   - "workout": خودکار، وقتی صفحه‌ی «ثبت تمرین» در موبایل باز است
+   - "timer"  : وقتی تایمر استراحت در حال اجراست (rest-timer.js)
+   اگر مرورگر پشتیبانی نکند (مثلاً iOS قدیمی‌تر از ۱۶.۴) بی‌صدا نادیده گرفته می‌شود. */
+const GymLogWakeLock = (function () {
+    const reasons = new Set();
+    const supported = typeof navigator !== "undefined" && "wakeLock" in navigator;
+    let sentinel = null;
+    let pending = false;
+
+    async function sync() {
+        if (!supported) return;
+
+        if (reasons.size === 0) {
+            if (sentinel) {
+                const s = sentinel;
+                sentinel = null;
+                try { await s.release(); } catch (e) { /* ignore */ }
+            }
+            return;
+        }
+
+        if (sentinel || pending || document.visibilityState !== "visible") return;
+
+        pending = true;
+        try {
+            const s = await navigator.wakeLock.request("screen");
+            sentinel = s;
+            s.addEventListener("release", () => { if (sentinel === s) sentinel = null; });
+        } catch (e) { /* مثلاً حالت کم‌باتری یا نبودن اجازه */ }
+        pending = false;
+
+        if (reasons.size === 0 && sentinel) sync();
+    }
+
+    /* با برگشتن به برنامه (بعد از قفل یا رفتن به برنامه‌ی دیگر) دوباره فعال می‌شود */
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") sync();
+    });
+
+    return {
+        supported,
+        request(reason) { reasons.add(reason || "default"); sync(); },
+        release(reason) { reasons.delete(reason || "default"); sync(); }
+    };
+})();
+
+/* در موبایل، تا وقتی صفحه‌ی «ثبت تمرین» باز است صفحه روشن بماند */
+(function () {
+    const mq = window.matchMedia ? window.matchMedia("(max-width: 1023px)") : null;
+
+    function update() {
+        const view = document.getElementById("viewWorkout");
+        const on = !!(view && view.classList.contains("active") && mq && mq.matches);
+        if (on) GymLogWakeLock.request("workout");
+        else GymLogWakeLock.release("workout");
+    }
+
+    function init() {
+        const view = document.getElementById("viewWorkout");
+        if (view) new MutationObserver(update).observe(view, { attributes: true, attributeFilter: ["class"] });
+        if (mq) {
+            if (mq.addEventListener) mq.addEventListener("change", update);
+            else if (mq.addListener) mq.addListener(update);
+        }
+        update();
+    }
+
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+})();
