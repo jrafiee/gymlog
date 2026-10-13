@@ -655,7 +655,11 @@ function renderProgramsView() {
     if (monthKeys.length === 0) {
         programsCardsHtml = `<div class="dash-empty-notice">هنوز هیچ برنامه تمرینی در پایگاه‌داده وجود ندارد. از کادر بالا برای بارگذاری فایل برنامه استفاده کنید.</div>`;
     } else {
-        programsCardsHtml = monthKeys.map(mKey => {
+        /* برنامه جاری اول و باز؛ برنامه‌های قبلی (جدیدترین اول) بسته و با کلیک باز می‌شوند */
+        const ordered = monthKeys.filter(k => k === currentMonth).concat(
+            monthKeys.filter(k => k !== currentMonth).reverse()
+        );
+        programsCardsHtml = ordered.map(mKey => {
             const month = workoutPrograms[mKey];
             const isCur = mKey === currentMonth;
             const sessionsHtml = Object.keys(month.sessions || {})
@@ -664,11 +668,11 @@ function renderProgramsView() {
                 .join("");
 
             return `
-                <div class="card gl-program-card">
-                    <div class="gl-program-card-head">
+                <div class="card gl-program-card ${isCur ? "open" : "collapsed"}" data-prog-card="${esc(mKey)}">
+                    <div class="gl-program-card-head" ${isCur ? "" : 'data-prog-toggle role="button" tabindex="0" aria-expanded="false"'}>
                         <div>
                             <h3 class="gl-program-card-title">
-                                ${month.title} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : ""}
+                                ${month.title} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : '<span class="gl-prog-chev" aria-hidden="true">▾</span>'}
                             </h3>
                             <span class="gl-muted-sm">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
                         </div>
@@ -677,7 +681,7 @@ function renderProgramsView() {
                             <button type="button" class="danger-btn" data-prog-delete="${esc(mKey)}">🗑 حذف برنامه</button>
                         </div>
                     </div>
-                    <div class="dv-prog-sessions">${sessionsHtml}</div>
+                    <div class="dv-prog-sessions" ${isCur ? "" : "hidden"}>${sessionsHtml}</div>
                 </div>
             `;
         }).join("");
@@ -716,6 +720,25 @@ function renderProgramsView() {
         ${programsCardsHtml}
     `;
 
+    container.querySelectorAll("[data-prog-toggle]").forEach(head => {
+        const card = head.closest(".gl-program-card");
+        const body = card.querySelector(".dv-prog-sessions");
+        const toggle = () => {
+            const open = body.hidden;
+            body.hidden = !open;
+            card.classList.toggle("open", open);
+            card.classList.toggle("collapsed", !open);
+            head.setAttribute("aria-expanded", String(open));
+        };
+        head.addEventListener("click", e => {
+            if (e.target.closest("button, a")) return;
+            toggle();
+        });
+        head.addEventListener("keydown", e => {
+            if (e.target !== head) return;
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+    });
     container.querySelectorAll("[data-prog-edit]").forEach(btn => {
         btn.addEventListener("click", () => {
             if (typeof openProgramEditor === "function") openProgramEditor(btn.dataset.progEdit);

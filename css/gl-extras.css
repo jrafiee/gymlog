@@ -395,3 +395,12 @@ body.sidebar-collapsed .sidebar-nav-item:hover { transform: scale(1.1); }
 .gl-program-card-head { gap: 12px; flex-wrap: wrap; }
 .gl-program-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .gl-program-card-actions button { min-height: 38px; padding: 6px 14px; font-size: 13px; }
+
+
+/* ---------- برنامه‌های قبلی: جمع‌شونده ---------- */
+.gl-program-card.collapsed .gl-program-card-head { margin-bottom: 0; }
+.gl-program-card-head[data-prog-toggle] { cursor: pointer; }
+.gl-program-card-head[data-prog-toggle]:hover .gl-program-card-title { color: var(--gl-accent); }
+.gl-prog-chev { display: inline-block; margin-right: 6px; color: var(--gl-muted); transition: transform 0.2s ease; }
+.gl-program-card.open .gl-prog-chev { transform: rotate(180deg); }
+.gl-program-card .dv-prog-sessions[hidden] { display: none; }
