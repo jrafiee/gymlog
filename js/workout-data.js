@@ -37,6 +37,7 @@ function buildWorkoutPrograms(catalog, programsRaw) {
                     target: exercise.target,
                     rest: exercise.rest,
                     sets: exercise.sets,
+                    ...(exercise.superset ? { superset: String(exercise.superset) } : {}),
                     name: catalogEntry ? catalogEntry.name : exercise.id,
                     images: catalogEntry ? catalogEntry.images : [],
                     instructions: catalogEntry ? catalogEntry.instructions : []

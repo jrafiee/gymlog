@@ -850,9 +850,10 @@
             keys.forEach((k, i) => {
                 const sess = raw.sessions[k] || {};
                 const d = i + 1;
-                st.plan[d] = (sess.exercises || []).map(ex => {
+                st.plan[d] = (sess.exercises || []).map((ex, xi, arr) => {
                     const t = parseTargetString(ex.target, ex.sets);
-                    return { id: ex.id, sets: t.sets, min: t.min, max: t.max, unit: t.unit, rest: ex.rest || "90 ثانیه" };
+                    const link = xi > 0 && !!ex.superset && String(arr[xi - 1].superset || "") === String(ex.superset);
+                    return { id: ex.id, sets: t.sets, min: t.min, max: t.max, unit: t.unit, rest: ex.rest || "90 ثانیه", link };
                 });
                 st.dayTitles[d] = sess.title || "";
             });
@@ -868,7 +869,7 @@
     function defaultExercise(id) {
         const unit = DEFAULT_UNIT[id] || "reps";
         const timed = unit === "sec" || unit === "sec_side";
-        return { id, sets: 3, min: timed ? 30 : 8, max: timed ? 45 : 12, unit, rest: "90 ثانیه" };
+        return { id, sets: 3, min: timed ? 30 : 8, max: timed ? 45 : 12, unit, rest: "90 ثانیه", link: false };
     }
 
     function setDays(n) {
@@ -1126,17 +1127,31 @@
         });
     }
 
+    /* سوپرست: هر حرکتی که link دارد با حرکت قبلی یک گروه است. خروجی: شماره‌ی گروه (۱، ۲، …) یا 0 */
+    function ssInfo(list) {
+        const out = list.map(() => 0);
+        let n = 0;
+        list.forEach((ex, i) => {
+            if (i > 0 && ex.link) {
+                if (!out[i - 1]) out[i - 1] = ++n;
+                out[i] = out[i - 1];
+            }
+        });
+        return out;
+    }
+
     /* لیست حرکات روز */
-    function exerciseCardHtml(ex, idx, total, catalog) {
+    function exerciseCardHtml(ex, idx, total, catalog, ss) {
         const item = catalog[ex.id];
         const name = item ? item.name : ex.id;
         return `
-        <div class="pb-ex" data-idx="${idx}">
+        <div class="pb-ex ${ss ? "pb-ex-linked" : ""}" data-idx="${idx}">
             <div class="pb-ex-top">
                 <span class="pb-ex-num">${toFa(idx + 1)}</span>
                 <div class="pb-ex-name">
                     <strong>${esc(name)}</strong>
                     <span>${esc(catOf(ex.id, item))}</span>
+                    ${ss ? `<em class="pb-ss-chip">⚡ سوپرست ${toFa(ss)}</em>` : ""}
                 </div>
                 <div class="pb-ex-ctl">
                     <button type="button" data-act="up" aria-label="بالا" ${idx === 0 ? "disabled" : ""}>↑</button>
@@ -1165,6 +1180,10 @@
                     </select>
                 </label>
             </div>
+            ${idx > 0 ? `<label class="pb-ss-toggle">
+                <input type="checkbox" data-act="link" ${ex.link ? "checked" : ""}>
+                <span>سوپرست با حرکت قبلی <small>(بدون استراحت بین این دو حرکت)</small></span>
+            </label>` : ""}
         </div>`;
     }
 
@@ -1174,7 +1193,7 @@
         const list = PB.plan[PB.day];
         const catalog = getEffectiveCatalog();
         el.innerHTML = list.length
-            ? list.map((ex, i) => exerciseCardHtml(ex, i, list.length, catalog)).join("")
+            ? (ss => list.map((ex, i) => exerciseCardHtml(ex, i, list.length, catalog, ss[i])).join(""))(ssInfo(list))
             : `<div class="pb-empty">هنوز حرکتی برای روز ${toFa(PB.day)} اضافه نشده.<br>${isDesktopLayout()
                 ? "حرکت را از فهرست کنار صفحه به اینجا بکش."
                 : "با دکمه‌ی «افزودن حرکت» شروع کن."}</div>`;
@@ -1210,7 +1229,8 @@
             const card = btn.closest(".pb-ex");
             const i = Number(card.dataset.idx);
             const list = PB.plan[PB.day];
-            if (btn.dataset.act === "del") list.splice(i, 1);
+            if (btn.dataset.act === "link") { if (i > 0) list[i].link = !list[i].link; }
+            else if (btn.dataset.act === "del") list.splice(i, 1);
             else if (btn.dataset.act === "up" && i > 0) [list[i - 1], list[i]] = [list[i], list[i - 1]];
             else if (btn.dataset.act === "down" && i < list.length - 1) [list[i + 1], list[i]] = [list[i], list[i + 1]];
             afterListChange();
@@ -1237,6 +1257,8 @@
     }
 
     function afterListChange() {
+        const cur = PB.plan[PB.day];
+        if (cur && cur[0]) cur[0].link = false;
         renderList();
         renderDayTabs();
         renderLibList();
@@ -1429,12 +1451,13 @@
         for (let d = 1; d <= PB.days; d++) {
             sessions[String(d)] = {
                 title: dayTitleOf(d),
-                exercises: PB.plan[d].map(ex => ({
+                exercises: (ssl => PB.plan[d].map((ex, xi) => ({
                     id: ex.id,
                     target: targetString(ex),
                     rest: ex.rest,
-                    sets: ex.sets
-                }))
+                    sets: ex.sets,
+                    ...(ssl[xi] ? { superset: String(ssl[xi]) } : {})
+                })))(ssInfo(PB.plan[d]))
             };
         }
         return {

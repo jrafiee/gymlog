@@ -382,26 +382,58 @@ function getMonthDateRangeText(monthKey) {
     return formatPersianDate(startDate, true) + " تا " + formatPersianDate(endDate, true);
 }
 
+/* گروه‌بندی سوپرست: حرکات پشت‌سرهم با مقدار superset یکسان یک گروه‌اند.
+   خروجی: آرایه‌ی هم‌اندازه با شماره‌ی گروه (۱، ۲، …) یا 0 برای حرکت عادی */
+function getSupersetMap(exercises) {
+    const keys = (exercises || []).map(e => (e && e.superset ? String(e.superset) : ""));
+    const out = keys.map(() => 0);
+    let n = 0;
+    for (let i = 0; i < keys.length; i++) {
+        if (!keys[i]) continue;
+        let j = i;
+        while (j + 1 < keys.length && keys[j + 1] === keys[i]) j++;
+        if (j > i) {
+            n += 1;
+            for (let k = i; k <= j; k++) out[k] = n;
+        }
+        i = j;
+    }
+    return out;
+}
+
 /* جدول ساختاریافته‌ی یک جلسه از برنامه (هم در صفحه‌ی برنامه‌ها و هم در «برنامه‌های من») */
 function buildProgramSessionTableHtml(session, key) {
     const exercises = session.exercises || [];
-    const rows = exercises.map((e, i) => {
+    const ssMap = getSupersetMap(exercises);
+    const ssCount = ssMap.reduce((m, g) => Math.max(m, g), 0);
+    let rows = "";
+
+    exercises.forEach((e, i) => {
+        const g = ssMap[i];
+        const first = g && (i === 0 || ssMap[i - 1] !== g);
+        const last = g && (i === exercises.length - 1 || ssMap[i + 1] !== g);
         const reps = String(e.target || "").replace(/^\s*[\d۰-۹]+\s*[×xX*]\s*/, "");
-        return `
-            <tr>
+
+        if (first) {
+            rows += `
+            <tr class="dv-ss-head"><td colspan="5">⚡ سوپرست ${g.toLocaleString("fa-IR")} <span>— این حرکات پشت‌سرهم و بدون استراحت انجام می‌شوند</span></td></tr>`;
+        }
+        rows += `
+            <tr class="${g ? "dv-ss-row" + (last ? " dv-ss-last" : "") : ""}">
                 <td class="dv-prog-idx">${(i + 1).toLocaleString("fa-IR")}</td>
-                <td class="dv-prog-name">${e.name}</td>
+                <td class="dv-prog-name">${e.name}${g ? `<span class="dv-ss-chip">سوپرست ${g.toLocaleString("fa-IR")}</span>` : ""}</td>
                 <td>${Number(e.sets).toLocaleString("fa-IR")}</td>
                 <td class="dv-prog-reps">${reps}</td>
                 <td>${e.rest || "—"}</td>
             </tr>`;
-    }).join("");
+    });
 
     return `
         <div class="dv-prog-session">
             <div class="dv-prog-session-head">
                 <span class="dv-prog-session-num">جلسه ${Number(key).toLocaleString("fa-IR")}</span>
                 <h4>${session.title}</h4>
+                ${ssCount ? `<span class="dv-ss-chip dv-ss-chip-head">⚡ ${ssCount.toLocaleString("fa-IR")} سوپرست</span>` : ""}
                 <span class="dv-prog-session-count">${exercises.length.toLocaleString("fa-IR")} حرکت</span>
             </div>
             <div class="dv-prog-table-wrap">
@@ -547,6 +579,9 @@ function renderExercises() {
         sessionPrevNote.hidden = !prevNote;
     }
 
+    const ssMap = getSupersetMap(program.exercises);
+    let ssWrap = null;
+
     program.exercises.forEach((exercise, index) => {
         const previousExercise = previous?.exercises?.find(item => item.id === exercise.id);
         const currentExercise = currentWorkout?.exercises?.find(item => item.id === exercise.id);
@@ -585,7 +620,28 @@ function renderExercises() {
                 <textarea class="exercise-note-input" rows="2" maxlength="1000" placeholder="مثلاً تنظیم دستگاه، حس حرکت، دلیل کم‌شدن وزنه…">${esc(exNote)}</textarea>
             </details>
         `;
-        exerciseList.appendChild(card);
+
+        const g = ssMap[index];
+        if (g) {
+            card.classList.add("in-superset");
+            const meta = card.querySelector(".exercise-meta");
+            if (meta) meta.insertAdjacentHTML("beforeend", `<span class="superset-tag">⚡ سوپرست ${toFa(g)}</span>`);
+            if (!ssWrap || ssWrap.dataset.g !== String(g)) {
+                ssWrap = document.createElement("div");
+                ssWrap.className = "superset-group";
+                ssWrap.dataset.g = String(g);
+                ssWrap.innerHTML = `
+                    <div class="superset-head">
+                        <span class="superset-badge">⚡ سوپرست ${toFa(g)}</span>
+                        <span class="superset-hint">یک ست از هر حرکت را پشت‌سرهم و بدون استراحت بزن، بعد استراحت کن و دور بعد را شروع کن.</span>
+                    </div>`;
+                exerciseList.appendChild(ssWrap);
+            }
+            ssWrap.appendChild(card);
+        } else {
+            ssWrap = null;
+            exerciseList.appendChild(card);
+        }
     });
 
     attachInputEvents();

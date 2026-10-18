@@ -13,7 +13,7 @@
 (function () {
     "use strict";
 
-    const ALARM_MAX_MS = 30000;      // حداکثر مدت آلارم تا بسته‌شدن خودکار
+    const ALARM_MAX_BURSTS = 3;      // آلارم بعد از این تعداد هشدار خودبه‌خود قطع می‌شود
     const BURST_EVERY_MS = 2200;     // هر چند میلی‌ثانیه یک دسته بوق تکرار شود
     const BEEPS_PER_BURST = 4;
 
@@ -114,14 +114,16 @@
 
     function startAlarm() {
         stopAlarm();
-        const began = Date.now();
+        let bursts = 0;
         const fire = () => {
+            bursts += 1;
             beepBurst();
             vibrate();
         };
         fire();
         alarmTimer = setInterval(() => {
-            if (Date.now() - began >= ALARM_MAX_MS) { stop(); return; }
+            /* بعد از آخرین هشدار (و تمام‌شدن صدای آن) آلارم و تایمر بسته می‌شوند */
+            if (bursts >= ALARM_MAX_BURSTS) { stop(); return; }
             fire();
         }, BURST_EVERY_MS);
 

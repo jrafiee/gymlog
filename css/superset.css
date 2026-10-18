@@ -1,0 +1,67 @@
+/* =====================================================
+   GymLog — سوپرست (حرکات پشت‌سرهم بدون استراحت)
+   بعد از gl-extras.css و redesign.css لود می‌شود.
+===================================================== */
+:root { --ss-color: #7c3aed; --ss-soft: rgba(124, 58, 237, 0.08); }
+body.dark-mode { --ss-color: #c4b5fd; --ss-soft: rgba(196, 181, 253, 0.1); }
+
+/* ---------- صفحه‌ی ثبت تمرین ---------- */
+.superset-group {
+    margin-bottom: 14px;
+    padding: 8px;
+    border: 2px solid var(--ss-color);
+    border-radius: 16px;
+    background: var(--ss-soft);
+}
+.superset-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+    padding: 4px 6px 10px;
+}
+.superset-badge {
+    padding: 3px 12px; border-radius: 999px;
+    background: var(--ss-color); color: #ffffff;
+    font-size: 13px; font-weight: 800; white-space: nowrap;
+}
+body.dark-mode .superset-badge { color: #1e1b4b; }
+.superset-hint { font-size: 12px; line-height: 1.8; color: var(--gl-muted); }
+.superset-group .exercise-card { margin-bottom: 8px; }
+.superset-group .exercise-card:last-child { margin-bottom: 0; }
+.superset-tag {
+    display: inline-block; margin-right: 8px; padding: 0 8px; border-radius: 999px;
+    background: var(--ss-soft); color: var(--ss-color);
+    border: 1px solid var(--ss-color); font-size: 11px; font-weight: 700;
+}
+
+/* ---------- جدول برنامه‌ها ---------- */
+.dv-prog-table tr.dv-ss-head td {
+    padding: 7px 10px; text-align: right;
+    background: var(--ss-soft); color: var(--ss-color);
+    border-bottom: 1px solid var(--ss-color);
+    font-size: 12px; font-weight: 800;
+}
+.dv-prog-table tr.dv-ss-head td span { font-weight: 500; opacity: 0.85; }
+.dv-prog-table tr.dv-ss-row td { background: var(--ss-soft) !important; }
+.dv-prog-table tr.dv-ss-row td:first-child { box-shadow: inset -4px 0 0 var(--ss-color); }
+.dv-prog-table tr.dv-ss-row.dv-ss-last td { border-bottom: 1px solid var(--ss-color); }
+.dv-ss-chip {
+    display: inline-block; margin-right: 8px; padding: 1px 8px; border-radius: 999px;
+    background: var(--ss-color); color: #ffffff;
+    font-size: 10.5px; font-weight: 700; white-space: nowrap;
+}
+body.dark-mode .dv-ss-chip { color: #1e1b4b; }
+.dv-ss-chip-head { margin: 0; }
+
+/* ---------- ساخت برنامه ---------- */
+.pb-ex.pb-ex-linked { border-color: var(--ss-color); box-shadow: inset -4px 0 0 var(--ss-color); }
+.pb-ss-chip {
+    display: inline-block; margin-right: 6px; padding: 0 8px; border-radius: 999px;
+    background: var(--ss-color); color: #ffffff; font-size: 10.5px; font-style: normal; font-weight: 700;
+}
+body.dark-mode .pb-ss-chip { color: #1e1b4b; }
+.pb-ss-toggle {
+    display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 10px;
+    border: 1px dashed var(--ss-color); border-radius: 10px;
+    background: var(--ss-soft); font-size: 13px; cursor: pointer;
+}
+.pb-ss-toggle input { flex: 0 0 auto; width: 20px; height: 20px; min-height: 0; }
+.pb-ss-toggle small { font-size: 11px; opacity: 0.75; }
