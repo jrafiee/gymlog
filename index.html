@@ -175,7 +175,10 @@
                             <strong>زمان پشتیبان‌گیری رسیده</strong>
                             <span id="backupWarningDetail">مدتی از آخرین پشتیبان‌گیری گذشته.</span>
                         </div>
-                        <button type="button" id="backupWarningBtn" class="secondary-btn">دریافت پشتیبان</button>
+                        <div class="backup-warning-actions">
+                            <button type="button" id="backupWarningBtn" class="secondary-btn">دریافت پشتیبان</button>
+                            <button type="button" id="backupWarningSyncBtn" class="secondary-btn" data-bale-sync hidden>🔄 سینک با بله</button>
+                        </div>
                     </section>
 
                     <!-- Session selector -->
@@ -435,6 +438,11 @@
                         <input type="file" id="importInput" accept=".json" hidden>
                     </label>
                 </div>
+            </div>
+
+            <!-- Bale sync -->
+            <div class="setting-row bale-setting">
+                <div class="bs-panel" data-bale-panel></div>
             </div>
 
             <!-- Program upload -->

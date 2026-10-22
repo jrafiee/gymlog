@@ -48,6 +48,7 @@ const openExerciseBankBtn = document.getElementById("openExerciseBankBtn");
 const backupWarningBanner = document.getElementById("backupWarningBanner");
 const backupWarningDetail = document.getElementById("backupWarningDetail");
 const backupWarningBtn = document.getElementById("backupWarningBtn");
+const backupWarningSyncBtn = document.getElementById("backupWarningSyncBtn");
 const sessionNote = document.getElementById("sessionNote");
 const sessionPrevNote = document.getElementById("sessionPrevNote");
 
@@ -110,6 +111,7 @@ function makeModalCloser(overlay, modalKey) {
 function openSettingsPage() {
     if (!settingsPage) return;
     settingsPage.style.display = "";
+    if (typeof renderBaleSyncPanels === "function") renderBaleSyncPanels(settingsPage);
     history.pushState({ modal: "settings" }, "");
     document.addEventListener("keydown", closeSettingsWithEscape);
 }
@@ -1088,7 +1090,16 @@ if (finishWorkoutBtn) {
             console.error("خطا در پشتیبان خودکار:", error);
         }
 
-        // ۳) پیام نتیجه و رفتن به جلسه‌ی بعد
+        // ۳) ارسال خودکار به بله (اختیاری؛ در پس‌زمینه تا رفتن به جلسه‌ی بعد معطل نشود)
+        let baleSyncPromise = null;
+        if (typeof getBaleSettings === "function") {
+            const bs = getBaleSettings();
+            if (bs.autoAfterSession && bs.token && bs.chatId) {
+                baleSyncPromise = syncBackupToBale();
+            }
+        }
+
+        // ۴) پیام نتیجه و رفتن به جلسه‌ی بعد
         if (backupOk) {
             showToast("جلسه با موفقیت در IndexedDB ذخیره شد و نسخه پشتیبان تهیه گردید.");
             renderBackupWarning();
@@ -1097,6 +1108,14 @@ if (finishWorkoutBtn) {
         }
 
         goToNextWorkout();
+
+        if (baleSyncPromise) {
+            baleSyncPromise.then(r => {
+                showToast(r.ok ? "پشتیبان به بله هم ارسال شد." : r.message, r.ok ? "success" : "warning");
+                if (typeof refreshBaleStatus === "function") refreshBaleStatus();
+                renderBackupWarning();
+            }).catch(() => {});
+        }
     });
 }
 
@@ -1347,6 +1366,10 @@ function renderHistory() {
 ========================= */
 function renderBackupWarning() {
     if (!backupWarningBanner) return;
+
+    if (backupWarningSyncBtn) {
+        backupWarningSyncBtn.hidden = !(typeof isBaleConfigured === "function" && isBaleConfigured());
+    }
 
     const info = getBackupWarningInfo();
 
@@ -1603,6 +1626,15 @@ async function bootApp() {
     // 4. Background asset caching for offline usage
     if (navigator.onLine) {
         cacheProgramAssets(getEffectiveProgramsRaw(), getEffectiveCatalog()).catch(() => {});
+    }
+
+    // 5. ارسال معوق به بله (اگر دفعه‌ی قبل اینترنت نبود)
+    if (typeof retryPendingBaleSync === "function") {
+        retryPendingBaleSync().then(r => {
+            if (r && r.ok) showToast("ارسال معوق پشتیبان به بله انجام شد.");
+            if (typeof refreshBaleStatus === "function") refreshBaleStatus();
+            renderBackupWarning();
+        }).catch(() => {});
     }
 }
 

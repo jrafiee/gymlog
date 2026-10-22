@@ -758,7 +758,7 @@
         return `
         <section class="dv-data-note" aria-labelledby="dvDataNoteTitle">
             <h3 id="dvDataNoteTitle">🔒 اطلاعات تمرین‌هایت کجا ذخیره می‌شود؟</h3>
-            <p class="dv-data-note-lead">GymLog سرور ندارد. هر چه ثبت می‌کنی فقط داخل مرورگرِ همین دستگاه ذخیره می‌شود و به اینترنت یا جای دیگری فرستاده نمی‌شود؛ پس نگه‌داری اطلاعات با خودِ توست.</p>
+            <p class="dv-data-note-lead">GymLog سرور ندارد. هر چه ثبت می‌کنی فقط داخل مرورگرِ همین دستگاه ذخیره می‌شود و به جای دیگری فرستاده نمی‌شود، مگر اینکه خودت «همگام‌سازی با بله» را فعال کنی و دکمه‌ی سینک را بزنی؛ پس نگه‌داری اطلاعات با خودِ توست.</p>
             <div class="dv-data-note-grid">
                 <div class="dv-data-note-item">
                     <strong>💾 پشتیبان‌گیری چطور است؟</strong>

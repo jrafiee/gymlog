@@ -1117,6 +1117,61 @@ function buildBackupFileName() {
 }
 
 /**
+ * ساخت ساختار پشتیبان (بدون دانلود): هم برای exportData و هم برای سینک با بله.
+ * onlyUser: شناسه‌ی یک کاربر، یا null برای پشتیبان کامل. اگر کاربری نباشد null برمی‌گرداند.
+ */
+function buildBackupData(onlyUser) {
+    const users = (_storeCache.users || []).filter(u => !onlyUser || u.id === onlyUser);
+    if (!users.length) return null;
+    const ids = new Set(users.map(u => u.id));
+
+    const workoutsList = getAllWorkouts().filter(w => ids.has(w.userId));
+
+    const programsArray = [];
+    users.forEach(u => {
+        const progs = _storeCache.programsByUser[u.id] || {};
+        Object.keys(progs).forEach(key => {
+            programsArray.push({ id: key, userId: u.id, ...progs[key] });
+        });
+    });
+
+    const catalogOverrides = loadCatalogOverrides();
+    const exercisesArray = Object.keys(catalogOverrides).map(id => ({
+        id,
+        ...catalogOverrides[id]
+    }));
+
+    const settingsArray = [
+        { key: "schemaVersion", value: SCHEMA_VERSION },
+        { key: "lastBackupAt", value: new Date().toISOString() },
+        { key: "firstUseAt", value: getFirstUseAt() },
+        { key: "theme", value: localStorage.getItem(LEGACY_THEME_KEY) || "light" }
+    ];
+
+    const backupData = {
+        app: "Gym Progress Tracker",
+        schemaVersion: BACKUP_SCHEMA_VERSION,
+        backupType: onlyUser ? "user" : "all",
+        exportedAt: new Date().toISOString(),
+        activeUserId: _storeCache.activeUserId,
+        users: users.map(u => ({
+            id: u.id,
+            name: u.name,
+            profile: u.profile || null,
+            notes: u.notes || "",
+            measurements: getUserMeasurements(u.id),
+            createdAt: u.createdAt
+        })),
+        workouts: workoutsList,
+        programs: programsArray,
+        exercises: exercisesArray,
+        settings: settingsArray,
+        catalogAdditions: catalogOverrides
+    };
+    return { backupData, users, workoutsList, programsArray, exercisesArray };
+}
+
+/**
  * Exports a versioned JSON backup.
  *  - بدون options.userId: پشتیبان کامل از همه‌ی کاربران
  *  - با options.userId: فقط اطلاعات همان کاربر (برای «به‌روزرسانی اطلاعات تمرین» در کاربر دیگر)
@@ -1133,53 +1188,9 @@ function exportData(options) {
         const opts = options || {};
         const onlyUser = opts.userId || null;
 
-        const users = (_storeCache.users || []).filter(u => !onlyUser || u.id === onlyUser);
-        if (!users.length) return false;
-        const ids = new Set(users.map(u => u.id));
-
-        const workoutsList = getAllWorkouts().filter(w => ids.has(w.userId));
-
-        const programsArray = [];
-        users.forEach(u => {
-            const progs = _storeCache.programsByUser[u.id] || {};
-            Object.keys(progs).forEach(key => {
-                programsArray.push({ id: key, userId: u.id, ...progs[key] });
-            });
-        });
-
-        const catalogOverrides = loadCatalogOverrides();
-        const exercisesArray = Object.keys(catalogOverrides).map(id => ({
-            id,
-            ...catalogOverrides[id]
-        }));
-
-        const settingsArray = [
-            { key: "schemaVersion", value: SCHEMA_VERSION },
-            { key: "lastBackupAt", value: new Date().toISOString() },
-            { key: "firstUseAt", value: getFirstUseAt() },
-            { key: "theme", value: localStorage.getItem(LEGACY_THEME_KEY) || "light" }
-        ];
-
-        const backupData = {
-            app: "Gym Progress Tracker",
-            schemaVersion: BACKUP_SCHEMA_VERSION,
-            backupType: onlyUser ? "user" : "all",
-            exportedAt: new Date().toISOString(),
-            activeUserId: _storeCache.activeUserId,
-            users: users.map(u => ({
-                id: u.id,
-                name: u.name,
-                profile: u.profile || null,
-                notes: u.notes || "",
-                measurements: getUserMeasurements(u.id),
-                createdAt: u.createdAt
-            })),
-            workouts: workoutsList,
-            programs: programsArray,
-            exercises: exercisesArray,
-            settings: settingsArray,
-            catalogAdditions: catalogOverrides
-        };
+        const built = buildBackupData(onlyUser);
+        if (!built) return false;
+        const { backupData, users, workoutsList, programsArray, exercisesArray } = built;
 
         // Save export snapshot in backups store in IndexedDB
         if (_storeCache.db) {
@@ -1291,7 +1302,7 @@ async function restoreBackup(data) {
     }
 
     const activeUserId = known.has(data.activeUserId) ? data.activeUserId : firstId;
-    const skipSettings = new Set(["users", "activeUserId", "userProfile"]);
+    const skipSettings = new Set(["users", "activeUserId", "userProfile", "baleSync"]);
 
     // Write transactionally to IndexedDB
     if (_storeCache.db) {
@@ -1969,4 +1980,251 @@ async function resetCatalogExercise(id) {
     _storeCache.catalogOverrides = next;
     mirrorCatalogToLocalStorage();
     return true;
+}
+
+
+/* =====================================================
+   Bale Sync — ارسال پشتیبان کامل به بله
+
+   جریان: مرورگر ← POST /api/bale (Worker همین دامنه) ← tapi.bale.ai
+   (مرورگر مستقیم به بله نمی‌تواند وصل شود، چون بله هدر CORS ندارد.)
+
+   - توکن و chat_id فقط در store «settings» (کلید baleSync) نگه‌داری می‌شوند.
+     exportData فهرست تنظیمات را دستی می‌سازد، پس این کلید هیچ‌وقت داخل فایل پشتیبان نمی‌رود؛
+     restoreBackup هم آن را نادیده می‌گیرد.
+   - ارسال ناموفق به‌خاطر نبودن اینترنت/خطای سرور → علامت pending؛ با اولین فرصت خودکار تکرار می‌شود.
+   - اگر پشتیبان از BALE_FULL_LIMIT بزرگ‌تر شد، نسخه‌ی بدون تصویر/ویدیوی حرکات سفارشی ارسال می‌شود.
+===================================================== */
+
+const BALE_SETTINGS_KEY = "baleSync";
+const BALE_ENDPOINT = "/api/bale";
+const BALE_FULL_LIMIT = 15 * 1024 * 1024;
+const BALE_HARD_LIMIT = 19 * 1024 * 1024;
+const BALE_TOKEN_RE = /^\d{3,}:[A-Za-z0-9_-]{10,}$/;
+
+let _baleBusy = false;
+
+function getBaleSettings() {
+    const s = (_storeCache.settings && _storeCache.settings[BALE_SETTINGS_KEY]) || {};
+    return {
+        token: typeof s.token === "string" ? s.token : "",
+        chatId: typeof s.chatId === "string" ? s.chatId : "",
+        autoAfterSession: !!s.autoAfterSession,
+        pending: !!s.pending,
+        lastSyncAt: s.lastSyncAt || null,
+        lastStatus: s.lastStatus || "",
+        lastError: s.lastError || "",
+        lastStripped: !!s.lastStripped
+    };
+}
+
+function isBaleConfigured() {
+    const s = getBaleSettings();
+    return !!(s.token && s.chatId);
+}
+
+async function saveBaleSettings(patch) {
+    const next = { ...getBaleSettings(), ...patch };
+    if (!_storeCache.settings) _storeCache.settings = {};
+    _storeCache.settings[BALE_SETTINGS_KEY] = next;
+
+    if (_storeCache.db) {
+        try {
+            await putRecord(_storeCache.db, "settings", {
+                key: BALE_SETTINGS_KEY,
+                value: next,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (err) {
+            console.error("[GymLog Bale] خطا در ذخیره‌ی تنظیمات:", err);
+        }
+    }
+    return next;
+}
+
+async function clearBaleSettings() {
+    if (_storeCache.settings) delete _storeCache.settings[BALE_SETTINGS_KEY];
+    if (_storeCache.db) {
+        try {
+            await deleteRecordByKey(_storeCache.db, "settings", BALE_SETTINGS_KEY);
+        } catch (err) {
+            console.error("[GymLog Bale] خطا در حذف تنظیمات:", err);
+        }
+    }
+    return true;
+}
+
+/* تصویر/ویدیوی بارگذاری‌شده (data URL) حذف می‌شود؛ مسیرهای فایل عادی می‌مانند */
+function stripBackupMedia(backup) {
+    const clean = e => (e && Array.isArray(e.images)
+        ? { ...e, images: e.images.filter(p => typeof p !== "string" || !p.startsWith("data:")) }
+        : e);
+    const copy = { ...backup };
+    copy.exercises = (backup.exercises || []).map(clean);
+    copy.catalogAdditions = {};
+    Object.keys(backup.catalogAdditions || {}).forEach(id => {
+        copy.catalogAdditions[id] = clean(backup.catalogAdditions[id]);
+    });
+    return copy;
+}
+
+function buildBaleCaption(built, stripped) {
+    const faNum = n => (typeof toFa === "function" ? toFa(n) : String(n));
+    const today = _todayLocalIso();
+    const day = typeof formatPersianDate === "function" ? formatPersianDate(today, true) : today;
+    const lines = [
+        "پشتیبان GymLog",
+        day,
+        `${faNum(built.users.length)} کاربر · ${faNum(built.workoutsList.length)} جلسه`
+    ];
+    if (stripped) lines.push("⚠ بدون تصویر/ویدیوی حرکات سفارشی (حجم زیاد)");
+    return lines.join("\n");
+}
+
+/* ارسال FormData به Worker. خروجی: {ok} یا {ok:false, offline?, status?, error?, hasJson?} */
+async function postToBale(form) {
+    let res;
+    try {
+        res = await fetch(BALE_ENDPOINT, { method: "POST", body: form });
+    } catch (err) {
+        return { ok: false, offline: true, error: "network" };
+    }
+    let data = null;
+    try { data = await res.json(); } catch (err) { /* پاسخ JSON نبود */ }
+
+    if (res.ok && data && data.ok) return { ok: true };
+    return {
+        ok: false,
+        status: res.status,
+        hasJson: !!data,
+        error: (data && (data.error || data.description)) || ("HTTP " + res.status)
+    };
+}
+
+function describeBaleError(r) {
+    if (r.offline) return "اتصال به اینترنت یا سرور برقرار نشد.";
+    const e = String(r.error || "");
+    if (e === "bad_credentials") return "توکن یا chat_id معتبر نیست.";
+    if (e === "file_too_large" || r.status === 413) return "حجم فایل برای ارسال زیاد است.";
+    if (e === "forbidden_origin") return "این آدرس مجاز به استفاده از واسط ارسال نیست.";
+    if (e === "upstream_unreachable") return "سرور بله در دسترس نیست.";
+    if (r.status === 404 && !r.hasJson) return "واسط ارسال (/api/bale) پیدا نشد؛ برنامه باید از آدرس دیپلوی‌شده‌ی Worker باز شده باشد.";
+    if (r.status === 401 || r.status === 403 || r.status === 404) return "توکن ربات نامعتبر است.";
+    if (r.status === 400) return "بله درخواست را نپذیرفت (chat_id یا شروع‌نشدن گفت‌وگو با ربات را بررسی کن): " + e;
+    return "ارسال ناموفق بود (" + e + ").";
+}
+
+/* پیام آزمایشی؛ با مقادیر واردشده در فرم (حتی قبل از ذخیره) */
+async function baleTestConnection(token, chatId) {
+    const form = new FormData();
+    form.set("token", token);
+    form.set("chat_id", chatId);
+    form.set("text", "✅ اتصال GymLog به بله برقرار است.");
+    const r = await postToBale(form);
+    return r.ok ? { ok: true } : { ok: false, message: describeBaleError(r) };
+}
+
+/**
+ * سینک: پشتیبان کامل تازه می‌سازد و به بله می‌فرستد.
+ * خروجی: {ok, stripped?, size?} یا {ok:false, message, pending?}
+ */
+async function syncBackupToBale() {
+    const cfg = getBaleSettings();
+    if (!cfg.token || !cfg.chatId) {
+        return { ok: false, message: "اول توکن ربات و chat_id را در تنظیمات وارد کن." };
+    }
+    if (_baleBusy) return { ok: false, message: "یک ارسال دیگر در حال انجام است." };
+    _baleBusy = true;
+
+    try {
+        const built = buildBackupData(null);
+        if (!built) return { ok: false, message: "اطلاعاتی برای ارسال وجود ندارد." };
+
+        let backup = built.backupData;
+        let blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+        let stripped = false;
+
+        if (blob.size > BALE_FULL_LIMIT) {
+            backup = stripBackupMedia(backup);
+            blob = new Blob([JSON.stringify(backup)], { type: "application/json" });
+            stripped = true;
+        }
+        if (blob.size > BALE_HARD_LIMIT) {
+            const message = "حجم پشتیبان حتی بدون تصویر/ویدیو برای ارسال زیاد است.";
+            await saveBaleSettings({ pending: false, lastStatus: "error", lastError: message });
+            return { ok: false, message };
+        }
+
+        const nowIso = new Date().toISOString();
+        const form = new FormData();
+        form.set("token", cfg.token);
+        form.set("chat_id", cfg.chatId);
+        form.set("caption", buildBaleCaption(built, stripped));
+        form.set("file", blob, buildBackupFileName());
+
+        const r = await postToBale(form);
+
+        if (r.ok) {
+            setLastBackupAt(nowIso);
+            await saveBaleSettings({
+                pending: false,
+                lastSyncAt: nowIso,
+                lastStatus: "ok",
+                lastError: "",
+                lastStripped: stripped
+            });
+            if (_storeCache.db) {
+                putRecord(_storeCache.db, "backups", {
+                    exportedAt: nowIso,
+                    type: "sync-bale",
+                    summary: {
+                        usersCount: built.users.length,
+                        workoutsCount: built.workoutsList.length,
+                        sizeBytes: blob.size,
+                        stripped
+                    }
+                }).catch(() => {});
+            }
+            return { ok: true, stripped, size: blob.size };
+        }
+
+        const reason = describeBaleError(r);
+        const pending = !!r.offline || r.status >= 500;
+        await saveBaleSettings({
+            pending,
+            lastStatus: pending ? "pending" : "error",
+            lastError: reason
+        });
+        return {
+            ok: false,
+            pending,
+            message: pending
+                ? "ارسال انجام نشد و در صف ماند؛ با دسترسی به اینترنت خودکار تکرار می‌شود. (" + reason + ")"
+                : reason
+        };
+    } catch (err) {
+        console.error("[GymLog Bale] خطای غیرمنتظره در سینک:", err);
+        return { ok: false, message: "خطای غیرمنتظره در ارسال پشتیبان." };
+    } finally {
+        _baleBusy = false;
+    }
+}
+
+/* اگر ارسال قبلی در صف مانده بود، تکرار می‌شود (خروجی null = کاری برای انجام نبود) */
+async function retryPendingBaleSync() {
+    const cfg = getBaleSettings();
+    if (!cfg.pending || !cfg.token || !cfg.chatId) return null;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return null;
+    return syncBackupToBale();
+}
+
+if (typeof window !== "undefined") {
+    window.addEventListener("online", () => {
+        retryPendingBaleSync().then(r => {
+            if (!r) return;
+            if (r.ok && typeof toast === "function") toast("ارسال معوق پشتیبان به بله انجام شد.");
+            if (typeof refreshBaleStatus === "function") refreshBaleStatus();
+            if (typeof renderBackupWarning === "function") renderBackupWarning();
+        }).catch(() => {});
+    });
 }

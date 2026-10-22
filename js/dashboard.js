@@ -893,7 +893,18 @@ function renderBackupView() {
                 </label>
             </div>
         </div>
+
+        <div class="card gl-panel gl-gap-top">
+            <h3 class="gl-panel-title">همگام‌سازی با بله</h3>
+            <p class="gl-panel-desc">یک پشتیبان کامل تازه ساخته و به چت بله‌ی خودت ارسال می‌شود. توکن ربات و chat_id را از بخش «تنظیمات» وارد کن.</p>
+            <div class="gl-info-box">
+                <strong>وضعیت:</strong>
+                <span class="bs-status" data-bale-status></span>
+            </div>
+            <button type="button" class="primary-btn" data-bale-sync>🔄 سینک (ارسال پشتیبان به بله)</button>
+        </div>
     `;
+    if (typeof refreshBaleStatus === "function") refreshBaleStatus();
 
     container.querySelector("#dashExportBtn").addEventListener("click", () => {
         if (typeof exportData === "function") exportData();
@@ -942,6 +953,10 @@ function renderSettingsView() {
                 </button>
             </div>
 
+            <div class="setting-row gl-setting-row bale-setting">
+                <div class="bs-panel" data-bale-panel></div>
+            </div>
+
             <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>پاک‌سازی تاریخچه تمرینات</strong>
@@ -963,6 +978,8 @@ function renderSettingsView() {
             </div>
         </div>
     `;
+
+    renderBaleSyncPanels(container);
 
     const builderBtn = container.querySelector("#dashOpenBuilderBtn");
     if (builderBtn) {
@@ -1013,7 +1030,7 @@ const HELP_FEATURES = [
     ["تاریخچه و تقویم", "فهرست همه‌ی جلسات با جستجو و فیلتر، و تقویم ماهانه با روزهای تمرین‌کرده."],
     ["بانک حرکات", "حرکات همراه با تصویر و توضیح اجرا؛ امکان افزودن و ویرایش حرکت و بارگذاری تصویر یا ویدیو."],
     ["چند کاربره", "برای هر نفر تمرین‌ها و برنامه‌ی جدا؛ پشتیبان تکی یا کلی و اضافه‌کردن اطلاعات یک فایل به یک کاربر."],
-    ["پشتیبان‌گیری", "خروجی فایل JSON از همه‌چیز و بازیابی آن، همراه با یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
+    ["پشتیبان‌گیری", "خروجی فایل JSON از همه‌چیز و بازیابی آن، ارسال پشتیبان به چت بله با دکمه‌ی سینک، و یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
     ["کار بدون اینترنت", "بعد از اولین بازکردن، برنامه آفلاین هم کار می‌کند و روی گوشی مثل یک اپ نصب می‌شود (PWA)."]
 ];
 
@@ -1135,6 +1152,16 @@ const HELP_GROUPS = [
                 a: `<p>بله. بعد از اولین بازکردن با اینترنت، برنامه و فایل‌های آموزشی روی دستگاه ذخیره می‌شوند و بدون اینترنت هم می‌توانی تمرین ثبت کنی. وقتی نسخه‌ی جدید برنامه آماده شود، در «تنظیمات» دکمه‌ی «به‌روزرسانی» فعال می‌شود.</p>`
             },
             {
+                q: "همگام‌سازی با بله چیست و چطور راه‌اندازی می‌شود؟",
+                a: `<p>با دکمه‌ی «سینک»، یک پشتیبان کامل به چت بله‌ی خودت فرستاده می‌شود. برای راه‌اندازی:</p>
+                    <ol>
+                        <li>در بله با <b>BotFather</b> یک ربات بساز (دستور <bdi dir="ltr">/newbot</bdi>) و توکن را بگیر.</li>
+                        <li>ربات را در بله استارت کن و یک پیام برایش بفرست تا شناسه‌ی چتت (chat_id) مشخص شود.</li>
+                        <li>در «تنظیمات ← همگام‌سازی با بله» توکن و chat_id را وارد کن و «ارسال پیام آزمایشی» را بزن.</li>
+                    </ol>
+                    <p>توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود. اگر اینترنت نبود، ارسال در صف می‌ماند و بعداً خودکار انجام می‌شود. اگر فایل خیلی بزرگ باشد (مثلاً به‌خاطر ویدیوهای حرکات سفارشی)، نسخه‌ی بدون تصویر/ویدیو ارسال می‌شود. چون پشتیبان شامل اطلاعات همه‌ی کاربران است، چت مقصد را خصوصی نگه دار.</p>`
+            },
+            {
                 q: "تفاوت «حذف تاریخچه» و «حذف همه‌چیز» چیست؟",
                 a: `<p>«حذف تاریخچه» فقط وزنه و تکرارهای کاربر فعال را پاک می‌کند و برنامه‌ها و سایر کاربران می‌مانند. «حذف همه‌چیز» تمام کاربران، برنامه‌ها و سوابق را پاک می‌کند. هر دو برگشت‌پذیر نیستند؛ قبلش پشتیبان بگیر.</p>`
             }
@@ -1188,7 +1215,7 @@ function renderHelpView() {
     <div class="hp-wrap">
         <section class="hp-hero">
             <h2>راهنمای GymLog</h2>
-            <p>GymLog یک دفترچه‌ی تمرین فارسی و رایگان است که روی مرورگر یا گوشی‌ات اجرا می‌شود: تمرین‌ها را ثبت می‌کنی، پیشرفتت را می‌بینی و بدون حساب کاربری و بدون ارسال اطلاعات به جایی، همه‌چیز پیش خودت می‌ماند.</p>
+            <p>GymLog یک دفترچه‌ی تمرین فارسی و رایگان است که روی مرورگر یا گوشی‌ات اجرا می‌شود: تمرین‌ها را ثبت می‌کنی، پیشرفتت را می‌بینی و بدون حساب کاربری، همه‌چیز به‌طور پیش‌فرض پیش خودت می‌ماند (فقط اگر همگام‌سازی با بله را روشن کنی، پشتیبان به چت بله‌ی خودت ارسال می‌شود).</p>
         </section>
 
         <section class="hp-block">
@@ -1230,6 +1257,205 @@ function renderHelpView() {
         none.hidden = total > 0;
     });
 }
+
+/* =====================================================
+   Bale Sync UI — تنظیمات، وضعیت و دکمه‌ی «سینک»
+   منطق ارسال در storage.js است (syncBackupToBale و ...).
+   هر عنصر با data-bale-panel یک پنل کامل می‌گیرد (منوی موبایل و صفحه‌ی تنظیمات)،
+   و هر دکمه‌ی دارای data-bale-sync سینک را اجرا می‌کند.
+===================================================== */
+function baleStatusInfo() {
+    const cfg = getBaleSettings();
+    if (!cfg.token || !cfg.chatId) return { cls: "", text: "هنوز تنظیم نشده است." };
+    if (cfg.pending) {
+        return { cls: "pending", text: "ارسال در صف است (اینترنت یا سرور در دسترس نبود)؛ با دسترسی دوباره خودکار ارسال می‌شود." };
+    }
+    if (cfg.lastStatus === "error") {
+        return { cls: "err", text: "آخرین تلاش ناموفق بود: " + (cfg.lastError || "خطای نامشخص") };
+    }
+    if (cfg.lastSyncAt) {
+        const d = new Date(cfg.lastSyncAt);
+        const day = formatPersianDate(_localIsoFromStamp(cfg.lastSyncAt), true);
+        const time = isNaN(d.getTime()) ? "" : " ساعت " + d.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+        return { cls: "ok", text: "آخرین ارسال موفق: " + day + time + (cfg.lastStripped ? " (بدون تصویر/ویدیو)" : "") };
+    }
+    return { cls: "", text: "تنظیم شده است؛ هنوز ارسالی انجام نشده." };
+}
+
+function refreshBaleStatus() {
+    const info = baleStatusInfo();
+    document.querySelectorAll("[data-bale-status]").forEach(el => {
+        el.textContent = info.text;
+        el.className = "bs-status" + (info.cls ? " " + info.cls : "");
+    });
+}
+
+function goToBaleSettings() {
+    if (isWideCalendar()) switchView("settings");
+    else if (typeof openSettingsPage === "function") openSettingsPage();
+}
+
+let _baleRunning = false;
+
+async function runBaleSync() {
+    if (_baleRunning) return;
+    if (typeof isBaleConfigured !== "function" || !isBaleConfigured()) {
+        toast("اول توکن ربات و chat_id را در تنظیمات وارد کن.", "warning");
+        goToBaleSettings();
+        return;
+    }
+
+    _baleRunning = true;
+    const buttons = Array.from(document.querySelectorAll("[data-bale-sync]"));
+    const labels = buttons.map(b => b.textContent);
+    buttons.forEach(b => { b.disabled = true; b.textContent = "در حال ارسال…"; });
+
+    let r;
+    try {
+        r = await syncBackupToBale();
+    } catch (err) {
+        console.error(err);
+        r = { ok: false, message: "خطای غیرمنتظره در ارسال." };
+    }
+
+    buttons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+    _baleRunning = false;
+
+    refreshBaleStatus();
+    if (typeof renderBackupWarning === "function") renderBackupWarning();
+
+    if (r.ok) {
+        toast(r.stripped
+            ? "پشتیبان به بله ارسال شد، ولی به‌خاطر حجم زیاد بدون تصویر/ویدیوی حرکات سفارشی."
+            : "پشتیبان کامل به بله ارسال شد.");
+    } else {
+        toast(r.message, r.pending ? "info" : "warning");
+    }
+}
+
+function renderBaleSyncPanels(root) {
+    (root || document).querySelectorAll("[data-bale-panel]").forEach(el => renderBalePanel(el));
+}
+
+function renderBalePanel(el) {
+    const cfg = getBaleSettings();
+    const hasToken = !!cfg.token;
+
+    el.innerHTML = `
+        <div class="bs-head">
+            <strong>همگام‌سازی با بله</strong>
+            <span class="bs-status" data-bale-status></span>
+        </div>
+        <p class="bs-desc">با دکمه‌ی «سینک»، یک پشتیبان کامل از همه‌ی کاربران، تمرین‌ها و برنامه‌ها به چت بله‌ی خودت ارسال می‌شود. توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود.</p>
+        <button type="button" class="primary-btn bs-sync-btn" data-bale-sync>🔄 سینک (ارسال پشتیبان به بله)</button>
+
+        <div class="bs-fields">
+            <div class="bs-field">
+                <span class="bs-label">توکن ربات</span>
+                <div class="bs-input-row">
+                    <input type="password" name="baleToken" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false"
+                        aria-label="توکن ربات بله"
+                        placeholder="${hasToken ? "ذخیره شده — برای تغییر، توکن جدید را وارد کن" : "123456789:AbCdEf..."}">
+                    <button type="button" class="secondary-btn" data-bs-act="toggle">نمایش</button>
+                </div>
+            </div>
+            <div class="bs-field">
+                <span class="bs-label">chat_id</span>
+                <input type="text" name="baleChat" dir="ltr" inputmode="numeric" autocomplete="off"
+                    aria-label="شناسه‌ی چت بله" value="${esc(cfg.chatId)}" placeholder="123456789">
+            </div>
+        </div>
+
+        <label class="bs-check">
+            <input type="checkbox" name="baleAuto" ${cfg.autoAfterSession ? "checked" : ""}>
+            <span>بعد از «پایان جلسه»، پشتیبان خودکار به بله هم ارسال شود
+                <small>دانلود فایل بعد از پایان جلسه مثل قبل انجام می‌شود.</small></span>
+        </label>
+
+        <div class="bs-actions">
+            <button type="button" class="primary-btn" data-bs-act="save">ذخیره</button>
+            <button type="button" class="secondary-btn" data-bs-act="test">ارسال پیام آزمایشی</button>
+            ${hasToken || cfg.chatId ? `<button type="button" class="danger-btn" data-bs-act="clear">حذف تنظیمات</button>` : ""}
+        </div>
+        <p class="bs-msg" role="status"></p>
+        <small class="gl-hint">پشتیبان کامل شامل اطلاعات همه‌ی کاربران (از جمله قد، وزن و دور کمر) است و در همان چت بله می‌ماند. بهتر است چت مقصد یک چت خصوصی باشد.</small>
+    `;
+
+    const q = s => el.querySelector(s);
+    const setMsg = (text, kind) => {
+        const m = q(".bs-msg");
+        if (!m) return;
+        m.textContent = text || "";
+        m.className = "bs-msg" + (kind ? " " + kind : "");
+    };
+
+    function readInputs() {
+        const typed = toLatinDigits(q('[name="baleToken"]').value).trim();
+        const token = typed || cfg.token;
+        const chatId = toLatinDigits(q('[name="baleChat"]').value).trim();
+        if (!token) return { error: "توکن ربات را وارد کن." };
+        if (!BALE_TOKEN_RE.test(token)) return { error: "شکل توکن درست نیست؛ باید شبیه 123456789:AbCdEf… باشد." };
+        if (!chatId) return { error: "chat_id را وارد کن." };
+        if (!/^(-?\d+|@\w+)$/.test(chatId)) return { error: "chat_id باید عدد باشد." };
+        return { token, chatId, auto: q('[name="baleAuto"]').checked };
+    }
+
+    el.onclick = async e => {
+        const btn = e.target.closest("[data-bs-act]");
+        if (!btn) return;
+        const act = btn.dataset.bsAct;
+
+        if (act === "toggle") {
+            const input = q('[name="baleToken"]');
+            const show = input.type === "password";
+            input.type = show ? "text" : "password";
+            btn.textContent = show ? "پنهان" : "نمایش";
+            return;
+        }
+
+        if (act === "clear") {
+            if (!confirm("توکن و chat_id از این دستگاه پاک شوند؟ ارسال به بله متوقف می‌شود.")) return;
+            await clearBaleSettings();
+            renderBaleSyncPanels();
+            refreshBaleStatus();
+            if (typeof renderBackupWarning === "function") renderBackupWarning();
+            toast("تنظیمات همگام‌سازی پاک شد.");
+            return;
+        }
+
+        const r = readInputs();
+        if (r.error) { setMsg(r.error, "err"); return; }
+
+        if (act === "save") {
+            const changed = r.token !== cfg.token || r.chatId !== cfg.chatId;
+            await saveBaleSettings({
+                token: r.token,
+                chatId: r.chatId,
+                autoAfterSession: r.auto,
+                ...(changed ? { pending: false, lastStatus: "", lastError: "" } : {})
+            });
+            renderBaleSyncPanels();
+            refreshBaleStatus();
+            if (typeof renderBackupWarning === "function") renderBackupWarning();
+            setMsg("ذخیره شد ✓", "ok");
+        } else if (act === "test") {
+            btn.disabled = true;
+            setMsg("در حال ارسال پیام آزمایشی…", "");
+            const res = await baleTestConnection(r.token, r.chatId);
+            btn.disabled = false;
+            setMsg(res.ok ? "پیام آزمایشی ارسال شد؛ بله را بررسی کن." : res.message, res.ok ? "ok" : "err");
+        }
+    };
+
+    refreshBaleStatus();
+}
+
+document.addEventListener("click", e => {
+    const btn = e.target.closest("[data-bale-sync]");
+    if (!btn) return;
+    e.preventDefault();
+    runBaleSync();
+});
 
 /* =====================================================
    Init Dashboard & Desktop Shell

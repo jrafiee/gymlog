@@ -404,3 +404,37 @@ body.sidebar-collapsed .sidebar-nav-item:hover { transform: scale(1.1); }
 .gl-prog-chev { display: inline-block; margin-right: 6px; color: var(--gl-muted); transition: transform 0.2s ease; }
 .gl-program-card.open .gl-prog-chev { transform: rotate(180deg); }
 .gl-program-card .dv-prog-sessions[hidden] { display: none; }
+
+/* =====================================================
+   همگام‌سازی با بله (prefix: bs-)
+===================================================== */
+.gl-gap-top { margin-top: 16px; }
+.bale-setting { align-items: flex-start; flex-direction: column; }
+.bs-panel { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.bs-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
+.bs-head strong { font-size: 15px; color: var(--gl-text); }
+.bs-status { font-size: 12px; line-height: 1.8; color: var(--gl-muted); }
+.bs-status.ok { color: #16a34a; }
+.bs-status.pending { color: #d97706; }
+.bs-status.err { color: var(--gl-danger); }
+.bs-desc { margin: 0; font-size: 12.5px; line-height: 1.9; color: var(--gl-muted); }
+.bs-sync-btn { width: 100%; }
+.bs-fields { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 600px) { .bs-fields { grid-template-columns: 1.6fr 1fr; } }
+.bs-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.bs-label { font-size: 13px; font-weight: 600; color: var(--gl-muted); }
+.bs-input-row { display: flex; gap: 6px; }
+.bs-input-row input { flex: 1; min-width: 0; }
+.bs-input-row button { flex: 0 0 auto; min-height: 44px; padding: 6px 12px; font-size: 12px; }
+.bs-field input[dir="ltr"] { text-align: left; }
+.bs-check { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; line-height: 1.8; cursor: pointer; color: var(--gl-text); }
+.bs-check input { flex: 0 0 auto; width: 20px; height: 20px; min-height: 0; margin-top: 3px; }
+.bs-check small { display: block; font-size: 11px; color: var(--gl-faint); }
+.bs-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.bs-actions button { min-height: 42px; padding: 6px 14px; font-size: 13px; }
+.bs-msg { min-height: 18px; margin: 0; font-size: 12.5px; line-height: 1.8; color: var(--gl-muted); }
+.bs-msg.ok { color: #16a34a; }
+.bs-msg.err { color: var(--gl-danger); }
+.backup-warning-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.backup-warning-actions .secondary-btn { min-height: 38px; font-size: 12px; }
+.backup-warning-actions [hidden] { display: none; }
