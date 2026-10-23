@@ -24,6 +24,7 @@ let currentMonth = getLatestMonthKey();
 let viewingMonth = currentMonth;
 let currentSession = 1;
 let keepSelectedWeek = false;
+let settingsReturnView = null;   // صفحه‌ای که از داخل تنظیمات موبایل باز شده
 
 /* -------------------------
 عناصر صفحه
@@ -132,6 +133,16 @@ function closeSettingsWithEscape(event) {
     }
 }
 
+/* باز کردن یک صفحه از منوی تنظیمات؛ Back به تنظیمات برمی‌گردد */
+function openFromSettings(view) {
+    closeSettingsPage(true);
+    settingsReturnView = view;
+    const st = { subview: view };
+    if (history.state && history.state.modal === "settings") history.replaceState(st, "");
+    else history.pushState(st, "");
+    switchView(view);
+}
+
 if (openSettingsBtn) {
     openSettingsBtn.addEventListener("click", openSettingsPage);
 }
@@ -160,6 +171,17 @@ window.addEventListener("popstate", () => {
     const myProgramsOverlay = document.querySelector(".my-programs-overlay");
     if (myProgramsOverlay) {
         myProgramsOverlay.remove();
+        return;
+    }
+
+    // ۳.۵ بازگشت از صفحه‌ای که از تنظیمات باز شده (راهنما / کاربران / بانک حرکات)
+    if (settingsReturnView && !(history.state && history.state.subview)) {
+        const v = settingsReturnView;
+        settingsReturnView = null;
+        if (typeof currentDesktopView !== "undefined" && currentDesktopView === v) {
+            switchView("workout");
+            openSettingsPage();
+        }
         return;
     }
 
@@ -521,10 +543,7 @@ if (openMyProgramsBtn) {
 }
 
 if (openExerciseBankBtn) {
-    openExerciseBankBtn.addEventListener("click", () => {
-        closeSettingsPage(true);
-        switchView("bank");
-    });
+    openExerciseBankBtn.addEventListener("click", () => openFromSettings("bank"));
 }
 
 /* =========================
@@ -1427,7 +1446,14 @@ async function cacheProgramAssets(programsRaw, catalog) {
     await Promise.all(urls.map(async url => {
         try {
             if (await cache.match(url)) { ok += 1; return; }
-            const response = await fetch(url, { cache: "reload" });
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 8000);
+            let response;
+            try {
+                response = await fetch(url, { cache: "reload", signal: ctrl.signal });
+            } finally {
+                clearTimeout(timer);
+            }
             if (response.ok && response.status === 200) {
                 await cache.put(url, response);
                 ok += 1;

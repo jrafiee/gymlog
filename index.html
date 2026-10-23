@@ -336,150 +336,87 @@
         </div>
 
         <div class="settings-content">
-            <!-- Dashboard Quick Link -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>داشبورد تحلیلی تمرین</strong>
-                    <span>مشاهده آمار کامل دوره، نمودارهای حجم و وضعیت جلسات</span>
-                </div>
-                <button class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(); switchView('dashboard');">
-                    مشاهده داشبورد
-                </button>
-            </div>
 
-            <!-- Help -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>راهنما و سوالات متداول</strong>
-                    <span>معرفی امکانات برنامه، نحوه‌ی ذخیره‌سازی و پشتیبان‌گیری، و راه‌های تماس</span>
+            <section class="settings-group">
+                <h3 class="settings-group-title">صفحات برنامه</h3>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>داشبورد تحلیلی تمرین</strong><span>آمار دوره، نمودارها و وضعیت جلسات</span></div>
+                    <button class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(); switchView('dashboard');">مشاهده داشبورد</button>
                 </div>
-                <button class="secondary-btn setting-btn" type="button" onclick="closeSettingsPage(true); switchView('help');">
-                    مشاهده راهنما
-                </button>
-            </div>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>کاربران</strong><span>افزودن، حذف و ویرایش مشخصات کاربران</span></div>
+                    <button class="secondary-btn setting-btn" type="button" onclick="openFromSettings('user');">نمایش کاربران</button>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>بانک حرکات</strong><span>فهرست حرکات با تصویر و نحوه اجرا</span></div>
+                    <button id="openExerciseBankBtn" class="secondary-btn setting-btn" type="button">نمایش بانک حرکات</button>
+                </div>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>راهنما و سوالات متداول</strong><span>امکانات برنامه، ذخیره‌سازی و راه‌های تماس</span></div>
+                    <button class="secondary-btn setting-btn" type="button" onclick="openFromSettings('help');">مشاهده راهنما</button>
+                </div>
+            </section>
 
-            <!-- User -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>کاربران</strong>
-                    <span>مشاهده، افزودن و حذف کاربران؛ ویرایش مشخصات و به‌روزرسانی اطلاعات هر کاربر</span>
+            <section class="settings-group">
+                <h3 class="settings-group-title">برنامه‌های تمرینی</h3>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>ساخت برنامه تمرینی</strong><span>طراحی برنامه‌ی جدید و ثبت مستقیم یا دانلود JSON</span></div>
+                    <button id="openProgramBuilderBtn" class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(true); openProgramBuilder();">ساخت برنامه</button>
                 </div>
-                <button class="secondary-btn setting-btn" type="button" onclick="closeSettingsPage(true); switchView('user');">
-                    مشاهده
-                </button>
-            </div>
+                <div class="setting-row my-programs-setting">
+                    <div class="setting-info"><strong>برنامه‌های من</strong><span>فهرست برنامه‌ها و جزئیات جلسات</span></div>
+                    <button id="openMyProgramsBtn" class="secondary-btn setting-btn" type="button">مشاهده</button>
+                </div>
+                <div class="setting-row program-setting">
+                    <div class="setting-info"><strong>بارگذاری برنامه‌ی جدید</strong><span>فایل آماده‌شده‌ی برنامه‌ی باشگاه (JSON)</span></div>
+                    <div class="program-actions">
+                        <label class="secondary-btn file-btn">بارگذاری برنامه‌ی جدید
+                            <input type="file" id="programImportInput" accept=".json" hidden>
+                        </label>
+                    </div>
+                </div>
+            </section>
 
-            <!-- Program builder -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>ساخت برنامه تمرینی</strong>
-                    <span>طراحی برنامه‌ی جدید و ثبت مستقیم یا دانلود فایل JSON</span>
+            <section class="settings-group">
+                <h3 class="settings-group-title">ظاهر و به‌روزرسانی</h3>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>ظاهر برنامه</strong><span>تغییر بین حالت روشن و تاریک</span></div>
+                    <button id="themeToggleBtn" class="secondary-btn setting-btn" type="button">🌙 حالت تاریک</button>
                 </div>
-                <button id="openProgramBuilderBtn" class="primary-btn setting-btn" type="button" onclick="closeSettingsPage(true); openProgramBuilder();">
-                    ساخت برنامه
-                </button>
-            </div>
+                <div class="setting-row">
+                    <div class="setting-info"><strong>به‌روزرسانی برنامه</strong><span id="updateStatus">نسخه‌ی فعلی به‌روز است.</span></div>
+                    <button id="updateAppBtn" class="secondary-btn setting-btn" type="button" disabled>به‌روزرسانی</button>
+                </div>
+            </section>
 
-            <!-- Appearance -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>ظاهر برنامه</strong>
-                    <span>تغییر بین حالت روشن و تاریک</span>
+            <section class="settings-group">
+                <h3 class="settings-group-title">پشتیبان‌گیری و همگام‌سازی</h3>
+                <div class="setting-row backup-setting">
+                    <div class="setting-info"><strong>پشتیبان اطلاعات</strong><span>دانلود یا بازیابی فایل پشتیبان همه‌ی کاربران</span></div>
+                    <div class="backup-actions">
+                        <button id="exportBtn" class="secondary-btn" type="button">دریافت پشتیبان</button>
+                        <label class="secondary-btn file-btn">بازیابی پشتیبان
+                            <input type="file" id="importInput" accept=".json" hidden>
+                        </label>
+                    </div>
                 </div>
-                <button id="themeToggleBtn" class="secondary-btn setting-btn" type="button">
-                    🌙 حالت تاریک
-                </button>
-            </div>
+                <div class="setting-row bale-setting">
+                    <div class="bs-panel" data-bale-panel></div>
+                </div>
+            </section>
 
-            <!-- Exercise Bank -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>بانک حرکات</strong>
-                    <span>فهرست کامل حرکات ورزشی کاتالوگ با تصویر و نحوه اجرا</span>
+            <section class="settings-group settings-group-danger">
+                <h3 class="settings-group-title">منطقه خطر</h3>
+                <div class="setting-row danger-setting">
+                    <div class="setting-info"><strong>حذف تاریخچه‌ی تمرین‌ها</strong><span>فقط وزنه/تکرارهای کاربر فعال پاک می‌شود.</span></div>
+                    <button id="clearBtn" class="danger-btn setting-btn" type="button">حذف تاریخچه</button>
                 </div>
-                <button id="openExerciseBankBtn" class="secondary-btn setting-btn" type="button">
-                    نمایش بانک حرکات
-                </button>
-            </div>
+                <div class="setting-row danger-setting">
+                    <div class="setting-info"><strong>بازنشانی کامل</strong><span>همه‌چیز (همه‌ی کاربران) پاک می‌شود؛ توکن و chat_id بله می‌ماند.</span></div>
+                    <button id="fullResetBtn" class="danger-btn setting-btn" type="button">حذف همه‌چیز</button>
+                </div>
+            </section>
 
-            <!-- My programs -->
-            <div class="setting-row my-programs-setting">
-                <div class="setting-info">
-                    <strong>برنامه‌های من</strong>
-                    <span>فهرست برنامه‌های ماهانه و جزئیات جلسات.</span>
-                </div>
-                <button id="openMyProgramsBtn" class="secondary-btn setting-btn" type="button">
-                    مشاهده
-                </button>
-            </div>
-            <!-- App update -->
-            <div class="setting-row">
-                <div class="setting-info">
-                    <strong>به‌روزرسانی برنامه</strong>
-                    <span id="updateStatus">نسخه‌ی فعلی به‌روز است.</span>
-                </div>
-                <button id="updateAppBtn" class="secondary-btn setting-btn" type="button" disabled>
-                    به‌روزرسانی
-                </button>
-            </div>
-
-            <!-- Backup -->
-            <div class="setting-row backup-setting">
-                <div class="setting-info">
-                    <strong>پشتیبان اطلاعات</strong>
-                    <span>دانلود یا بازیابی فایل پشتیبان تمرینات و برنامه‌های همه‌ی کاربران.</span>
-                </div>
-                <div class="backup-actions">
-                    <button id="exportBtn" class="secondary-btn" type="button">
-                        دریافت پشتیبان
-                    </button>
-                    <label class="secondary-btn file-btn">
-                        بازیابی پشتیبان
-                        <input type="file" id="importInput" accept=".json" hidden>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Bale sync -->
-            <div class="setting-row bale-setting">
-                <div class="bs-panel" data-bale-panel></div>
-            </div>
-
-            <!-- Program upload -->
-            <div class="setting-row program-setting">
-                <div class="setting-info">
-                    <strong>برنامه‌ی تمرینی</strong>
-                    <span>بارگذاری فایل آماده‌شده برنامه جدید باشگاه.</span>
-                </div>
-                <div class="program-actions">
-                    <label class="secondary-btn file-btn">
-                        بارگذاری برنامه‌ی جدید
-                        <input type="file" id="programImportInput" accept=".json" hidden>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Delete data -->
-            <div class="setting-row danger-setting">
-                <div class="setting-info">
-                    <strong>حذف تاریخچه‌ی تمرین‌ها</strong>
-                    <span>فقط وزنه/تکرارهای کاربر فعال پاک می‌شود؛ برنامه و سایر کاربران دست‌نخورده می‌مانند.</span>
-                </div>
-                <button id="clearBtn" class="danger-btn" type="button">
-                    حذف تاریخچه
-                </button>
-            </div>
-
-            <!-- Full reset -->
-            <div class="setting-row danger-setting">
-                <div class="setting-info">
-                    <strong>بازنشانی کامل</strong>
-                    <span>همه‌چیز (شامل همه‌ی کاربران) از IndexedDB و حافظه دستگاه پاک می‌شود؛ توکن و chat_id بله می‌ماند.</span>
-                </div>
-                <button id="fullResetBtn" class="danger-btn" type="button">
-                    حذف همه‌چیز
-                </button>
-            </div>
         </div>
     </div>
 </div>

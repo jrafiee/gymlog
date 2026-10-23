@@ -3,7 +3,7 @@
    (مثلاً v17). تغییر همین فایل باعث می‌شود مرورگر نسخه‌ی جدید را
    پیدا کند و دکمه‌ی «به‌روزرسانی» در تنظیمات فعال شود.
 */
-const CACHE_NAME = "gym-tracker-v37";
+const CACHE_NAME = "gym-tracker-v38";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
 const MEDIA_CACHE = "gym-media-v1";
@@ -119,23 +119,40 @@ async function rangeResponse(response, request) {
 }
 
 
-async function handleFetch(request) {
+const NETWORK_TIMEOUT_MS = 3000;
+
+/* اول شبکه، ولی اگر کش داریم و شبکه دیر جواب داد (مثلاً فیلتر بودن کلادفلر)، همان کش را بده */
+async function networkFirstWithTimeout(event) {
+    const request = event.request;
+    const cached = await caches.match(request, { ignoreSearch: true });
+
+    const netPromise = fetch(request).then(res => {
+        if (res && res.status === 200) {
+            const copy = res.clone();              // قبل از هر await
+            caches.open(CACHE_NAME).then(c => c.put(request, copy)).catch(() => {});
+        }
+        return res;
+    });
+
+    if (!cached) return netPromise;                // اولین بار: چاره‌ای جز صبر نیست
+
+    event.waitUntil(netPromise.catch(() => {}));   // دانلود در پس‌زمینه تمام شود
+
+    let timer;
+    const timeout = new Promise(resolve => { timer = setTimeout(() => resolve(null), NETWORK_TIMEOUT_MS); });
+    const res = await Promise.race([netPromise.catch(() => null), timeout]);
+    clearTimeout(timer);
+    return res || cached;
+}
+
+
+async function handleFetch(event) {
+    const request = event.request;
     const url = new URL(request.url);
 
-    // برای فایل‌های جاوااسکریپت و صفحات، ابتدا از شبکه می‌خواند تا تغییرات کدهای ذخیره‌سازی فوراً اعمال شوند
+    // برای فایل‌های جاوااسکریپت و صفحات، ابتدا از شبکه (با تایم‌اوت) می‌خواند
     if (url.origin === self.location.origin && (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith("/"))) {
-        try {
-            const networkResponse = await fetch(request);
-            if (networkResponse && networkResponse.status === 200) {
-                const cache = await caches.open(CACHE_NAME);
-                cache.put(request, networkResponse.clone());
-            }
-            return networkResponse;
-        } catch (networkError) {
-            const cached = await caches.match(request);
-            if (cached) return cached;
-            throw networkError;
-        }
+        return networkFirstWithTimeout(event);
     }
 
     const cached = await caches.match(request);
@@ -168,5 +185,5 @@ async function handleFetch(request) {
 
 self.addEventListener("fetch", event => {
     if (event.request.method !== "GET") return;
-    event.respondWith(handleFetch(event.request));
+    event.respondWith(handleFetch(event));
 });

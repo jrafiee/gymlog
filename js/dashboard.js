@@ -36,6 +36,9 @@ function switchView(viewName) {
     if (viewName === "reports") viewName = "dashboard";
 
     if (!VIEW_TITLES[viewName]) return;
+    if (typeof settingsReturnView !== "undefined" && settingsReturnView && viewName !== settingsReturnView) {
+        settingsReturnView = null;
+    }
     currentDesktopView = viewName;
 
     // 1. Update views visibility
