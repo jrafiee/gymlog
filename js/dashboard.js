@@ -896,12 +896,12 @@ function renderBackupView() {
 
         <div class="card gl-panel gl-gap-top">
             <h3 class="gl-panel-title">همگام‌سازی با بله</h3>
-            <p class="gl-panel-desc">یک پشتیبان کامل تازه ساخته و به چت بله‌ی خودت ارسال می‌شود. توکن ربات و chat_id را از بخش «تنظیمات» وارد کن.</p>
+            <p class="gl-panel-desc">پشتیبان روی بله با اطلاعات این دستگاه مقایسه و نسخه‌ی جدیدتر جایگزین می‌شود. توکن ربات و chat_id را از بخش «تنظیمات» وارد کن.</p>
             <div class="gl-info-box">
                 <strong>وضعیت:</strong>
                 <span class="bs-status" data-bale-status></span>
             </div>
-            <button type="button" class="primary-btn" data-bale-sync>🔄 سینک (ارسال پشتیبان به بله)</button>
+            <button type="button" class="primary-btn" data-bale-sync>🔄 همگام‌سازی</button>
         </div>
     `;
     if (typeof refreshBaleStatus === "function") refreshBaleStatus();
@@ -1030,7 +1030,7 @@ const HELP_FEATURES = [
     ["تاریخچه و تقویم", "فهرست همه‌ی جلسات با جستجو و فیلتر، و تقویم ماهانه با روزهای تمرین‌کرده."],
     ["بانک حرکات", "حرکات همراه با تصویر و توضیح اجرا؛ امکان افزودن و ویرایش حرکت و بارگذاری تصویر یا ویدیو."],
     ["چند کاربره", "برای هر نفر تمرین‌ها و برنامه‌ی جدا؛ پشتیبان تکی یا کلی و اضافه‌کردن اطلاعات یک فایل به یک کاربر."],
-    ["پشتیبان‌گیری", "خروجی فایل JSON از همه‌چیز و بازیابی آن، ارسال پشتیبان به چت بله با دکمه‌ی سینک، و یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
+    ["پشتیبان‌گیری", "خروجی فایل JSON از همه‌چیز و بازیابی آن، همگام‌سازی پشتیبان با چت بله با یک دکمه، و یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
     ["کار بدون اینترنت", "بعد از اولین بازکردن، برنامه آفلاین هم کار می‌کند و روی گوشی مثل یک اپ نصب می‌شود (PWA)."]
 ];
 
@@ -1153,7 +1153,7 @@ const HELP_GROUPS = [
             },
             {
                 q: "همگام‌سازی با بله چیست و چطور راه‌اندازی می‌شود؟",
-                a: `<p>با دکمه‌ی «سینک»، یک پشتیبان کامل به چت بله‌ی خودت فرستاده می‌شود. برای راه‌اندازی:</p>
+                a: `<p>با دکمه‌ی «همگام‌سازی»، پشتیبان روی بله با اطلاعات این دستگاه مقایسه می‌شود: اگر بله قدیمی‌تر باشد پشتیبان کامل به چت بله‌ی خودت فرستاده می‌شود و اگر جدیدتر باشد، دانلود و در برنامه بارگذاری می‌شود (قبلش تأیید می‌گیرد). برای راه‌اندازی:</p>
                     <ol>
                         <li>در بله با <b>BotFather</b> یک ربات بساز (دستور <bdi dir="ltr">/newbot</bdi>) و توکن را بگیر.</li>
                         <li>ربات را در بله استارت کن و یک پیام برایش بفرست تا شناسه‌ی چتت (chat_id) مشخص شود.</li>
@@ -1259,10 +1259,10 @@ function renderHelpView() {
 }
 
 /* =====================================================
-   Bale Sync UI — تنظیمات، وضعیت و دکمه‌ی «سینک»
+   Bale Sync UI — تنظیمات، وضعیت و دکمه‌ی «همگام‌سازی»
    منطق ارسال در storage.js است (syncBackupToBale و ...).
    هر عنصر با data-bale-panel یک پنل کامل می‌گیرد (منوی موبایل و صفحه‌ی تنظیمات)،
-   و هر دکمه‌ی دارای data-bale-sync سینک را اجرا می‌کند.
+   و هر دکمه‌ی دارای data-bale-sync همگام‌سازی را اجرا می‌کند.
 ===================================================== */
 function baleStatusInfo() {
     const cfg = getBaleSettings();
@@ -1308,14 +1308,14 @@ async function runBaleSync() {
     _baleRunning = true;
     const buttons = Array.from(document.querySelectorAll("[data-bale-sync]"));
     const labels = buttons.map(b => b.textContent);
-    buttons.forEach(b => { b.disabled = true; b.textContent = "در حال ارسال…"; });
+    buttons.forEach(b => { b.disabled = true; b.textContent = "در حال همگام‌سازی…"; });
 
     let r;
     try {
-        r = await syncBackupToBale();
+        r = await syncWithBale();
     } catch (err) {
         console.error(err);
-        r = { ok: false, message: "خطای غیرمنتظره در ارسال." };
+        r = { ok: false, message: "خطای غیرمنتظره در همگام‌سازی." };
     }
 
     buttons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
@@ -1325,11 +1325,18 @@ async function runBaleSync() {
     if (typeof renderBackupWarning === "function") renderBackupWarning();
 
     if (r.ok) {
-        toast(r.stripped
-            ? "پشتیبان به بله ارسال شد، ولی به‌خاطر حجم زیاد بدون تصویر/ویدیوی حرکات سفارشی."
-            : "پشتیبان کامل به بله ارسال شد.");
+        if (r.action === "downloaded") {
+            toast("پشتیبان جدیدتر از بله دریافت و در برنامه بارگذاری شد.");
+            setTimeout(() => location.reload(), 1200);
+        } else if (r.action === "same") {
+            toast("اطلاعات این دستگاه و بله هم‌نسخه هستند؛ نیازی به همگام‌سازی نبود.", "info");
+        } else {
+            toast(r.stripped
+                ? "پشتیبان به بله ارسال شد، ولی به‌خاطر حجم زیاد بدون تصویر/ویدیوی حرکات سفارشی."
+                : "بله قدیمی‌تر بود؛ پشتیبان کامل به بله ارسال شد.");
+        }
     } else {
-        toast(r.message, r.pending ? "info" : "warning");
+        toast(r.message, r.cancelled || r.pending ? "info" : "warning");
     }
 }
 
@@ -1346,8 +1353,8 @@ function renderBalePanel(el) {
             <strong>همگام‌سازی با بله</strong>
             <span class="bs-status" data-bale-status></span>
         </div>
-        <p class="bs-desc">با دکمه‌ی «سینک»، یک پشتیبان کامل از همه‌ی کاربران، تمرین‌ها و برنامه‌ها به چت بله‌ی خودت ارسال می‌شود. توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود.</p>
-        <button type="button" class="primary-btn bs-sync-btn" data-bale-sync>🔄 سینک (ارسال پشتیبان به بله)</button>
+        <p class="bs-desc">با دکمه‌ی «همگام‌سازی»، پشتیبان روی بله با اطلاعات این دستگاه مقایسه می‌شود: اگر بله قدیمی‌تر باشد، پشتیبان کامل ارسال می‌شود؛ اگر جدیدتر باشد، دانلود و در برنامه بارگذاری می‌شود. توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود.</p>
+        <button type="button" class="primary-btn bs-sync-btn" data-bale-sync>🔄 همگام‌سازی</button>
 
         <div class="bs-fields">
             <div class="bs-field">

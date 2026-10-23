@@ -761,6 +761,7 @@ async function addWorkout(workout) {
 
     // 3. Keep fallback in localStorage updated
     mirrorWorkoutsToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -816,6 +817,7 @@ async function deleteAllData() {
     }
 
     mirrorWorkoutsToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -1057,6 +1059,7 @@ async function importProgramPackage(rawPkg, userId) {
         mirrorProgramsToLocalStorage();
     }
 
+    await touchDataChanged();
     return true;
 }
 
@@ -1153,6 +1156,7 @@ function buildBackupData(onlyUser) {
         schemaVersion: BACKUP_SCHEMA_VERSION,
         backupType: onlyUser ? "user" : "all",
         exportedAt: new Date().toISOString(),
+        dataUpdatedAt: getDataChangedAt(),
         activeUserId: _storeCache.activeUserId,
         users: users.map(u => ({
             id: u.id,
@@ -1549,6 +1553,7 @@ async function mergeBackupIntoUser(data, targetUserId, sourceUserId) {
         }
     }
 
+    await touchDataChanged();
     return {
         added: added.length,
         measurementsAdded,
@@ -1562,6 +1567,41 @@ async function mergeBackupIntoUser(data, targetUserId, sourceUserId) {
 /* =====================================================
    Backup Reminders & Dates
 ===================================================== */
+
+/* =====================================================
+   Data change stamp — برای مقایسه‌ی نسخه‌ی دستگاه با نسخه‌ی روی بله
+   dataChangedAt: آخرین زمانی که اطلاعات (تمرین، برنامه، کاربر، حرکت) تغییر کرده.
+   با هر تغییر touchDataChanged() صدا زده می‌شود و داخل فایل پشتیبان
+   به‌صورت dataUpdatedAt ذخیره می‌شود.
+===================================================== */
+async function touchDataChanged(iso) {
+    const v = iso || new Date().toISOString();
+    if (!_storeCache.settings) _storeCache.settings = {};
+    _storeCache.settings.dataChangedAt = v;
+    if (_storeCache.db) {
+        try {
+            await putRecord(_storeCache.db, "settings", { key: "dataChangedAt", value: v, updatedAt: v });
+        } catch (err) {
+            console.warn("[GymLog DB] ذخیره‌ی زمان تغییر اطلاعات ناموفق بود:", err);
+        }
+    }
+    return v;
+}
+
+function getDataChangedAt() {
+    const saved = _storeCache.settings && _storeCache.settings.dataChangedAt;
+    if (saved) return saved;
+    /* اطلاعات قدیمی که هنوز مهر زمانی ندارند */
+    let m = "";
+    getAllWorkouts().forEach(w => { if (w.updatedAt && w.updatedAt > m) m = w.updatedAt; });
+    return m || getLastBackupAt() || "";
+}
+
+/* اگر مهر زمانی ذخیره نشده بود، مقدار فعلی را ثابت می‌کند تا بین دو سینک عوض نشود */
+async function ensureDataStamp() {
+    if (_storeCache.settings && _storeCache.settings.dataChangedAt) return _storeCache.settings.dataChangedAt;
+    return touchDataChanged(getDataChangedAt() || new Date().toISOString());
+}
 
 function getLastBackupAt() {
     if (_storeCache.settings && _storeCache.settings.lastBackupAt) {
@@ -1699,6 +1739,7 @@ async function createUser(profile) {
     _recordMeasurementFromProfile(user);
     _storeCache.users = [..._storeCache.users, user];
     await persistUsers();
+    await touchDataChanged();
     return user;
 }
 
@@ -1740,6 +1781,7 @@ async function deleteUser(id) {
     await persistUsers();
     mirrorWorkoutsToLocalStorage();
     mirrorProgramsToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -1844,6 +1886,7 @@ async function addUserMeasurement(userId, entry) {
     _syncProfileFromMeasurements(user);
     _storeCache.users = _storeCache.users.slice();
     await persistUsers();
+    await touchDataChanged();
     return true;
 }
 
@@ -1854,6 +1897,7 @@ async function deleteUserMeasurement(userId, date) {
     _syncProfileFromMeasurements(user);
     _storeCache.users = _storeCache.users.slice();
     await persistUsers();
+    await touchDataChanged();
     return true;
 }
 
@@ -1862,6 +1906,7 @@ async function saveUserNotes(userId, text) {
     if (!user) return false;
     user.notes = String(text == null ? "" : text).slice(0, 5000);   /* همزمان در حافظه ثبت می‌شود */
     await persistUsers();
+    await touchDataChanged();
     return true;
 }
 
@@ -1889,6 +1934,7 @@ async function saveUserProfile(profile, userId) {
     _recordMeasurementFromProfile(user);
     _storeCache.users = _storeCache.users.slice();
     await persistUsers();
+    await touchDataChanged();
     return true;
 }
 
@@ -1929,6 +1975,7 @@ async function deleteProgram(monthKey, userId, withWorkouts) {
         mirrorWorkoutsToLocalStorage();
     }
     mirrorProgramsToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -1967,6 +2014,7 @@ async function saveCatalogExercise(id, entry) {
 
     _storeCache.catalogOverrides = { ..._storeCache.catalogOverrides, [id]: entry };
     mirrorCatalogToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -1979,6 +2027,7 @@ async function resetCatalogExercise(id) {
     delete next[id];
     _storeCache.catalogOverrides = next;
     mirrorCatalogToLocalStorage();
+    await touchDataChanged();
     return true;
 }
 
@@ -2078,6 +2127,8 @@ function buildBaleCaption(built, stripped) {
         `${faNum(built.users.length)} کاربر · ${faNum(built.workoutsList.length)} جلسه`
     ];
     if (stripped) lines.push("⚠ بدون تصویر/ویدیوی حرکات سفارشی (حجم زیاد)");
+    /* خط ماشینی: Worker و همگام‌سازی از روی همین خط نسخه‌ی فایل روی بله را می‌خوانند */
+    lines.push("#stamp:" + (built.backupData.dataUpdatedAt || ""));
     return lines.join("\n");
 }
 
@@ -2137,6 +2188,7 @@ async function syncBackupToBale() {
     _baleBusy = true;
 
     try {
+        await ensureDataStamp();
         const built = buildBackupData(null);
         if (!built) return { ok: false, message: "اطلاعاتی برای ارسال وجود ندارد." };
 
@@ -2216,6 +2268,146 @@ async function retryPendingBaleSync() {
     if (!cfg.pending || !cfg.token || !cfg.chatId) return null;
     if (typeof navigator !== "undefined" && navigator.onLine === false) return null;
     return syncBackupToBale();
+}
+
+
+/* ---------- همگام‌سازی دوطرفه ---------- */
+async function baleRequest(form) {
+    let res;
+    try {
+        res = await fetch(BALE_ENDPOINT, { method: "POST", body: form });
+    } catch (err) {
+        return { ok: false, offline: true, error: "network" };
+    }
+    return { ok: true, res };
+}
+
+function baleForm(cfg, op, extra) {
+    const form = new FormData();
+    form.set("op", op);
+    form.set("token", cfg.token);
+    form.set("chat_id", cfg.chatId);
+    Object.keys(extra || {}).forEach(k => form.set(k, extra[k]));
+    return form;
+}
+
+/* آخرین پشتیبان روی بله (پیام سنجاق‌شده). خروجی: {ok, remote|null} */
+async function baleFetchLatest(cfg) {
+    const r = await baleRequest(baleForm(cfg, "latest"));
+    if (!r.ok) return r;
+    let data = null;
+    try { data = await r.res.json(); } catch (err) { /* JSON نبود */ }
+    if (r.res.ok && data && data.ok) return { ok: true, remote: data.remote || null };
+    return {
+        ok: false,
+        status: r.res.status,
+        hasJson: !!data,
+        error: (data && (data.error || data.description)) || ("HTTP " + r.res.status)
+    };
+}
+
+async function baleDownloadBackup(cfg, fileId) {
+    const r = await baleRequest(baleForm(cfg, "download", { file_id: fileId }));
+    if (!r.ok) return r;
+    let text = "";
+    try { text = await r.res.text(); } catch (err) { /* ignore */ }
+    let data = null;
+    try { data = JSON.parse(text); } catch (err) { /* ignore */ }
+    if (r.res.ok && data && !data.error) return { ok: true, backup: data };
+    return {
+        ok: false,
+        status: r.res.status,
+        hasJson: !!data,
+        error: (data && (data.error || data.description)) || ("HTTP " + r.res.status)
+    };
+}
+
+async function downloadAndRestoreFromBale(cfg, remote) {
+    const d = await baleDownloadBackup(cfg, remote.fileId);
+    if (!d.ok) return { ok: false, message: describeBaleError(d) };
+    if (!d.backup || !Array.isArray(d.backup.workouts)) {
+        return { ok: false, message: "فایل روی بله، پشتیبان معتبر GymLog نیست." };
+    }
+    try {
+        await restoreBackup(d.backup);
+        await touchDataChanged(remote.stamp);
+    } catch (err) {
+        console.error("[GymLog Bale] بازیابی از بله ناموفق بود:", err);
+        return { ok: false, message: "بارگذاری پشتیبان بله انجام نشد: " + (err.message || "فایل نامعتبر") };
+    }
+    await saveBaleSettings({
+        pending: false,
+        lastSyncAt: new Date().toISOString(),
+        lastStatus: "ok",
+        lastError: ""
+    });
+    return { ok: true, action: "downloaded" };
+}
+
+/**
+ * همگام‌سازی: نسخه‌ی روی بله را با نسخه‌ی دستگاه مقایسه می‌کند.
+ *  - روی بله چیزی نیست، یا بله قدیمی‌تر است → آپلود
+ *  - بله جدیدتر است → دانلود و جایگزینی اطلاعات (با تأیید کاربر)
+ *  - برابرند → کاری لازم نیست
+ * خروجی: {ok, action: "uploaded" | "downloaded" | "same"} یا {ok:false, message, cancelled?}
+ */
+async function syncWithBale() {
+    const cfg = getBaleSettings();
+    if (!cfg.token || !cfg.chatId) {
+        return { ok: false, message: "اول توکن ربات و chat_id را در تنظیمات وارد کن." };
+    }
+
+    const q = await baleFetchLatest(cfg);
+    if (!q.ok) {
+        const reason = describeBaleError(q);
+        await saveBaleSettings({ lastStatus: "error", lastError: reason });
+        return { ok: false, message: reason };
+    }
+    const remote = q.remote && q.remote.fileId && q.remote.stamp ? q.remote : null;
+
+    /* دستگاه خالی است: اگر روی بله پشتیبانی هست، مستقیم بارگذاری می‌شود */
+    if (!hasBackableData()) {
+        if (!remote) return { ok: false, message: "روی بله پشتیبانی پیدا نشد و در برنامه هم اطلاعاتی برای ارسال نیست." };
+        return downloadAndRestoreFromBale(cfg, remote);
+    }
+
+    await ensureDataStamp();
+    const local = getDataChangedAt();
+
+    if (!remote) {
+        const up = await syncBackupToBale();
+        return up.ok ? { ...up, action: "uploaded" } : up;
+    }
+
+    if (remote.stamp === local) {
+        await saveBaleSettings({
+            pending: false,
+            lastSyncAt: new Date().toISOString(),
+            lastStatus: "ok",
+            lastError: ""
+        });
+        return { ok: true, action: "same" };
+    }
+
+    if (remote.stamp < local) {
+        const up = await syncBackupToBale();
+        return up.ok ? { ...up, action: "uploaded" } : up;
+    }
+
+    /* بله جدیدتر است */
+    const fmt = iso => {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return iso;
+        return formatPersianDate(_isoFromDate(d), true) + " ساعت " +
+            d.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+    };
+    const ok = confirm(
+        "پشتیبان روی بله جدیدتر از اطلاعات این دستگاه است.\n\n" +
+        "بله: " + fmt(remote.stamp) + "\nاین دستگاه: " + fmt(local) + "\n\n" +
+        "با ادامه، همه‌ی اطلاعات فعلی (همه‌ی کاربران، تمرین‌ها و برنامه‌ها) با نسخه‌ی بله جایگزین می‌شود. ادامه می‌دهی؟"
+    );
+    if (!ok) return { ok: false, cancelled: true, message: "همگام‌سازی لغو شد." };
+    return downloadAndRestoreFromBale(cfg, remote);
 }
 
 if (typeof window !== "undefined") {
