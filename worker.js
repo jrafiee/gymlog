@@ -14,8 +14,11 @@
 
    op=latest
      token, chat_id
-     پیام سنجاق‌شده‌ی چت (آخرین پشتیبان) را با getChat می‌خواند و
-     {ok, remote: {fileId, fileName, size, messageId, stamp} | null} برمی‌گرداند.
+     مشخصات آخرین پشتیبان ارسال‌شده را برمی‌گرداند:
+     {ok, remote: {fileId, fileName, size, messageId, stamp} | null, debug}
+     ربات بله نمی‌تواند تاریخچه‌ی چت را بخواند؛ پس هر بار که فایلی ارسال می‌شود،
+     file_id و stamp آن در KV (باینگ SYNC_KV) نگه‌داری می‌شود. اگر KV نبود،
+     پیام سنجاق‌شده با getChat امتحان می‌شود.
 
    op=download
      token, chat_id, file_id
@@ -33,6 +36,12 @@ const JSON_HEADERS = {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store"
 };
+
+/* کلید KV: هش SHA-256 از توکن و chat_id؛ خودِ توکن هیچ‌جا ذخیره نمی‌شود */
+async function kvKey(token, chatId) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token + ":" + chatId));
+    return "latest:" + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
 
 function json(obj, status) {
     return new Response(JSON.stringify(obj), { status: status || 200, headers: JSON_HEADERS });
@@ -60,7 +69,7 @@ function baleFail(r) {
     return json({ ok: false, error: "bale_error", description: (r.data && r.data.description) || ("HTTP " + r.res.status) }, status);
 }
 
-async function opUpload(form, token, chatId) {
+async function opUpload(form, token, chatId, env) {
     const file = form.get("file");
     let method;
     let init;
@@ -100,8 +109,26 @@ async function opUpload(form, token, chatId) {
     if (method === "sendDocument" && res.ok) {
         let parsed = null;
         try { parsed = JSON.parse(body); } catch (e) { /* ignore */ }
-        const messageId = parsed && parsed.ok && parsed.result && parsed.result.message_id;
+        const result = parsed && parsed.ok && parsed.result;
+        const messageId = result && result.message_id;
         if (messageId) {
+            /* ۱) ثبت مشخصات فایل در KV (روش اصلی) */
+            const stampM = STAMP_RE.exec(String(form.get("caption") || ""));
+            parsed.kv = false;
+            if (env.SYNC_KV && result.document && result.document.file_id && stampM) {
+                try {
+                    await env.SYNC_KV.put(await kvKey(token, chatId), JSON.stringify({
+                        messageId,
+                        fileId: result.document.file_id,
+                        fileName: result.document.file_name || "",
+                        size: result.document.file_size || 0,
+                        stamp: stampM[1],
+                        uploadedAt: new Date().toISOString()
+                    }));
+                    parsed.kv = true;
+                } catch (e) { /* ignore */ }
+            }
+            /* ۲) سنجاق‌کردن پیام (روش کمکی؛ ممکن است بله در چت خصوصی پشتیبانی نکند) */
             const pin = await baleJson(token, "pinChatMessage", { chat_id: chatId, message_id: messageId });
             parsed.pinned = !!(pin && pin.res.ok && pin.data && pin.data.ok);
             return json(parsed, 200);
@@ -110,15 +137,35 @@ async function opUpload(form, token, chatId) {
     return new Response(body, { status: res.status, headers: JSON_HEADERS });
 }
 
-async function opLatest(token, chatId) {
+async function opLatest(token, chatId, env) {
+    const debug = { kv: !!env.SYNC_KV, kvHit: false, chatKeys: [], pinned: false, pinnedDocument: false, pinnedStamp: false };
+
+    /* ۱) KV */
+    if (env.SYNC_KV) {
+        try {
+            const rec = await env.SYNC_KV.get(await kvKey(token, chatId), "json");
+            if (rec && rec.fileId && rec.stamp) {
+                debug.kvHit = true;
+                return json({ ok: true, remote: rec, debug });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    /* ۲) پیام سنجاق‌شده */
     const r = await baleJson(token, "getChat", { chat_id: chatId });
     if (!r || !r.res.ok || !r.data || !r.data.ok) return baleFail(r);
 
-    const pin = r.data.result && r.data.result.pinned_message;
+    const chat = r.data.result || {};
+    debug.chatKeys = Object.keys(chat);
+    const pin = chat.pinned_message;
+    debug.pinned = !!pin;
     const doc = pin && pin.document;
-    if (!doc || !doc.file_id) return json({ ok: true, remote: null });
+    debug.pinnedDocument = !!(doc && doc.file_id);
+    if (!doc || !doc.file_id) return json({ ok: true, remote: null, debug });
 
     const m = STAMP_RE.exec(String(pin.caption || ""));
+    debug.pinnedStamp = !!m;
+    if (!m) return json({ ok: true, remote: null, debug });
     return json({
         ok: true,
         remote: {
@@ -127,8 +174,9 @@ async function opLatest(token, chatId) {
             fileName: doc.file_name || "",
             size: doc.file_size || 0,
             date: pin.date || 0,
-            stamp: m ? m[1] : ""
-        }
+            stamp: m[1]
+        },
+        debug
     });
 }
 
@@ -191,9 +239,9 @@ export default {
         }
 
         const op = String(form.get("op") || "upload");
-        if (op === "latest") return opLatest(token, chatId);
+        if (op === "latest") return opLatest(token, chatId, env);
         if (op === "download") return opDownload(form, token);
-        if (op === "upload") return opUpload(form, token, chatId);
+        if (op === "upload") return opUpload(form, token, chatId, env);
         return json({ ok: false, error: "bad_request" }, 400);
     }
 };

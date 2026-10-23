@@ -970,7 +970,7 @@ function renderSettingsView() {
             <div class="setting-row">
                 <div class="setting-info">
                     <strong class="gl-danger-text">بازنشانی کامل (Reset All)</strong>
-                    <span>تمام اطلاعات همه‌ی کاربران از IndexedDB و حافظه دستگاه به طور کامل حذف می‌شود.</span>
+                    <span>تمام اطلاعات همه‌ی کاربران از IndexedDB و حافظه دستگاه حذف می‌شود. توکن و chat_id بله پاک نمی‌شود؛ آن‌ها را با «حذف تنظیمات همگام‌سازی» پاک کن.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashFullResetBtn">
                     حذف همه‌چیز
@@ -1382,7 +1382,7 @@ function renderBalePanel(el) {
         <div class="bs-actions">
             <button type="button" class="primary-btn" data-bs-act="save">ذخیره</button>
             <button type="button" class="secondary-btn" data-bs-act="test">ارسال پیام آزمایشی</button>
-            ${hasToken || cfg.chatId ? `<button type="button" class="danger-btn" data-bs-act="clear">حذف تنظیمات</button>` : ""}
+            ${hasToken || cfg.chatId ? `<button type="button" class="danger-btn" data-bs-act="clear">حذف تنظیمات همگام‌سازی</button>` : ""}
         </div>
         <p class="bs-msg" role="status"></p>
         <small class="gl-hint">پشتیبان کامل شامل اطلاعات همه‌ی کاربران (از جمله قد، وزن و دور کمر) است و در همان چت بله می‌ماند. بهتر است چت مقصد یک چت خصوصی باشد.</small>

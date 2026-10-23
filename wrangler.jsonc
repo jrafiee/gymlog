@@ -2,6 +2,9 @@
   "name": "gymlog",
   "main": "worker.js",
   "compatibility_date": "2025-09-01",
+  "kv_namespaces": [
+    { "binding": "SYNC_KV" }
+  ],
   "assets": {
     "directory": "./",
     "binding": "ASSETS",

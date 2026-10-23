@@ -1095,7 +1095,7 @@ if (finishWorkoutBtn) {
         if (typeof getBaleSettings === "function") {
             const bs = getBaleSettings();
             if (bs.autoAfterSession && bs.token && bs.chatId) {
-                baleSyncPromise = syncBackupToBale();
+                baleSyncPromise = syncWithBale({ auto: true });
             }
         }
 
@@ -1529,7 +1529,7 @@ async function confirmClearHistory() {
 }
 
 async function confirmFullReset() {
-    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند.")) return false;
+    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند. (تنظیمات همگام‌سازی با بله، یعنی توکن و chat_id، حذف نمی‌شود.)")) return false;
     await fullResetStorage();
     location.reload();
     return true;

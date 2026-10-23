@@ -835,6 +835,21 @@ async function fullResetStorage() {
         } catch (e) { /* ignore */ }
     }
 
+    // تنظیمات اتصال به بله (توکن و chat_id) با «حذف همه‌چیز» پاک نمی‌شوند؛
+    // فقط با دکمه‌ی «حذف تنظیمات همگام‌سازی». وضعیت ارسال معوق و زمان‌ها پاک می‌شوند
+    // تا بعد از ریست، پشتیبان خالی روی پشتیبان بله نوشته نشود.
+    let baleKeep = null;
+    {
+        const b = _storeCache.settings && _storeCache.settings[BALE_SETTINGS_KEY];
+        if (b && (b.token || b.chatId)) {
+            baleKeep = {
+                token: b.token || "",
+                chatId: b.chatId || "",
+                autoAfterSession: !!b.autoAfterSession
+            };
+        }
+    }
+
     // 2. Clear every single store in IndexedDB
     if (db) {
         try {
@@ -844,6 +859,13 @@ async function fullResetStorage() {
             if (allStoreNames.length > 0) {
                 const tx = db.transaction(allStoreNames, "readwrite");
                 allStoreNames.forEach(name => tx.objectStore(name).clear());
+                if (baleKeep && allStoreNames.includes("settings")) {
+                    tx.objectStore("settings").put({
+                        key: BALE_SETTINGS_KEY,
+                        value: baleKeep,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
                 await new Promise(resolve => {
                     tx.oncomplete = resolve;
                     tx.onerror = resolve;
@@ -863,7 +885,7 @@ async function fullResetStorage() {
 
     // 3. Delete the entire IndexedDB database file
     try {
-        if ("indexedDB" in window) {
+        if ("indexedDB" in window && !baleKeep) {
             await new Promise(resolve => {
                 const req = window.indexedDB.deleteDatabase(DB_NAME);
                 req.onsuccess = () => resolve(true);
@@ -2267,7 +2289,7 @@ async function retryPendingBaleSync() {
     const cfg = getBaleSettings();
     if (!cfg.pending || !cfg.token || !cfg.chatId) return null;
     if (typeof navigator !== "undefined" && navigator.onLine === false) return null;
-    return syncBackupToBale();
+    return syncWithBale({ auto: true });
 }
 
 
@@ -2297,7 +2319,7 @@ async function baleFetchLatest(cfg) {
     if (!r.ok) return r;
     let data = null;
     try { data = await r.res.json(); } catch (err) { /* JSON نبود */ }
-    if (r.res.ok && data && data.ok) return { ok: true, remote: data.remote || null };
+    if (r.res.ok && data && data.ok) return { ok: true, remote: data.remote || null, debug: data.debug || null };
     return {
         ok: false,
         status: r.res.status,
@@ -2351,7 +2373,8 @@ async function downloadAndRestoreFromBale(cfg, remote) {
  *  - برابرند → کاری لازم نیست
  * خروجی: {ok, action: "uploaded" | "downloaded" | "same"} یا {ok:false, message, cancelled?}
  */
-async function syncWithBale() {
+async function syncWithBale(opts) {
+    const auto = !!(opts && opts.auto);
     const cfg = getBaleSettings();
     if (!cfg.token || !cfg.chatId) {
         return { ok: false, message: "اول توکن ربات و chat_id را در تنظیمات وارد کن." };
@@ -2367,7 +2390,14 @@ async function syncWithBale() {
 
     /* دستگاه خالی است: اگر روی بله پشتیبانی هست، مستقیم بارگذاری می‌شود */
     if (!hasBackableData()) {
-        if (!remote) return { ok: false, message: "روی بله پشتیبانی پیدا نشد و در برنامه هم اطلاعاتی برای ارسال نیست." };
+        if (!remote) {
+            console.warn("[GymLog Bale] پاسخ getChat/latest:", q.debug);
+            return {
+                ok: false,
+                message: "روی بله پشتیبانِ قابل‌خواندن پیدا نشد. یک بار از دستگاهی که اطلاعات دارد «همگام‌سازی» را بزن تا فایل ثبت شود، بعد دوباره امتحان کن."
+            };
+        }
+        if (auto) return { ok: false, skipped: true, message: "پشتیبان بله موجود است؛ برای دریافت آن، دکمه‌ی «همگام‌سازی» را بزن." };
         return downloadAndRestoreFromBale(cfg, remote);
     }
 
@@ -2395,6 +2425,9 @@ async function syncWithBale() {
     }
 
     /* بله جدیدتر است */
+    if (auto) {
+        return { ok: false, skipped: true, message: "پشتیبان روی بله جدیدتر است؛ برای دریافت آن، دکمه‌ی «همگام‌سازی» را بزن." };
+    }
     const fmt = iso => {
         const d = new Date(iso);
         if (isNaN(d.getTime())) return iso;
