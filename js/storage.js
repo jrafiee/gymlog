@@ -1395,6 +1395,8 @@ async function restoreBackup(data) {
     mirrorUsersToLocalStorage();
     mirrorCatalogToLocalStorage();
     setLastBackupAt(nowIso);
+    /* مهر زمانی اطلاعات = مهر داخل فایل (یا اکنون)، تا همگام‌سازی با بله نسخه‌ی تازه‌بازیابی‌شده را قدیمی نپندارد */
+    await touchDataChanged(typeof data.dataUpdatedAt === "string" && data.dataUpdatedAt ? data.dataUpdatedAt : undefined);
 
     return {
         type: "full",

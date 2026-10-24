@@ -118,60 +118,12 @@
     margin: 10px 14px;
 }
 
-/* Dedicated Program Upload in Sidebar */
-.sidebar-action-upload {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 2px 0 8px;
-    padding: 10px 14px;
-    border-radius: 8px;
-    background: #eff6ff;
-    border: 1px dashed #3b82f6;
-    color: #1d4ed8;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-}
-
-.sidebar-action-upload:hover {
-    background: #dbeafe;
-    border-color: #2563eb;
-}
-
-body.dark-mode .sidebar-action-upload {
-    background: #1e3a8a33;
-    border-color: #3b82f6;
-    color: #60a5fa;
-}
-
 .sidebar-footer {
     padding: 16px;
     border-top: 1px solid #f3f4f6;
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.sidebar-theme-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 9px 12px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    background: #ffffff;
-    color: #374151;
-    font-family: inherit;
-    font-size: 12.5px;
-    cursor: pointer;
-}
-
-.sidebar-theme-btn:hover {
-    background: #f9fafb;
 }
 
 .sidebar-status {
@@ -215,27 +167,6 @@ body.dark-mode .sidebar-action-upload {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.desktop-topbar-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    border-radius: 8px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    color: #374151;
-    font-family: inherit;
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.desktop-topbar-btn.primary {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: #ffffff;
 }
 
 /* Desktop Theme Toggle Icon Button (Top-left corner) */
@@ -439,98 +370,10 @@ body.dark-mode .desktop-theme-icon-btn {
 /* -------------------------
    KPI Summary Metric Cards
 ------------------------- */
-.dash-metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 14px;
-}
-
-.dash-metric-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.dash-metric-label {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 500;
-}
-
-.dash-metric-val {
-    font-size: 26px;
-    font-weight: 800;
-    color: #111827;
-    line-height: 1.2;
-}
-
-.dash-metric-sub {
-    font-size: 11px;
-    color: #9ca3af;
-    margin-top: 2px;
-}
 
 /* -------------------------
    Charts Grid
 ------------------------- */
-.dash-charts-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 16px;
-}
-
-@media (max-width: 1080px) {
-    .dash-charts-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.dash-chart-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.dash-chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.dash-chart-header h3 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 700;
-    color: #111827;
-}
-
-.dash-chart-header span {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-.dash-chart-body {
-    width: 100%;
-    min-height: 200px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dash-chart-svg {
-    width: 100%;
-    height: auto;
-    overflow: visible;
-}
 
 .dash-empty-notice {
     font-size: 12.5px;
@@ -804,7 +647,6 @@ body.dark-mode .desktop-theme-icon-btn {
 @media (max-width: 1023px) {
     /* Hide start next workout button & program upload buttons in mobile dashboard (Requirement 1) */
     .dash-overview-actions,
-    .desktop-only-flex,
     .dash-start-workout-btn,
     #dashStartNextBtn {
         display: none !important;
@@ -823,8 +665,6 @@ body.dark-mode .app-sidebar,
 body.dark-mode .desktop-topbar,
 body.dark-mode .mobile-nav-bar,
 body.dark-mode .dash-overview-card,
-body.dark-mode .dash-metric-card,
-body.dark-mode .dash-chart-card,
 body.dark-mode .dash-cycle-card,
 body.dark-mode .dash-table-card,
 body.dark-mode .dash-detail-modal {
@@ -844,8 +684,6 @@ body.dark-mode .dash-table td {
 body.dark-mode .sidebar-title h1,
 body.dark-mode .desktop-topbar-title,
 body.dark-mode .dash-overview-title,
-body.dark-mode .dash-metric-val,
-body.dark-mode .dash-chart-header h3,
 body.dark-mode .dash-cycle-header h3,
 body.dark-mode .dash-table-header h3,
 body.dark-mode .dash-detail-modal-header h3 {
@@ -903,13 +741,6 @@ body.dark-mode .dash-table-action-btn {
     color: #93c5fd;
 }
 
-body.dark-mode .sidebar-theme-btn,
-body.dark-mode .desktop-topbar-btn {
-    background: #1e293b;
-    border-color: #475569;
-    color: #e2e8f0;
-}
-
 body.dark-mode .mobile-tab-switch {
     background: #0f172a;
 }
@@ -928,22 +759,8 @@ body.dark-mode .dash-progress-bar-bg {
 }
 
 /* -------------------------
-   Calendar View (Identical to "تمرین امروز" Date Picker)
+   Calendar day details
 ------------------------- */
-.calendar-view-container {
-    max-width: 360px;
-    margin: 12px auto 36px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.calendar-desktop-card {
-    width: 100% !important;
-    max-width: 100% !important;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-}
 
 .calendar-day-details-card {
     background: #ffffff;
@@ -965,102 +782,7 @@ body.dark-mode .dash-progress-bar-bg {
     gap: 12px;
 }
 
-/* -------------------------
-   Dedicated Program Upload Box (Requirement 3)
-------------------------- */
-.program-upload-card {
-    background: #ffffff;
-    border: 1.5px solid #dbeafe;
-    border-radius: 16px;
-    padding: 24px 28px;
-    margin-bottom: 28px;
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 24px;
-}
-
-.program-upload-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 18px;
-    max-width: 660px;
-}
-
-.program-upload-icon-wrapper {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    flex-shrink: 0;
-}
-
-.program-upload-title {
-    margin: 0 0 6px;
-    font-size: 17px;
-    font-weight: 800;
-    color: #1e293b;
-}
-
-.program-upload-desc {
-    margin: 0 0 12px;
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.65;
-}
-
-.program-upload-tags {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.program-upload-tag {
-    padding: 4px 10px;
-    border-radius: 6px;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 11.5px;
-    font-weight: 600;
-}
-
-.program-upload-btn-prominent {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 13px 26px;
-    border-radius: 12px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    border: 1px solid #1d4ed8;
-}
-
-.program-upload-btn-prominent:hover {
-    background: #1d4ed8;
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
-    transform: translateY(-1px);
-}
-
 /* Dark mode overrides */
-body.dark-mode .calendar-desktop-card {
-    border-color: #334155 !important;
-    background: #1e293b !important;
-}
 
 body.dark-mode .calendar-day-details-card {
     background: #1e293b !important;
@@ -1072,62 +794,6 @@ body.dark-mode .calendar-day-item {
     background: #0f172a !important;
     border-color: #334155 !important;
     color: #f1f5f9 !important;
-}
-
-body.dark-mode .program-upload-card {
-    background: #1e293b !important;
-    border-color: #334155 !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-}
-
-body.dark-mode .program-upload-title {
-    color: #f8fafc !important;
-}
-
-body.dark-mode .program-upload-desc {
-    color: #94a3b8 !important;
-}
-
-body.dark-mode .program-upload-icon-wrapper {
-    background: #0f172a !important;
-    border-color: #3b82f6 !important;
-}
-
-body.dark-mode .program-upload-tag {
-    background: #0f172a !important;
-    color: #94a3b8 !important;
-}
-
-/* Embedded Dashboard Report Section Styles */
-.dash-report-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.dash-report-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.dash-report-titles h3 {
-    margin: 0 0 4px;
-    font-size: 18px;
-    font-weight: 800;
-    color: #111827;
-}
-
-.dash-report-titles span {
-    font-size: 12.5px;
-    color: #6b7280;
 }
 
 /* -------------------------
@@ -1165,140 +831,22 @@ body.dark-mode .program-upload-tag {
 /* -------------------------
    Program Upload Dedicated Box (In Programs View)
 ------------------------- */
-.program-upload-box {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-.program-upload-box-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.program-upload-box-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    max-width: 640px;
-}
-
-.program-upload-box-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: #eff6ff;
-    color: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-}
-
-.program-upload-box-text h3 {
-    margin: 0 0 6px;
-    font-size: 16px;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-.program-upload-box-text p {
-    margin: 0 0 8px;
-    font-size: 13px;
-    color: #64748b;
-    line-height: 1.6;
-}
-
-.program-upload-box-badges {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.program-upload-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: #f1f5f9;
-    color: #475569;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.program-upload-action-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 11px 22px;
-    border-radius: 10px;
-    background: #2563eb;
-    color: #ffffff;
-    font-size: 13.5px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
-    transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
-}
-
-.program-upload-action-btn:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
-}
 
 /* Dark mode additions */
-body.dark-mode .calendar-nav-wrap,
+
 body.dark-mode .calendar-day-details-card,
-body.dark-mode .history-filters-bar,
-body.dark-mode .program-upload-box {
+body.dark-mode .history-filters-bar{
     background: #1e293b;
     border-color: #334155;
     color: #f3f4f6;
 }
 
-body.dark-mode .program-upload-box-icon {
-    background: #1e3a8a44;
-    color: #60a5fa;
-}
-
-body.dark-mode .program-upload-box-text h3 {
-    color: #f8fafc;
-}
-
-body.dark-mode .program-upload-box-text p {
-    color: #94a3b8;
-}
-
-body.dark-mode .program-upload-badge {
-    background: #0f172a;
-    color: #94a3b8;
-}
-
-body.dark-mode .calendar-nav-btn,
-body.dark-mode .calendar-today-btn,
 body.dark-mode .history-filter-select,
 body.dark-mode .history-search-input {
     background: #0f172a;
     border-color: #475569;
     color: #f3f4f6;
 }
-
-body.dark-mode .calendar-month-title {
-    color: #f8fafc;
-}
-
 
 /* Dark mode: وضعیت جلسات دوره تمرینی */
 body.dark-mode .dash-cycle-header p,

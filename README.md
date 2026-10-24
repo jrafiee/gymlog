@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# GymLog
 
-# Run and deploy your AI Studio app
+دفترچه‌ی تمرین بدنسازی فارسی (RTL) و PWA؛ بدون فریم‌ورک و بدون مرحله‌ی build.
+تمرین‌ها در مرورگر (IndexedDB) ذخیره می‌شوند و برنامه آفلاین هم کار می‌کند.
 
-This contains everything you need to run your app locally.
+## ساختار
 
-View your app in AI Studio: https://ai.studio/apps/14aa407e-40b6-43f5-9969-1abfb361887d
+| مسیر | کاربرد |
+| --- | --- |
+| `index.html`, `css/`, `js/`, `assets/` | خود برنامه (فایل‌های استاتیک) |
+| `service-worker.js` | کش آفلاین؛ با هر انتشار، عدد `CACHE_NAME` را بالا ببر |
+| `worker.js`, `wrangler.jsonc` | Cloudflare Worker: فقط مسیر `POST /api/bale` (واسط همگام‌سازی با بله)؛ بقیه‌ی مسیرها فایل استاتیک‌اند |
+| `.assetsignore` | فایل‌هایی که نباید به‌صورت عمومی سرو شوند |
 
-## Run Locally
+## اجرا و انتشار
 
-**Prerequisites:**  Node.js
+- انتشار: push به مخزن گیت (Cloudflare به‌صورت خودکار دیپلوی می‌کند).
+- اجرای محلی: `npx wrangler dev` (برای تست `/api/bale` لازم است؛ برای بقیه‌ی بخش‌ها هر وب‌سرور استاتیکی کافی است).
+- همگام‌سازی با بله به یک KV با نام binding برابر `SYNC_KV` نیاز دارد (در `wrangler.jsonc`).
 
+## نکات نگه‌داری
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- ترتیب بارگذاری اسکریپت‌ها در `index.html` مهم است (`utils.js` اول، `app.js` بعد از `storage.js`).
+- شناسه‌ی حرکت‌ها (`id` در کاتالوگ) هرگز نباید تغییر کند؛ سوابق تمرین با همین شناسه ذخیره می‌شوند.
+- هر متنی که از برنامه/کاتالوگ/پشتیبان وارد صفحه می‌شود باید با `esc()` (در `utils.js`) escape شود.

@@ -4,8 +4,8 @@
    هر تابع این فایل یک «سؤال واقعی» را جواب می‌دهد:
 
    computeStatus      → این هفته چقدر تمرین کرده‌ام؟ چقدر به برنامه پایبند بوده‌ام؟
-   computeProgression → در یک حرکت مشخص، عملکردم در طول جلسات چه شکلی بوده؟
-   computeComparison  → نسبت به جلسه‌ی قبل همین جلسه‌ی برنامه چه تغییری کرده‌ام؟
+   computeSessionCharts → عملکرد هر حرکتِ یک جلسه‌ی برنامه در طول جلسات (و برنامه‌ها) چه شکلی بوده؟
+   computeMuscleSets    → برای هر گروه عضلانی چند ست ثبت کرده‌ام؟
    computeReadiness   → کدام حرکت طبق target برنامه آماده‌ی افزایش وزنه است؟
    computeRecords     → آخرین رکوردهای معنادار من چه بوده‌اند؟
 
@@ -164,7 +164,6 @@
     }
 
     const entryFromWorkout = (workout, ex) => buildEntry(workout, ex, false);
-    const bodyEntry = (workout, ex) => buildEntry(workout, ex, true);
 
     function exerciseSessions(workouts, exerciseId, bodyMode) {
         const out = [];
@@ -275,148 +274,6 @@
             else text += ` تکرار جلسه‌ی آخر پایین‌تر از حداقل محدوده‌ی هدف (${fa(target.min, 0)}) است.`;
         }
         return { level: "ok", text };
-    }
-
-    function computeProgression(ctx, f) {
-        const { programs, catalog, today, activeMonth } = ctx;
-        let ws = ctx.workouts;
-
-        if (f.month && f.month !== "all") ws = ws.filter(w => w.month === f.month);
-        if (f.session && f.session !== "all") ws = ws.filter(w => Number(w.session) === Number(f.session));
-        if (f.range && f.range !== "all") ws = ws.filter(w => w.date >= addDays(today, -7 * Number(f.range) + 1));
-
-        const targetMonth = f.month && f.month !== "all" ? f.month : activeMonth;
-
-        const ids = new Set();
-        ws.forEach(w => (w.exercises || []).forEach(e => ids.add(e.id)));
-
-        const list = [];
-        ids.forEach(id => {
-            const t = getTarget(programs, targetMonth, id);
-            if (!isTrackable(id, t, catalog)) return;
-            const sess = exerciseSessions(ws, id);
-            if (!sess.length) return;
-            list.push({
-                id,
-                name: catalog[id] ? catalog[id].name : id,
-                count: sess.length,
-                lastDate: sess[sess.length - 1].date
-            });
-        });
-        list.sort((a, b) => b.count - a.count || b.lastDate.localeCompare(a.lastDate));
-
-        const selected = list.find(e => e.id === f.exercise) || list[0] || null;
-        if (!selected) return { workoutCount: ws.length, list, selected: null, sessions: [], target: null, interpretation: null, stats: null };
-
-        const sessions = exerciseSessions(ws, selected.id).map(s => {
-            const t = getTarget(programs, s.month, selected.id);
-            return Object.assign({}, s, { target: t, status: repStatus(s.best.reps, t) });
-        });
-        const target = sessions[sessions.length - 1].target;
-        const bestEver = sessions.reduce((m, s) => (s.best.weight > m.weight ? s.best : m), sessions[0].best);
-
-        return {
-            workoutCount: ws.length,
-            list,
-            selected,
-            sessions,
-            target,
-            interpretation: interpretProgression(sessions, target),
-            stats: {
-                count: sessions.length,
-                maxWeight: bestEver,
-                last: sessions[sessions.length - 1].best,
-                incompleteSessions: sessions.filter(s => s.incomplete > 0).length
-            }
-        };
-    }
-
-    /* =========================
-       ۳) مقایسه با جلسه قبل
-    ========================= */
-    function describeChange(prev, cur) {
-        const dW = cur.best.weight - prev.best.weight;
-        const dR = cur.best.reps - prev.best.reps;
-        if (dW > 0) {
-            if (dR === 0) return { tone: "up", text: `+${fa(dW)} kg در همان تعداد تکرار` };
-            return { tone: "mixed", text: `+${fa(dW)} kg؛ تکرار از ${fa(prev.best.reps, 0)} به ${fa(cur.best.reps, 0)}` };
-        }
-        if (dW < 0) {
-            return { tone: "lower", text: `−${fa(Math.abs(dW))} kg؛ تکرار از ${fa(prev.best.reps, 0)} به ${fa(cur.best.reps, 0)}` };
-        }
-        if (dR > 0) return { tone: "up", text: `+${fa(dR, 0)} تکرار در همان وزن` };
-        if (dR < 0) return { tone: "lower", text: `${fa(Math.abs(dR), 0)} تکرار کمتر در همان وزن` };
-        return { tone: "same", text: "بدون تغییر" };
-    }
-
-    function computeComparison(ctx) {
-        const { workouts, activeMonth, program, programs, catalog } = ctx;
-        const cycle = workouts.filter(w => w.month === activeMonth);
-        const current = cycle.length ? cycle[cycle.length - 1] : null;
-        if (!current) return { state: "empty" };
-
-        const prevWorkout = cycle
-            .filter(w => Number(w.session) === Number(current.session) && w.date < current.date)
-            .pop() || null;
-
-        const progSession = program && program.sessions ? program.sessions[current.session] : null;
-        const order = progSession ? progSession.exercises.map(e => e.id) : (current.exercises || []).map(e => e.id);
-
-        const rows = [];
-        let skipped = 0;
-
-        order.forEach(id => {
-            const cEx = (current.exercises || []).find(e => e.id === id);
-            if (!cEx) return;
-            const target = getTarget(programs, activeMonth, id);
-            if (!isTrackable(id, target, catalog)) { skipped += 1; return; }
-
-            const cur = entryFromWorkout(current, cEx);
-            if (!cur.sets.length) return;
-
-            const pEx = prevWorkout ? (prevWorkout.exercises || []).find(e => e.id === id) : null;
-            const prev = pEx ? entryFromWorkout(prevWorkout, pEx) : null;
-            const hasPrev = prev && prev.sets.length > 0;
-
-            let caveat = null;
-            if (prevWorkout && !hasPrev) {
-                caveat = "این حرکت در جلسه‌ی قبل ثبت نشده است.";
-            } else if (hasPrev && (prev.incomplete > 0 || (target && prev.logged < target.sets))) {
-                caveat = "برای مقایسه‌ی دقیق، ثبت کامل جلسه‌ی قبلی لازم است.";
-            } else if (cur.incomplete > 0 || (target && cur.logged < target.sets)) {
-                caveat = "ثبت این جلسه کامل نیست؛ مقایسه محدود است.";
-            }
-
-            rows.push({
-                id,
-                name: catalog[id] ? catalog[id].name : id,
-                target,
-                cur,
-                prev: hasPrev ? prev : null,
-                change: hasPrev ? describeChange(prev, cur) : null,
-                setCountChanged: hasPrev && prev.logged !== cur.logged,
-                ceiling: isCeilingReached(cur, target),
-                caveat
-            });
-        });
-
-        const summary = { up: 0, same: 0, lower: 0 };
-        rows.forEach(r => {
-            if (!r.change) return;
-            if (r.change.tone === "up") summary.up += 1;
-            else if (r.change.tone === "same") summary.same += 1;
-            else summary.lower += 1;
-        });
-
-        return {
-            state: prevWorkout ? "ok" : "no-previous",
-            current,
-            prevWorkout,
-            sessionTitle: progSession ? progSession.title : `جلسه ${current.session}`,
-            rows,
-            skipped,
-            summary
-        };
     }
 
     /* =========================
@@ -715,7 +572,7 @@
         num, fa, fmtSet, addDays, diffDays, sortWorkouts,
         parseTarget, getTarget, isTrackable, repStatus,
         entryFromWorkout, exerciseSessions, isCeilingReached,
-        computeStatus, computeProgression, computeComparison,
+        computeStatus,
         computeReadiness, computeRecords, interpretProgression,
         computeSessionCharts, computeMuscleSets, MUSCLE_ORDER
     };

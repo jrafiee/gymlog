@@ -133,7 +133,7 @@ function renderCycleGrid(data) {
             sessionItems += `
                 <div class="${itemClass}" data-week="${wk}" data-session="${sNum}" title="کلیک برای باز کردن جلسه">
                     <div class="dash-cycle-session-info">
-                        <strong>جلسه ${sNum}: ${sessInfo.title}</strong>
+                        <strong>جلسه ${sNum}: ${esc(sessInfo.title)}</strong>
                         <span>${subText}</span>
                     </div>
                     <span class="dash-cycle-status-icon">${statusIcon}</span>
@@ -230,13 +230,13 @@ function showWorkoutDetailModal(workout) {
         const setsHtml = (ex.sets || []).map((s, sIdx) => `
             <div class="dv-detail-set">
                 <span>ست ${sIdx + 1}</span>
-                <strong>${s.weight || "—"} kg × ${s.reps || "—"}</strong>
+                <strong>${esc(s.weight || "—")} kg × ${esc(s.reps || "—")}</strong>
             </div>
         `).join("");
 
         return `
             <div class="dv-detail-ex">
-                <h4>${idx + 1}. ${exName}</h4>
+                <h4>${idx + 1}. ${esc(exName)}</h4>
                 <div class="dv-detail-sets">${setsHtml}</div>
                 ${ex.note ? `<p class="dv-detail-note">📝 ${esc(ex.note)}</p>` : ""}
             </div>
@@ -342,7 +342,7 @@ function renderFullHistoryView() {
                     <option value="4" ${historyFilterWeek === "4" ? "selected" : ""}>هفته ۴</option>
                 </select>
 
-                <input type="text" id="historySearchInput" class="history-search-input" placeholder="جستجو بر اساس نام حرکت (فارسی/انگلیسی) یا تاریخ..." value="${historySearchQuery}">
+                <input type="text" id="historySearchInput" class="history-search-input" placeholder="جستجو بر اساس نام حرکت (فارسی/انگلیسی) یا تاریخ..." value="${esc(historySearchQuery)}">
             </div>
 
             <div class="dash-table-wrap">
@@ -675,7 +675,7 @@ function renderProgramsView() {
                     <div class="gl-program-card-head" ${isCur ? "" : 'data-prog-toggle role="button" tabindex="0" aria-expanded="false"'}>
                         <div>
                             <h3 class="gl-program-card-title">
-                                ${month.title} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : '<span class="gl-prog-chev" aria-hidden="true">▾</span>'}
+                                ${esc(month.title)} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : '<span class="gl-prog-chev" aria-hidden="true">▾</span>'}
                             </h3>
                             <span class="gl-muted-sm">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
                         </div>
@@ -797,13 +797,13 @@ function renderBankView() {
 
     const groupsHtml = categories.map(cat => `
         <section class="dv-bank-group">
-            <h4>${cat} <span>${groups[cat].length.toLocaleString("fa-IR")} حرکت</span></h4>
+            <h4>${esc(cat)} <span>${groups[cat].length.toLocaleString("fa-IR")} حرکت</span></h4>
             <div class="dv-bank-grid">
                 ${groups[cat].map(ex => `
-                    <div class="dv-bank-card" data-search="${String(ex.name + " " + (ex.nameEn || "") + " " + ex.key).toLowerCase().replace(/"/g, "")}">
-                        <button type="button" class="dv-bank-item" data-id="${ex.key}">
-                            <strong>${ex.name}</strong>
-                            <span>${ex.key}</span>
+                    <div class="dv-bank-card" data-search="${esc(String(ex.name + " " + (ex.nameEn || "") + " " + ex.key).toLowerCase())}">
+                        <button type="button" class="dv-bank-item" data-id="${esc(ex.key)}">
+                            <strong>${esc(ex.name)}</strong>
+                            <span>${esc(ex.key)}</span>
                             ${badgeFor(ex.key)}
                         </button>
                     </div>
@@ -921,6 +921,7 @@ function renderBackupView() {
             if (file && typeof handleBackupFileSelected === "function") {
                 handleBackupFileSelected(file);
             }
+            e.target.value = "";
         });
     }
 }

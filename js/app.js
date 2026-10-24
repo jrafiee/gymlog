@@ -445,10 +445,10 @@ function buildProgramSessionTableHtml(session, key) {
         rows += `
             <tr class="${g ? "dv-ss-row" + (last ? " dv-ss-last" : "") : ""}">
                 <td class="dv-prog-idx">${(i + 1).toLocaleString("fa-IR")}</td>
-                <td class="dv-prog-name">${e.name}${g ? `<span class="dv-ss-chip">سوپرست ${g.toLocaleString("fa-IR")}</span>` : ""}</td>
+                <td class="dv-prog-name">${esc(e.name)}${g ? `<span class="dv-ss-chip">سوپرست ${g.toLocaleString("fa-IR")}</span>` : ""}</td>
                 <td>${Number(e.sets).toLocaleString("fa-IR")}</td>
-                <td class="dv-prog-reps">${reps}</td>
-                <td>${e.rest || "—"}</td>
+                <td class="dv-prog-reps">${esc(reps)}</td>
+                <td>${esc(e.rest || "—")}</td>
             </tr>`;
     });
 
@@ -456,7 +456,7 @@ function buildProgramSessionTableHtml(session, key) {
         <div class="dv-prog-session">
             <div class="dv-prog-session-head">
                 <span class="dv-prog-session-num">جلسه ${Number(key).toLocaleString("fa-IR")}</span>
-                <h4>${session.title}</h4>
+                <h4>${esc(session.title)}</h4>
                 ${ssCount ? `<span class="dv-ss-chip dv-ss-chip-head">⚡ ${ssCount.toLocaleString("fa-IR")} سوپرست</span>` : ""}
                 <span class="dv-prog-session-count">${exercises.length.toLocaleString("fa-IR")} حرکت</span>
             </div>
@@ -485,7 +485,7 @@ function buildMyProgramCardHtml(monthKey) {
             <div class="my-program-summary">
                 <div class="my-program-summary-info">
                     <h3>
-                        ${month.title}
+                        ${esc(month.title)}
                         ${isCurrent ? '<span class="my-program-current-badge">برنامه جاری</span>' : ""}
                     </h3>
                     <span class="my-program-dates">${getMonthDateRangeText(monthKey)}</span>
@@ -563,7 +563,7 @@ function renderSessionButtons() {
         }
         button.innerHTML = `
             <strong>جلسه ${session}</strong>
-            <span>${sessions[session].title}</span>
+            <span>${esc(sessions[session].title)}</span>
         `;
         button.addEventListener("click", () => {
             currentSession = Number(session);
@@ -618,21 +618,21 @@ function renderExercises() {
                 <div class="exercise-title">
                     <div class="exercise-number">${index + 1}</div>
                     <div>
-                        <h2>${exercise.name}</h2>
+                        <h2>${esc(exercise.name)}</h2>
                         <div class="exercise-meta">
-                            هدف: ${exercise.target} &nbsp; | &nbsp; استراحت: ${exercise.rest}
+                            هدف: ${esc(exercise.target)} &nbsp; | &nbsp; استراحت: ${esc(exercise.rest)}
                         </div>
                     </div>
                 </div>
-                <button type="button" class="exercise-help-btn" data-exercise-id="${exercise.id}">
+                <button type="button" class="exercise-help-btn" data-exercise-id="${esc(exercise.id)}">
                     🖼 نحوه اجرا
                 </button>
-                <button type="button" class="exercise-history-btn" data-exercise-id="${exercise.id}">
+                <button type="button" class="exercise-history-btn" data-exercise-id="${esc(exercise.id)}">
                     📈 سابقه حرکت
                 </button>
                 ${restSec ? `<button type="button" class="exercise-rest-btn" data-seconds="${restSec}" data-exercise-name="${esc(exercise.name)}">⏱ استراحت</button>` : ""}
             </div>
-            <div class="sets-container" data-exercise="${exercise.id}">
+            <div class="sets-container" data-exercise="${esc(exercise.id)}">
                 ${createSetRows(exercise, previousExercise, currentExercise, refSets)}
             </div>
             <details class="exercise-note" ${exNote ? "open" : ""}>
@@ -749,7 +749,7 @@ function showExerciseHistory(exerciseId) {
     overlay.innerHTML = `
         <div class="exercise-guide-modal">
             <div class="exercise-guide-header">
-                <h2>سابقه — ${exercise.name}</h2>
+                <h2>سابقه — ${esc(exercise.name)}</h2>
                 <button type="button" class="exercise-guide-close" aria-label="بستن">×</button>
             </div>
             ${historyHtml}
@@ -770,7 +770,7 @@ function formatHistorySets(sets) {
     if (!sets || sets.length === 0) return "—";
     return sets.map(set => {
         if (set.weight === "" && set.reps === "") return "—";
-        return `<span class="history-set">${set.weight || "—"}kg × ${set.reps || "—"}</span>`;
+        return `<span class="history-set">${esc(set.weight || "—")}kg × ${esc(set.reps || "—")}</span>`;
     }).join("");
 }
 
@@ -780,19 +780,19 @@ function formatHistorySets(sets) {
 function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
         return `
-            <video class="exercise-guide-video" src="${mediaPath}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
+            <video class="exercise-guide-video" src="${esc(mediaPath)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
         `;
     }
     if (isVideoSrc(mediaPath)) {
         return `
             <video class="exercise-guide-video" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
-                <source src="${mediaPath}" type="${videoMime(mediaPath)}">
+                <source src="${esc(mediaPath)}" type="${videoMime(mediaPath)}">
                 مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
             </video>
         `;
     }
     return `
-        <img class="exercise-guide-image" src="${mediaPath}" alt="${exerciseName}" loading="lazy" onerror="handleExerciseMediaError(this)">
+        <img class="exercise-guide-image" src="${esc(mediaPath)}" alt="${esc(exerciseName)}" loading="lazy" onerror="handleExerciseMediaError(this)">
     `;
 }
 
@@ -832,7 +832,7 @@ function showExerciseGuide(exerciseId) {
         : `<div class="exercise-guide-no-image">تصویر این حرکت هنوز اضافه نشده است.</div>`;
 
     let instructionsHtml = instructions.length > 0
-        ? `<ul class="exercise-guide-instructions">${instructions.map(inst => `<li>${inst}</li>`).join("")}</ul>`
+        ? `<ul class="exercise-guide-instructions">${instructions.map(inst => `<li>${esc(inst)}</li>`).join("")}</ul>`
         : "";
 
     const overlay = document.createElement("div");
@@ -840,7 +840,7 @@ function showExerciseGuide(exerciseId) {
     overlay.innerHTML = `
         <div class="exercise-guide-modal">
             <div class="exercise-guide-header">
-                <h2>${exercise.name}</h2>
+                <h2>${esc(exercise.name)}</h2>
                 <button type="button" class="exercise-guide-close" aria-label="بستن">×</button>
             </div>
             ${imagesHtml}
@@ -957,10 +957,10 @@ function createSetRows(exercise, previousExercise, currentExercise, refSets) {
             <div class="set-row" data-set="${i}" data-bw="${isBw ? 1 : 0}" data-ref-w="${refSet ? esc(refSet.weight) : ""}" data-ref-r="${refSet ? esc(refSet.reps) : ""}">
                 <div class="set-label">ست ${i + 1}</div>
                 <div>
-                    <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" step="0.5" inputmode="decimal" value="${currentWeight}">
+                    <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
                 </div>
                 <div>
-                    <input type="number" class="reps-input" placeholder="تکرار" min="0" step="1" inputmode="numeric" value="${currentReps}">
+                    <input type="number" class="reps-input" placeholder="تکرار" min="0" step="1" inputmode="numeric" value="${esc(currentReps)}">
                 </div>
                 <div class="set-difference">
                     ${previousSet && (previousSet.weight || previousSet.reps)
@@ -1012,20 +1012,57 @@ function workoutHasData(workout) {
     );
 }
 
+/* ذخیره‌ی فوری (برای «پایان جلسه»). شناسه‌ی رکورد موجود را addWorkout حفظ می‌کند. */
 async function autoSaveWorkout() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    pendingWorkout = null;
     if (!workoutDate.value || viewingMonth !== currentMonth) return false;
     const workout = collectWorkout();
     if (!workoutHasData(workout)) return false;
 
-    // Preserves existing ID if record exists
-    const existing = getCurrentSavedWorkout();
-    if (existing && existing.id) {
-        workout.id = existing.id;
-    }
-
     await addWorkout(workout);
     return true;
 }
+
+/* ذخیره‌ی خودکار هنگام تایپ: عکس لحظه‌ای از فرم همان لحظه گرفته می‌شود (تا با عوض شدن جلسه/تاریخ قاطی نشود)
+   ولی نوشتن در IndexedDB و آینه‌ی localStorage با تأخیر کوتاه انجام می‌شود، نه با هر کلید. */
+let pendingWorkout = null;
+let saveTimer = null;
+
+function queueWorkoutSave() {
+    if (!workoutDate.value || viewingMonth !== currentMonth) return;
+    const snap = collectWorkout();
+    if (!workoutHasData(snap)) {
+        clearTimeout(saveTimer);
+        saveTimer = null;
+        pendingWorkout = null;
+        return;
+    }
+    pendingWorkout = snap;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushWorkoutSave, 400);
+}
+
+async function flushWorkoutSave() {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+    const w = pendingWorkout;
+    pendingWorkout = null;
+    if (!w) return false;
+    try {
+        return await addWorkout(w);
+    } catch (err) {
+        console.error("خطا در ذخیره‌ی خودکار جلسه:", err);
+        return false;
+    }
+}
+
+/* هنگام رفتن به پس‌زمینه یا بستن صفحه، تغییر ذخیره‌نشده از دست نرود */
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushWorkoutSave();
+});
+window.addEventListener("pagehide", () => { flushWorkoutSave(); });
 
 /* پیام کوتاه و غیرمسدودکننده */
 function showToast(message, type = "success") {
@@ -1302,11 +1339,7 @@ if (weekNumber) {
 }
 
 /* یادداشت‌ها همراه ست‌ها ذخیره می‌شوند (جلسه‌ی بدون هیچ ستی ذخیره نمی‌شود)؛ با تأخیر کوتاه */
-let noteSaveTimer = null;
-function scheduleNoteSave() {
-    clearTimeout(noteSaveTimer);
-    noteSaveTimer = setTimeout(() => { autoSaveWorkout().catch(() => {}); }, 500);
-}
+const scheduleNoteSave = queueWorkoutSave;
 
 if (sessionNote) sessionNote.addEventListener("input", scheduleNoteSave);
 
@@ -1315,7 +1348,7 @@ function attachInputEvents() {
         input.addEventListener("input", () => {
             checkSetWarning(input.closest(".set-row"), false);
             updateSummary();
-            autoSaveWorkout();
+            queueWorkoutSave();
         });
     });
     document.querySelectorAll(".set-row").forEach(row => {

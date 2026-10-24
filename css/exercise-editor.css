@@ -295,7 +295,7 @@
 }
 
 /* ---------- Dark mode ---------- */
-body.dark-mode body.dark-mode body.dark-mode .dv-bank-badge {
+body.dark-mode .dv-bank-badge {
     background: #1e3a8a;
     color: #bfdbfe !important;
 }

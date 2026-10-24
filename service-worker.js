@@ -3,7 +3,7 @@
    (مثلاً v17). تغییر همین فایل باعث می‌شود مرورگر نسخه‌ی جدید را
    پیدا کند و دکمه‌ی «به‌روزرسانی» در تنظیمات فعال شود.
 */
-const CACHE_NAME = "gym-tracker-v38";
+const CACHE_NAME = "gym-tracker-v39";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
 const MEDIA_CACHE = "gym-media-v1";
@@ -11,11 +11,9 @@ const MEDIA_CACHE = "gym-media-v1";
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
-    "./report.html",
     "./manifest.json",
 
     "./css/style.css",
-    "./css/report.css",
     "./css/dashboard.css",
     "./css/dashboard-overview.css",
     "./css/program-builder.css",
@@ -32,7 +30,6 @@ const FILES_TO_CACHE = [
     "./js/program-builder.js",
     "./js/exercise-editor.js",
     "./js/rest-timer.js",
-    "./js/report.js",
     "./js/storage.js",
     "./js/exercise-catalog.js",
     "./js/workout-programs.js",
