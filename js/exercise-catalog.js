@@ -24,7 +24,7 @@ const exerciseCatalog = {
 
     machine_chest_press: {
         name: "پرس سینه دستگاه",
-        images: ["assets/exercises/machine-chest-press.svg"],
+        images: ["assets/exercises/machine-chest-press.mp4"],
         instructions: [
             "کتف‌ها را عقب و پایین نگه دار.",
             "دسته‌ها را بدون ضربه به جلو فشار بده.",
