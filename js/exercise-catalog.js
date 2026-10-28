@@ -113,7 +113,7 @@ const exerciseCatalog = {
 
     overhead_cable_triceps: {
         name: "پشت بازو بالای سر با سیم‌کش",
-        images: ["assets/exercises/overhead-cable-triceps.jpg"],
+        images: ["assets/exercises/overhead-cable-triceps.mp4"],
         instructions: [
             "آرنج‌ها را تا حد ممکن ثابت نگه دار.",
             "دسته را پشت سر قرار بده.",
@@ -372,7 +372,7 @@ const exerciseCatalog = {
 
     bulgarian_split_squat: {
         name: "بلغارین اسپلیت اسکوات دمبل",
-        images: ["assets/exercises/bulgarian_split_squat.gif],
+        images: ["assets/exercises/bulgarian_split_squat.mp4"],
         instructions: [
             "پای عقب را روی نیمکت قرار بده.",
             "پای جلویی را در فاصله‌ای قرار بده که تعادل داشته باشی.",
