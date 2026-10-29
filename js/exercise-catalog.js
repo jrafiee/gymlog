@@ -24,7 +24,7 @@ const exerciseCatalog = {
 
     machine_chest_press: {
         name: "پرس سینه دستگاه",
-        images: ["assets/exercises/machine-chest-press.svg"],
+        images: ["assets/exercises/machine-chest-press.mp4"],
         instructions: [
             "کتف‌ها را عقب و پایین نگه دار.",
             "دسته‌ها را بدون ضربه به جلو فشار بده.",
@@ -34,7 +34,7 @@ const exerciseCatalog = {
 
     incline_dumbbell_press: {
         name: "پرس بالا سینه دمبل",
-        images: ["assets/exercises/incline-dumbbell-press.svg"],
+        images: ["assets/exercises/incline-dumbbell-press.mp4"],
         instructions: [
             "میز را حدود 30 تا 45 درجه تنظیم کن.",
             "کتف‌ها را به نیمکت تکیه بده.",
@@ -44,7 +44,7 @@ const exerciseCatalog = {
 
     dumbbell_fly: {
         name: "فلای دمبل",
-        images: ["assets/exercises/dumbbell-fly.mp4"],
+        images: ["assets/exercises/dumbbell_fly.mp4"],
         instructions: [
             "آرنج‌ها را کمی خم نگه دار.",
             "دست‌ها را با کنترل به طرفین باز کن.",
@@ -54,7 +54,7 @@ const exerciseCatalog = {
 
     elevated_pushup: {
         name: "شنا روی پایه",
-        images: ["assets/exercises/elevated-pushup.mp4"],
+        images: ["assets/exercises/elevated_pushup.mp4"],
         instructions: [
             "بدن را از سر تا لگن در یک خط نگه دار.",
             "سینه را به سمت پایه پایین بیاور.",
@@ -75,7 +75,7 @@ const exerciseCatalog = {
 
     cable_crossover: {
         name: "کراس اور سیم‌کش",
-        images: ["assets/exercises/cable-crossover.jpg"],
+        images: ["assets/exercises/cable_crossover.mp4"],
         instructions: [
             "دسته‌های سیم‌کش را در ارتفاع مناسب تنظیم کن.",
             "یک قدم جلو برو و بدن را پایدار نگه دار.",
@@ -102,7 +102,7 @@ const exerciseCatalog = {
 
     rope_triceps_pushdown: {
         name: "پشت بازو سیم‌کش طناب",
-        images: ["assets/exercises/rope-triceps-pushdown.mp4"],
+        images: ["assets/exercises/rope_triceps_pushdown.mp4"],
         instructions: [
             "آرنج‌ها را نزدیک بدن ثابت نگه دار.",
             "طناب را با حرکت آرنج به پایین بکش.",
@@ -113,7 +113,7 @@ const exerciseCatalog = {
 
     overhead_cable_triceps: {
         name: "پشت بازو بالای سر با سیم‌کش",
-        images: ["assets/exercises/overhead-cable-triceps.mp4"],
+        images: ["assets/exercises/overhead_cable_triceps.jpg"],
         instructions: [
             "آرنج‌ها را تا حد ممکن ثابت نگه دار.",
             "دسته را پشت سر قرار بده.",
@@ -241,7 +241,7 @@ const exerciseCatalog = {
 
     chest_supported_row: {
         name: "پارویی دمبل روی میز شیب‌دار",
-        images: ["assets/exercises/incline_dumbbell_row.mp4"],
+        images: ["assets/exercises/chest_supported_row.mp4"],
         instructions: [
             "سینه را کاملاً روی نیمکت تکیه بده.",
             "دمبل‌ها را به سمت بدن بکش.",
@@ -263,7 +263,7 @@ const exerciseCatalog = {
 
     straight_arm_pullover: {
         name: "پول‌اور سیم‌کش دست صاف با طناب",
-        images: ["assets/exercises/straight_arm_cable_pullover.mp4"],
+        images: ["assets/exercises/straight_arm_pullover.mp4"],
         instructions: [
             "آرنج‌ها را کمی خم ولی تقریباً ثابت نگه دار.",
             "طناب را با عضلات پشت به سمت ران‌ها پایین بکش.",
@@ -279,7 +279,7 @@ const exerciseCatalog = {
 
     dumbbell_shoulder_press: {
         name: "پرس سرشانه دمبل نشسته",
-        images: ["assets/exercises/dumbbell_shoulder_press_seated.mp4"],
+        images: ["assets/exercises/dumbbell_shoulder_press.mp4"],
         instructions: [
             "روی نیمکت با پشتی تقریباً عمودی بنشین.",
             "دمبل‌ها را در کنار سر قرار بده.",
@@ -372,7 +372,7 @@ const exerciseCatalog = {
 
     bulgarian_split_squat: {
         name: "بلغارین اسپلیت اسکوات دمبل",
-        images: ["assets/exercises/bulgarian_split_squat.mp4"],
+        images: ["assets/exercises/bulgarian_split_squat.gif"],
         instructions: [
             "پای عقب را روی نیمکت قرار بده.",
             "پای جلویی را در فاصله‌ای قرار بده که تعادل داشته باشی.",
@@ -383,7 +383,7 @@ const exerciseCatalog = {
 
     smith_calf_raise: {
         name: "ساق پا ایستاده اسمیت",
-        images: ["assets/exercises/smith_standing_calf_raise.mp4"],
+        images: ["assets/exercises/smith_calf_raise.mp4"],
         instructions: [
             "پنجه‌ها را روی سطح مناسب قرار بده.",
             "پاشنه‌ها را تا حد مناسب پایین بیاور.",
