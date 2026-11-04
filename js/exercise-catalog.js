@@ -192,7 +192,7 @@ const exerciseCatalog = {
 
     pallof_press: {
         name: "پرس پالوف",
-        images: ["assets/exercises/pallof_press.mp4"],
+        images: ["assets/exercises/pallof_press.gif"],
         instructions: [
             "در کنار دستگاه سیم‌کش بایست و بدن را کاملاً ثابت نگه دار.",
             "دسته را جلوی سینه نگه دار.",
@@ -339,7 +339,7 @@ const exerciseCatalog = {
 
     smith_squat: {
         name: "اسکوات اسمیت",
-        images: ["assets/exercises/smith-squat.mp4"],
+        images: ["assets/exercises/smith_squat.mp4"],
         instructions: [
             "پاها را در وضعیت پایدار زیر میله قرار بده.",
             "با کنترل زانوها و لگن را خم کن.",
@@ -414,7 +414,7 @@ const exerciseCatalog = {
 
     hammer_curl: {
         name: "جلو بازو چکشی دمبل",
-        images: ["assets/exercises/dumbbell-hammer-curl.mp4"],
+        images: ["assets/exercises/hammer_curl.mp4"],
         instructions: [
             "کف دست‌ها را رو به یکدیگر نگه دار.",
             "دمبل را بدون تاب دادن بدن بالا بیاور.",
