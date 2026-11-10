@@ -3,7 +3,7 @@
    (مثلاً v17). تغییر همین فایل باعث می‌شود مرورگر نسخه‌ی جدید را
    پیدا کند و دکمه‌ی «به‌روزرسانی» در تنظیمات فعال شود.
 */
-const CACHE_NAME = "gym-tracker-v43";
+const CACHE_NAME = "gym-tracker-v47";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
 const MEDIA_CACHE = "gym-media-v1";
@@ -21,6 +21,7 @@ const FILES_TO_CACHE = [
     "./css/gl-extras.css",
     "./css/superset.css",
 	"./css/redesign.css",
+    "./css/gl-ui.css",
 
     "./js/utils.js",
     "./js/app.js",
@@ -30,6 +31,7 @@ const FILES_TO_CACHE = [
     "./js/program-builder.js",
     "./js/exercise-editor.js",
     "./js/rest-timer.js",
+    "./js/gl-ui.js",
     "./js/storage.js",
     "./js/exercise-catalog.js",
     "./js/workout-programs.js",
@@ -77,7 +79,7 @@ self.addEventListener("activate", event => {
             .then(names =>
                 Promise.all(
                     names
-                        .filter(name => name !== CACHE_NAME && name !== MEDIA_CACHE)
+                        .filter(name => name !== CACHE_NAME && name !== MEDIA_CACHE && name !== FONT_CACHE)
                         .map(name => caches.delete(name))
                 )
             )
@@ -146,7 +148,7 @@ async function networkFirstWithTimeout(event) {
 async function handleFetch(event) {
     const request = event.request;
     const url = new URL(request.url);
-
+    if (FONT_HOSTS.includes(url.hostname)) return fontCacheFirst(request);
     // برای فایل‌های جاوااسکریپت و صفحات، ابتدا از شبکه (با تایم‌اوت) می‌خواند
     if (url.origin === self.location.origin && (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith("/"))) {
         return networkFirstWithTimeout(event);
@@ -184,3 +186,14 @@ self.addEventListener("fetch", event => {
     if (event.request.method !== "GET") return;
     event.respondWith(handleFetch(event));
 });
+const FONT_CACHE = "gym-fonts-v1";
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
+
+async function fontCacheFirst(request) {
+    const cache = await caches.open(FONT_CACHE);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const res = await fetch(request);
+    if (res && (res.ok || res.type === "opaque")) cache.put(request, res.clone());
+    return res;
+}
