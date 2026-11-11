@@ -1,7 +1,7 @@
 /* =====================================================
    GymLog — لایه‌ی رابط کاربری (فقط نمایش)
 
-   ۱) آیکون‌های SVG یکدست به‌جای ایموجی (منوی کناری، نوار موبایل، همبرگر)
+   ۱) آیکون‌های SVG یکدست به‌جای ایموجی (نوار موبایل، همبرگر)
    ۲) صفحه‌ی خانه (هیرو) به‌صورت view جداگانه؛ در دسکتاپ فقط منوی افقی کوچک دارد
    ۳) منوی همبرگری موبایل: همه‌ی صفحات برنامه
    ۴) ثبت سریع‌تر ست: Enter برای رفتن به فیلد بعد، انتخاب خودکار مقدار، دکمه‌ی «مثل قبل»
@@ -26,7 +26,6 @@
         menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
         chart: '<path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/>',
         dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
-        play: '<path d="M7 4.5v15l12-7.5z"/>',
         shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
         users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
         offline: '<path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"/>',
@@ -45,18 +44,8 @@
     const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
     const go = v => { if (typeof switchView === "function") switchView(v); };
 
-    /* ---------- ۱) آیکون‌ها در منوی کناری و نوار موبایل ---------- */
-    const NAV_ICON = {
-        home: "home", dashboard: "dashboard", workout: "workout", programs: "programs", history: "history",
-        bank: "bank", calendar: "calendar", user: "user", help: "help", backup: "backup", settings: "settings"
-    };
-
+    /* ---------- ۱) آیکون‌ها در نوار موبایل ---------- */
     function applyIcons() {
-        $$(".sidebar-nav-item[data-nav]").forEach(btn => {
-            const slot = $(".sidebar-nav-icon", btn);
-            if (slot) slot.innerHTML = ic(NAV_ICON[btn.dataset.nav] || "dashboard", 20);
-        });
-
         $$(".mobile-tab-btn[data-nav]").forEach(btn => {
             if ($(".gl-ic", btn)) return;
             btn.insertAdjacentHTML("afterbegin", ic(btn.dataset.nav === "workout" ? "workout" : "dashboard", 18));
@@ -68,11 +57,8 @@
             burger.setAttribute("aria-label", "منو");
         }
 
-        const title = $(".settings-page-header h2");
-        if (title) title.textContent = "منو";
-
-        /* لوگو و نام برنامه = بازگشت به خانه */
-        [".sidebar-logo", ".sidebar-title", ".mobile-nav-brand"].forEach(sel => {
+        /* نام برنامه = بازگشت به خانه */
+        [".mobile-nav-brand"].forEach(sel => {
             const el = $(sel);
             if (!el || el.dataset.glHome) return;
             el.dataset.glHome = "1";
@@ -149,7 +135,7 @@
     const NAV_MORE = [["programs", "برنامه‌های تمرینی"], ["history", "تاریخچه تمرینات"], ["bank", "بانک حرکات"],
         ["user", "کاربران"], ["settings", "تنظیمات"]];
 
-    /* منوی افقی سراسری دسکتاپ: جای منوی کناری و نوار بالا را می‌گیرد */
+    /* منوی افقی سراسری دسکتاپ: تنها منوی دسکتاپ است */
     function buildTopNav() {
         const host = $(".app-body");
         if (!host || $("#glTopnav")) return;
@@ -336,12 +322,6 @@
     function buildMenu() {
         const content = $(".settings-content");
         if (!content || $(".gl-menu-group", content)) return;
-
-        /* گروه قدیمی «صفحات برنامه» جایش را به شبکه‌ی جدید می‌دهد (همان دسترسی‌ها + تاریخچه، تقویم، پشتیبان) */
-        $$(".settings-group", content).forEach(g => {
-            const t = $(".settings-group-title", g);
-            if (t && t.textContent.trim() === "صفحات برنامه") g.style.display = "none";
-        });
 
         const sec = document.createElement("section");
         sec.className = "settings-group gl-menu-group";

@@ -212,20 +212,6 @@ function deleteRecordByKey(db, storeName, key) {
     });
 }
 
-function clearStore(db, storeName) {
-    return new Promise((resolve, reject) => {
-        try {
-            const tx = db.transaction(storeName, "readwrite");
-            const store = tx.objectStore(storeName);
-            store.clear();
-            tx.oncomplete = () => resolve(true);
-            tx.onerror = () => reject(tx.error);
-        } catch (err) {
-            reject(err);
-        }
-    });
-}
-
 /* =====================================================
    Safe Data Validation & Sanitization
 ===================================================== */
@@ -961,11 +947,7 @@ function getEffectiveCatalog() {
 }
 
 function getEffectiveProgramsRaw(userId) {
-    const basePrograms = typeof workoutProgramsRaw !== "undefined" ? workoutProgramsRaw : {};
-    return {
-        ...basePrograms,
-        ...loadProgramOverrides(userId)
-    };
+    return { ...loadProgramOverrides(userId) };
 }
 
 function saveDataToKey(key, data) {
@@ -1083,43 +1065,6 @@ async function importProgramPackage(rawPkg, userId) {
 
     await touchDataChanged();
     return true;
-}
-
-function validateProgramPackage(pkg) {
-    if (!pkg || typeof pkg !== "object") {
-        return "فایل معتبر نیست.";
-    }
-
-    const hasCatalog = pkg.catalogAdditions && typeof pkg.catalogAdditions === "object";
-    const hasPrograms = pkg.programsRaw && typeof pkg.programsRaw === "object";
-
-    if (!hasCatalog && !hasPrograms) {
-        return "فایل هیچ برنامه یا حرکت جدیدی ندارد.";
-    }
-
-    if (hasPrograms) {
-        const effectiveCatalog = getEffectiveCatalog();
-        const catalogAdditions = hasCatalog ? pkg.catalogAdditions : {};
-
-        for (const monthKey in pkg.programsRaw) {
-            const month = pkg.programsRaw[monthKey];
-            if (!month || !month.sessions) {
-                return `ماه "${monthKey}" ساختار درستی ندارد.`;
-            }
-
-            for (const sessionKey in month.sessions) {
-                const exercises = month.sessions[sessionKey].exercises || [];
-                for (const exercise of exercises) {
-                    const existsInCatalog = effectiveCatalog[exercise.id] || catalogAdditions[exercise.id];
-                    if (!existsInCatalog) {
-                        return `حرکتی با id "${exercise.id}" نه در کاتالوگ فعلی و نه در فایل آپلودی وجود ندارد.`;
-                    }
-                }
-            }
-        }
-    }
-
-    return null;
 }
 
 /* =====================================================
@@ -2454,4 +2399,75 @@ if (typeof window !== "undefined") {
             if (typeof renderBackupWarning === "function") renderBackupWarning();
         }).catch(() => {});
     });
+}
+
+
+/* =====================================================
+   ترکیب کاتالوگ + برنامه (نام و تصویر حرکت‌ها را به برنامه وصل می‌کند)
+===================================================== */
+
+function buildWorkoutPrograms(catalog, programsRaw) {
+
+    const result = {};
+
+    Object.keys(programsRaw || {}).forEach(monthKey => {
+
+        const month = programsRaw[monthKey];
+        if (!month || !month.sessions) return;
+        const sessions = {};
+
+        Object.keys(month.sessions).forEach(sessionKey => {
+
+            const session = month.sessions[sessionKey];
+            if (!session) return;
+
+            const exercises = (session.exercises || []).map(exercise => {
+
+                const catalogEntry = catalog[exercise.id];
+
+                if (!catalogEntry) {
+                    console.warn(
+                        `حرکتی با id "${exercise.id}" در کاتالوگ پیدا نشد.`
+                    );
+                }
+
+                return {
+                    id: exercise.id,
+                    target: exercise.target,
+                    rest: exercise.rest,
+                    sets: exercise.sets,
+                    ...(exercise.superset ? { superset: String(exercise.superset) } : {}),
+                    name: catalogEntry ? catalogEntry.name : exercise.id,
+                    images: catalogEntry ? catalogEntry.images : [],
+                    instructions: catalogEntry ? catalogEntry.instructions : []
+                };
+
+            });
+
+            sessions[sessionKey] = {
+                title: session.title,
+                exercises: exercises
+            };
+
+        });
+
+        let programTitle = month.title;
+        if (programTitle) {
+            programTitle = programTitle.replace(/ماه\s*(\d+|اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم)/gi, (match, p1) => {
+                return `برنامه ${p1}`;
+            });
+            if (programTitle.includes("ماه")) {
+                programTitle = programTitle.replace(/ماه/g, "برنامه");
+            }
+        }
+
+        result[monthKey] = {
+            title: programTitle || month.title,
+            sessions: sessions
+        };
+
+    });
+
+    return result;
+
 }

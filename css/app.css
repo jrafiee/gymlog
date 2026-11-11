@@ -1,0 +1,6610 @@
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+html {
+    font-size: 16px;
+}
+body {
+    margin: 0;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #f2f4f7;
+    color: #1f2937;
+    direction: rtl;
+}
+
+/* =========================
+   Container
+   ========================= */
+.container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 12px 12px 40px;
+}
+
+/* =========================
+   Header
+   ========================= */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.page-header h1 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.4;
+}
+.page-header p {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+.settings-icon-btn {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+.settings-icon-btn:hover {
+    background: #e5e7eb;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+button,
+.secondary-btn {
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+.primary-btn {
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+}
+.secondary-btn {
+    background: white;
+    border-color: #d1d5db;
+    color: #374151;
+}
+.danger-btn {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* =========================
+   Cards
+   ========================= */
+.card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 14px;
+    margin-bottom: 12px;
+}
+
+/* =========================
+   Session selector
+   ========================= */
+.session-selector {
+    padding: 10px;
+}
+.selector-title {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 2px 4px 8px;
+}
+.session-buttons {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+}
+.session-buttons::-webkit-scrollbar {
+    height: 3px;
+}
+.session-btn {
+    flex: 1 0 96px;
+    scroll-snap-align: center;
+    min-height: 62px;
+    padding: 7px 4px;
+    border-radius: 9px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    font-family: inherit;
+    cursor: pointer;
+}
+.session-btn strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+.session-btn span {
+    display: block;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #6b7280;
+}
+.session-btn.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #1d4ed8;
+}
+.session-btn.active span {
+    color: #2563eb;
+}
+
+/* =========================
+   Session info
+   ========================= */
+.session-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.field label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+}
+input,
+select {
+    width: 100%;
+    height: 44px;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    font-family: inherit;
+    font-size: 16px;
+    color: #1f2937;
+}
+input:focus,
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.session-note {
+    grid-column: 1 / -1;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* =========================
+   Backup warning banner
+   ========================= */
+.backup-warning-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+.backup-warning-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+.backup-warning-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+}
+.backup-warning-text strong {
+    font-size: 13px;
+    color: #92400e;
+}
+.backup-warning-text span {
+    font-size: 11px;
+    color: #b45309;
+    line-height: 1.6;
+}
+.backup-warning-banner .secondary-btn {
+    flex-shrink: 0;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+/* =========================
+   Date picker trigger button
+   ========================= */
+.date-picker-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 44px;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1f2937;
+    cursor: pointer;
+}
+.date-picker-btn:hover {
+    border-color: #9ca3af;
+}
+.date-picker-icon {
+    font-size: 16px;
+}
+
+/* =========================
+   Date picker calendar (modal)
+   ========================= */
+.date-picker-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(17, 24, 39, 0.5);
+}
+.date-picker-modal {
+    width: 100%;
+    max-width: 340px;
+    padding: 16px;
+    border-radius: 16px;
+    background: white;
+}
+.date-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.date-picker-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+.date-picker-nav {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: #f3f4f6;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+}
+.date-picker-nav:hover {
+    background: #e5e7eb;
+}
+.date-picker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    direction: ltr;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: #9ca3af;
+    text-align: center;
+}
+.date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    direction: ltr;
+    gap: 4px;
+}
+.date-picker-day {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1f2937;
+    cursor: pointer;
+}
+.date-picker-day.empty {
+    cursor: default;
+}
+.date-picker-day:not(.empty):hover {
+    background: #f3f4f6;
+}
+.date-picker-day.today {
+    box-shadow: inset 0 0 0 1px #2563eb;
+}
+.date-picker-day.selected {
+    background: #2563eb;
+    color: white;
+}
+.date-picker-day-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+}
+.date-picker-day.has-workout .date-picker-day-circle {
+    border-color: #16a34a;
+}
+.date-picker-day.selected.has-workout .date-picker-day-circle {
+    border-color: white;
+}
+.date-picker-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+.date-picker-legend-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #16a34a;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+.date-picker-close {
+    width: 100%;
+}
+
+/* =========================
+   Exercise card
+   ========================= */
+.exercise-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.exercise-header {
+    padding: 12px;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+}
+.exercise-title {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+.exercise-number {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+}
+.exercise-header h2 {
+    margin: 0 0 5px;
+    font-size: 19px;
+    line-height: 1.45;
+    font-weight: 700;
+}
+.exercise-meta {
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+
+/* =========================
+   Exercise action buttons
+   ========================= */
+.exercise-help-btn,
+.exercise-history-btn {
+    margin-top: 8px;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.exercise-help-btn:active,
+.exercise-history-btn:active {
+    background: #eff6ff;
+}
+
+/* =========================
+   Sets
+   ========================= */
+.sets-container {
+    padding: 10px;
+}
+.set-row {
+    display: grid;
+    grid-template-columns: 58px 1fr 1fr;
+    gap: 7px;
+    align-items: center;
+    margin-bottom: 7px;
+}
+.set-label {
+    font-size: 14px;
+    color: #4b5563;
+    text-align: center;
+    font-weight: bold;
+    white-space: nowrap;
+}
+.set-row input {
+    height: 44px;
+    text-align: center;
+    font-size: 16px;
+    direction: ltr;
+}
+.set-difference {
+    grid-column: 2 / 4;
+    padding: 2px 5px;
+    min-height: 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: right;
+    direction: rtl;
+}
+.set-difference:empty {
+    display: none;
+}
+
+/* =========================
+   Workout summary
+   ========================= */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 16px 0 12px;
+}
+.summary-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 11px;
+    text-align: center;
+}
+.summary-card span {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+.summary-card strong {
+    font-size: 19px;
+}
+.summary-card small {
+    display: block;
+    margin-top: 2px;
+    font-size: 9px;
+    color: #9ca3af;
+}
+
+/* =========================
+   Save workout
+   ========================= */
+.save-workout-section {
+    margin: 4px 0 18px;
+}
+
+/* =========================
+   History
+   ========================= */
+.history-section {
+    margin-top: 16px;
+}
+.section-title h2 {
+    margin: 0;
+    font-size: 17px;
+}
+.section-title p {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+.history-table-wrapper {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.history-table th,
+.history-table td {
+    padding: 9px 5px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+    white-space: nowrap;
+}
+.history-table th {
+    color: #6b7280;
+    background: #f9fafb;
+    font-weight: normal;
+}
+.history-empty {
+    padding: 25px 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* =========================
+   Exercise History Modal
+   ========================= */
+.exercise-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+}
+.exercise-history-item {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+.exercise-history-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 12px;
+    line-height: 1.7;
+}
+.exercise-history-info strong {
+    color: #1f2937;
+}
+.exercise-history-info span {
+    color: #6b7280;
+    white-space: nowrap;
+}
+.exercise-history-sets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.history-set {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 6px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-weight: bold;
+    color: #1f2937;
+    direction: ltr;
+}
+
+/* =========================
+   Settings (full page)
+   ========================= */
+.settings-page-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+}
+.settings-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+@media (min-width: 900px) {
+    .settings-page-overlay {
+        display: flex;
+        justify-content: center;
+        background: #f2f4f7;
+    }
+    .settings-page {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+.settings-page-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.settings-page-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+.settings-content {
+    flex: 1;
+    overflow-y: auto;
+}
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.setting-row:last-child {
+    border-bottom: none;
+}
+.setting-info {
+    min-width: 0;
+    flex: 1;
+}
+.setting-info strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #374151;
+}
+.setting-info span {
+    display: block;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+.setting-row .secondary-btn,
+.setting-row .danger-btn {
+    flex: 0 0 auto;
+    min-height: 42px;
+    font-size: 12px;
+}
+.backup-setting,
+.program-setting {
+    align-items: flex-start;
+    flex-direction: column;
+}
+.backup-setting .setting-info,
+.program-setting .setting-info {
+    width: 100%;
+}
+.backup-actions,
+.program-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+.program-actions {
+    grid-template-columns: 1fr;
+}
+.file-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+}
+.danger-setting .setting-info strong {
+    color: #991b1b;
+}
+
+/* =========================
+   My Programs (full page)
+   ========================= */
+.my-programs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: white;
+}
+.my-programs-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+@media (min-width: 900px) {
+    .my-programs-overlay {
+        display: flex;
+        justify-content: center;
+        background: #f2f4f7;
+    }
+    .my-programs-page {
+        width: 100%;
+        max-width: 600px;
+        background: white;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+.my-programs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.my-programs-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+.my-programs-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+.my-programs-empty {
+    font-size: 13px;
+    color: #9ca3af;
+}
+.my-program-card {
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+.my-program-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.my-program-summary-info h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #374151;
+}
+.my-program-current-badge {
+    margin-right: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 10px;
+}
+.my-program-dates {
+    display: block;
+    font-size: 11px;
+    color: #9ca3af;
+}
+.my-program-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* =========================
+   Exercise Guide Modal
+   ========================= */
+.exercise-guide-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+}
+.exercise-guide-modal {
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 18px 18px 0 0;
+    padding: 16px;
+}
+.exercise-guide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.exercise-guide-header h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.5;
+}
+.exercise-guide-close {
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+.exercise-guide-images {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.exercise-guide-image,
+.exercise-guide-video {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    max-height: 60vh;
+    margin: 0 auto 20px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+.exercise-guide-no-image {
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    background: #f3f4f6;
+    color: #9ca3af;
+    font-size: 12px;
+}
+.exercise-guide-instructions {
+    margin: 18px 0;
+    padding-right: 26px;
+    font-size: 16px;
+    line-height: 2;
+    color: #374151;
+}
+.exercise-guide-done {
+    width: 100%;
+    margin-top: 4px;
+}
+
+/* =========================
+   Dark Mode
+   ========================= */
+body.dark-mode {
+    background: #111827;
+    color: #f3f4f6;
+}
+body.dark-mode .card,
+body.dark-mode .summary-card,
+body.dark-mode .exercise-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+body.dark-mode .page-header p,
+body.dark-mode .selector-title,
+body.dark-mode .field label,
+body.dark-mode .exercise-meta,
+body.dark-mode .section-title p {
+    color: #9ca3af;
+}
+body.dark-mode .session-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+body.dark-mode .session-btn span {
+    color: #9ca3af;
+}
+body.dark-mode .session-btn.active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
+body.dark-mode .session-btn.active span {
+    color: #bfdbfe;
+}
+body.dark-mode input,
+body.dark-mode select {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+body.dark-mode input:focus,
+body.dark-mode select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.15);
+}
+body.dark-mode .date-picker-btn {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+body.dark-mode .date-picker-modal {
+    background: #1f2937;
+}
+body.dark-mode .date-picker-header h3 {
+    color: #f3f4f6;
+}
+body.dark-mode .date-picker-nav {
+    background: #374151;
+    color: #f3f4f6;
+}
+body.dark-mode .date-picker-nav:hover {
+    background: #4b5563;
+}
+body.dark-mode .date-picker-day {
+    color: #e5e7eb;
+}
+body.dark-mode .date-picker-day:not(.empty):hover {
+    background: #374151;
+}
+body.dark-mode .date-picker-legend {
+    color: #9ca3af;
+}
+body.dark-mode .backup-warning-banner {
+    background: #451a03;
+    border-color: #92400e;
+}
+body.dark-mode .backup-warning-text strong {
+    color: #fde68a;
+}
+body.dark-mode .backup-warning-text span {
+    color: #fcd34d;
+}
+body.dark-mode .session-note {
+    background: #172554;
+    color: #bfdbfe;
+}
+body.dark-mode .summary-card span {
+    color: #9ca3af;
+}
+body.dark-mode .summary-card small {
+    color: #6b7280;
+}
+body.dark-mode .exercise-header {
+    background: #18212f;
+    border-color: #374151;
+}
+body.dark-mode .set-label {
+    color: #d1d5db;
+}
+body.dark-mode .set-difference {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+body.dark-mode .secondary-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+body.dark-mode .secondary-btn:active {
+    background: #374151;
+}
+body.dark-mode .exercise-help-btn,
+body.dark-mode .exercise-history-btn {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #93c5fd;
+}
+body.dark-mode .exercise-help-btn:active,
+body.dark-mode .exercise-history-btn:active {
+    background: #172554;
+}
+body.dark-mode .history-table th {
+    background: #111827;
+    color: #9ca3af;
+}
+body.dark-mode .history-table th,
+body.dark-mode .history-table td {
+    border-color: #374151;
+}
+body.dark-mode .history-empty {
+    color: #6b7280;
+}
+body.dark-mode .exercise-history-item {
+    background: #18212f;
+    border-color: #374151;
+}
+body.dark-mode .exercise-history-info {
+    border-color: #374151;
+}
+body.dark-mode .exercise-history-info strong {
+    color: #f3f4f6;
+}
+body.dark-mode .exercise-history-info span {
+    color: #9ca3af;
+}
+body.dark-mode .history-set {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f3f4f6;
+}
+body.dark-mode .settings-icon-btn {
+    background: #374151;
+    color: #f3f4f6;
+}
+body.dark-mode .settings-icon-btn:hover {
+    background: #4b5563;
+}
+body.dark-mode .settings-page-overlay {
+    background: #111827;
+}
+@media (min-width: 900px) {
+    body.dark-mode .settings-page-overlay {
+        background: #0b0f17;
+    }
+    body.dark-mode .settings-page {
+        background: #111827;
+        box-shadow: 0 0 0 1px #374151;
+    }
+}
+body.dark-mode .settings-page-header {
+    border-color: #374151;
+}
+body.dark-mode .settings-page-header h2 {
+    color: #f3f4f6;
+}
+body.dark-mode .settings-content {
+    border-color: #374151;
+}
+body.dark-mode .setting-row {
+    border-color: #374151;
+}
+body.dark-mode .setting-info strong {
+    color: #f3f4f6;
+}
+body.dark-mode .setting-info span {
+    color: #9ca3af;
+}
+body.dark-mode .danger-setting .setting-info strong {
+    color: #fecaca;
+}
+body.dark-mode .my-programs-overlay {
+    background: #111827;
+}
+@media (min-width: 900px) {
+    body.dark-mode .my-programs-overlay {
+        background: #0b0f17;
+    }
+    body.dark-mode .my-programs-page {
+        background: #111827;
+        box-shadow: 0 0 0 1px #374151;
+    }
+}
+body.dark-mode .my-programs-header {
+    border-color: #374151;
+}
+body.dark-mode .my-programs-header h2 {
+    color: #f3f4f6;
+}
+body.dark-mode .my-program-card {
+    background: #1f2937;
+}
+body.dark-mode .my-program-summary-info h3 {
+    color: #f3f4f6;
+}
+body.dark-mode .my-program-details {
+    border-color: #374151;
+}
+body.dark-mode .exercise-guide-modal {
+    background: #1f2937;
+    color: #f3f4f6;
+}
+body.dark-mode .exercise-guide-close {
+    background: #374151;
+    color: #f3f4f6;
+}
+body.dark-mode .exercise-guide-instructions {
+    color: #d1d5db;
+}
+body.dark-mode .exercise-guide-no-image {
+    background: #111827;
+    color: #6b7280;
+}
+body.dark-mode .danger-btn {
+    background: #450a0a;
+    border-color: #7f1d1d;
+    color: #fecaca;
+}
+
+/* =========================
+   Settings: uniform buttons + update button
+   ========================= */
+.setting-row .setting-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    min-height: 42px;
+    padding: 8px 10px;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+#updateAppBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+#updateAppBtn.update-ready {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: white;
+    font-weight: bold;
+}
+
+/* =========================
+   Onboarding (empty program state)
+   ========================= */
+.onboarding {
+    padding: 20px 16px;
+}
+.onboarding-hero {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.onboarding-hero h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    line-height: 1.5;
+}
+.onboarding-hero p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #6b7280;
+}
+.onboarding-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.onboarding-actions .primary-btn,
+.onboarding-actions .secondary-btn {
+    width: 100%;
+}
+body.dark-mode .onboarding-hero p {
+    color: #9ca3af;
+}
+
+/* =========================
+   Toast (end-of-session message)
+   ========================= */
+.app-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 2000;
+    max-width: calc(100% - 32px);
+    padding: 11px 16px;
+    border-radius: 10px;
+    background: #111827;
+    color: white;
+    font-size: 13px;
+    line-height: 1.8;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transform: translate(-50%, 8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+}
+.app-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+.app-toast.warning {
+    background: #92400e;
+}
+.app-toast.info {
+    background: #1e3a8a;
+}
+body.dark-mode .app-toast {
+    background: #374151;
+}
+body.dark-mode .app-toast.warning {
+    background: #b45309;
+}
+body.dark-mode .app-toast.info {
+    background: #1d4ed8;
+}
+
+/* =====================================================
+   Gym Progress Tracker — Desktop Dashboard & Shell Styles
+   Anti-slop, clean typography, responsive grid & dark mode
+   ===================================================== */
+
+/* -------------------------
+   App Shell Layout
+   ------------------------- */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    background: #f2f4f7;
+    direction: rtl;
+}
+
+/* -------------------------
+   Main Body Layout
+   ------------------------- */
+.app-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Desktop Theme Toggle Icon Button (Top-left corner) */
+.desktop-theme-icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+.desktop-theme-icon-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    transform: scale(1.05);
+}
+body.dark-mode .desktop-theme-icon-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f3f4f6;
+}
+
+/* Mobile Top Nav Switcher */
+.mobile-nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+.mobile-nav-brand {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1f2937;
+}
+.mobile-tab-switch {
+    display: flex;
+    background: #f3f4f6;
+    padding: 3px;
+    border-radius: 8px;
+    gap: 2px;
+}
+.mobile-tab-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+}
+.mobile-tab-btn.active {
+    background: #ffffff;
+    color: #1d4ed8;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* -------------------------
+   Views Manager
+   ------------------------- */
+.app-view {
+    display: none;
+    width: 100%;
+}
+.app-view.active {
+    display: block;
+}
+
+/* -------------------------
+   Desktop Dashboard Page
+   ------------------------- */
+.dashboard-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Hero / Overview Banner */
+.dash-overview-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+}
+.dash-overview-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dash-program-kicker {
+    font-size: 12px;
+    color: #2563eb;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.dash-overview-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #111827;
+}
+.dash-overview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4b5563;
+}
+.dash-overview-meta .sep {
+    color: #d1d5db;
+}
+.dash-progress-track {
+    width: 100%;
+    max-width: 460px;
+    margin-top: 6px;
+}
+.dash-progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+.dash-progress-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+.dash-progress-bar-fill {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+.dash-overview-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dash-start-workout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+.dash-start-workout-btn:hover {
+    background: #1d4ed8;
+}
+
+/* -------------------------
+   KPI Summary Metric Cards
+   ------------------------- */
+
+/* -------------------------
+   Charts Grid
+   ------------------------- */
+.dash-empty-notice {
+    font-size: 12.5px;
+    color: #9ca3af;
+    text-align: center;
+    padding: 30px 10px;
+}
+
+/* -------------------------
+   Training Cycle Tracker (Week 1..4 Sessions)
+   ------------------------- */
+.dash-cycle-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+.dash-cycle-header {
+    margin-bottom: 16px;
+}
+.dash-cycle-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+.dash-cycle-header p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+.dash-cycle-weeks {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+@media (max-width: 900px) {
+    .dash-cycle-weeks {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+.dash-cycle-week-col {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dash-cycle-week-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e7eb;
+}
+.dash-cycle-week-badge {
+    font-size: 10.5px;
+    color: #6b7280;
+}
+.dash-cycle-session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.dash-cycle-session-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+.dash-cycle-session-item.done {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+.dash-cycle-session-item.active-next {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+.dash-cycle-session-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.dash-cycle-session-info strong {
+    color: #1f2937;
+    font-size: 12px;
+}
+.dash-cycle-session-info span {
+    color: #6b7280;
+    font-size: 10px;
+}
+.dash-cycle-status-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+/* -------------------------
+   Recent Workouts Table
+   ------------------------- */
+.dash-table-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+.dash-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+.dash-table-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+.dash-table-wrap {
+    overflow-x: auto;
+}
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.dash-table th,
+.dash-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+}
+.dash-table th {
+    color: #6b7280;
+    font-weight: 600;
+    background: #f9fafb;
+}
+.dash-table th:first-child,
+.dash-table td:first-child {
+    text-align: right;
+    font-weight: 600;
+}
+.dash-table-action-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #2563eb;
+    cursor: pointer;
+    font-family: inherit;
+}
+.dash-table-action-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+/* Workout Detail Modal */
+.dash-detail-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(17, 24, 39, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.dash-detail-modal {
+    width: 100%;
+    max-width: 580px;
+    max-height: 85vh;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.dash-detail-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+.dash-detail-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* -------------------------
+   Responsive Layout Rules
+   ------------------------- */
+@media (min-width: 1024px) {
+    .mobile-nav-bar {
+        display: none;
+    }
+    /* Wrap the active workout recorder nicely on desktop */
+    #viewWorkout .container {
+        max-width: 820px;
+        margin: 24px auto;
+        padding: 0 16px 40px;
+    }
+    #viewPrograms,
+    #viewHistory,
+    #viewBank,
+    #viewBackup,
+    #viewSettings {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+}
+
+/* Mobile Dashboard Layout Rules (< 1024px) */
+@media (max-width: 1023px) {
+    /* Hide start next workout button & program upload buttons in mobile dashboard (Requirement 1) */
+    .dash-overview-actions,
+    .dash-start-workout-btn,
+    #dashStartNextBtn {
+        display: none !important;
+    }
+}
+
+/* -------------------------
+   Dark Mode Support
+   ------------------------- */
+body.dark-mode .app-shell {
+    background: #0f172a;
+    color: #f3f4f6;
+}
+body.dark-mode .mobile-nav-bar,
+body.dark-mode .dash-overview-card,
+body.dark-mode .dash-cycle-card,
+body.dark-mode .dash-table-card,
+body.dark-mode .dash-detail-modal {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f3f4f6;
+}
+body.dark-mode .dash-table th,
+body.dark-mode .dash-table td {
+    border-color: #334155;
+}
+body.dark-mode .dash-overview-title,
+body.dark-mode .dash-cycle-header h3,
+body.dark-mode .dash-table-header h3,
+body.dark-mode .dash-detail-modal-header h3 {
+    color: #f8fafc;
+}
+body.dark-mode .dash-cycle-week-col {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .dash-cycle-week-title {
+    color: #e2e8f0;
+    border-color: #334155;
+}
+body.dark-mode .dash-cycle-session-item {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+body.dark-mode .dash-cycle-session-item.done {
+    background: #064e3b;
+    border-color: #059669;
+}
+body.dark-mode .dash-cycle-session-item.active-next {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+}
+body.dark-mode .dash-table th {
+    background: #0f172a;
+    color: #94a3b8;
+}
+body.dark-mode .dash-table-action-btn {
+    background: #1e293b;
+    border-color: #475569;
+    color: #93c5fd;
+}
+body.dark-mode .mobile-tab-switch {
+    background: #0f172a;
+}
+body.dark-mode .mobile-tab-btn {
+    color: #94a3b8;
+}
+body.dark-mode .mobile-tab-btn.active {
+    background: #1e293b;
+    color: #60a5fa;
+}
+body.dark-mode .dash-progress-bar-bg {
+    background: #334155;
+}
+
+/* -------------------------
+   Calendar day details
+   ------------------------- */
+.calendar-day-details-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+.calendar-day-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* Dark mode overrides */
+body.dark-mode .calendar-day-details-card {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+body.dark-mode .calendar-day-item {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+/* -------------------------
+   History Filters & Search
+   ------------------------- */
+.history-filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+.history-filter-select,
+.history-search-input {
+    min-height: 40px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1f2937;
+}
+.history-search-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* -------------------------
+   Program Upload Dedicated Box (In Programs View)
+   ------------------------- */
+
+/* Dark mode additions */
+body.dark-mode .calendar-day-details-card,
+body.dark-mode .history-filters-bar {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f3f4f6;
+}
+body.dark-mode .history-filter-select,
+body.dark-mode .history-search-input {
+    background: #0f172a;
+    border-color: #475569;
+    color: #f3f4f6;
+}
+
+/* Dark mode: وضعیت جلسات دوره تمرینی */
+body.dark-mode .dash-cycle-header p,
+body.dark-mode .dash-cycle-week-badge {
+    color: #94a3b8;
+}
+body.dark-mode .dash-cycle-session-info strong {
+    color: #f1f5f9;
+}
+body.dark-mode .dash-cycle-session-info span {
+    color: #94a3b8;
+}
+body.dark-mode .dash-cycle-status-icon {
+    color: #cbd5e1;
+}
+body.dark-mode .dash-cycle-session-item:hover {
+    background: #334155;
+    border-color: #60a5fa;
+}
+body.dark-mode .dash-cycle-session-item.done .dash-cycle-session-info span,
+body.dark-mode .dash-cycle-session-item.done .dash-cycle-status-icon {
+    color: #6ee7b7;
+}
+body.dark-mode .dash-cycle-session-item.done:hover {
+    background: #065f46;
+}
+body.dark-mode .dash-cycle-session-item.active-next .dash-cycle-session-info span,
+body.dark-mode .dash-cycle-session-item.active-next .dash-cycle-status-icon {
+    color: #bfdbfe;
+}
+body.dark-mode .dash-cycle-session-item.active-next:hover {
+    background: #1e40af;
+}
+
+/* موبایل: عنوان «ثبت جلسه تمرینی» در صفحه‌ی ثبت تمرین نمایش داده نشود */
+@media (max-width: 1023px) {
+    #viewWorkout .page-header {
+        display: none !important;
+    }
+}
+
+/* =====================================================
+   تقویم دسکتاپ: نمای یک‌ساله (۱۲ ماه) + پنل جزئیات روز
+   ===================================================== */
+@media (min-width: 1024px) {
+    #viewCalendar {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+}
+.cal-wide {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 20px;
+    align-items: start;
+}
+@media (max-width: 1250px) {
+    .cal-wide {
+        grid-template-columns: 1fr;
+    }
+}
+.cal-wide-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.cal-wide-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.cal-wide-nav h3 {
+    min-width: 220px;
+    margin: 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+}
+.cal-today-btn {
+    min-height: 34px;
+    padding: 4px 14px;
+    font-size: 12.5px;
+}
+.cal-wide-count {
+    font-size: 12.5px;
+    color: #6b7280;
+}
+.cal-year-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 14px;
+}
+.cal-month-card {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+.cal-month-card.current {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+.cal-month-card header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.cal-month-card h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+.cal-month-card header span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+}
+.cal-month-card .date-picker-grid {
+    gap: 2px;
+}
+.cal-month-card .date-picker-day {
+    height: 32px;
+    font-size: 12px;
+}
+.cal-month-card .date-picker-day-circle {
+    width: 26px;
+    height: 26px;
+}
+.cal-wide-side {
+    position: sticky;
+    top: 84px;
+}
+.calendar-day-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+}
+.calendar-day-head span {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 700;
+    color: #16a34a;
+}
+.calendar-day-item {
+    flex-direction: column;
+    align-items: stretch !important;
+}
+.calendar-day-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    color: #6b7280;
+}
+.calendar-day-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.calendar-day-empty {
+    text-align: center;
+    color: #6b7280;
+}
+.calendar-day-empty p {
+    margin: 0 0 10px;
+    font-size: 13px;
+}
+.calendar-day-empty .secondary-btn {
+    min-height: 36px;
+    padding: 6px 14px;
+    font-size: 12px;
+}
+body.dark-mode .cal-wide-nav h3,
+body.dark-mode .cal-month-card h4 {
+    color: #f8fafc;
+}
+body.dark-mode .cal-wide-count,
+body.dark-mode .calendar-day-sub {
+    color: #94a3b8;
+}
+body.dark-mode .cal-month-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .cal-month-card.current {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+body.dark-mode .calendar-day-head {
+    border-color: #334155;
+}
+
+/* =====================================================
+   GymLog — Dashboard Overview styles (prefix: dv-)
+   Mobile-first، RTL، رنگ فقط برای وضعیت (سبز: سقف هدف،
+   آبی: داخل محدوده، کهربایی: پایین‌تر/ناقص)
+   ===================================================== */
+.dv-root {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.dv-slot {
+    min-width: 0;
+}
+.dv-split {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.dv-split > .dv-slot {
+    width: 100%;
+}
+@media (min-width: 1024px) {
+    .dv-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+    }
+}
+
+/* ---------- Card ---------- */
+.dv-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+}
+.dv-card-head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: #111827;
+}
+.dv-card-head p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.7;
+}
+.dv-card-head {
+    margin-bottom: 14px;
+}
+.dv-empty {
+    padding: 22px 10px;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 10px;
+}
+.dv-note {
+    margin: 10px 0 0;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #9ca3af;
+}
+.dv-num {
+    direction: ltr;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+}
+.dv-muted {
+    color: #9ca3af;
+}
+
+/* ---------- KPIs ---------- */
+.dv-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+@media (min-width: 900px) {
+    .dv-kpis {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+}
+.dv-kpi {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.dv-kpi-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+.dv-kpi-val {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #111827;
+}
+.dv-kpi-val-sm {
+    font-size: 20px;
+    padding: 3px 0;
+}
+.dv-kpi-sub {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+
+/* ---------- Progression ---------- */
+.dv-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.dv-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #6b7280;
+    min-width: 0;
+}
+.dv-filters select {
+    height: 40px;
+    font-size: 13px;
+}
+@media (min-width: 900px) {
+    .dv-filters {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .dv-filters label {
+        flex: 0 0 auto;
+        min-width: 140px;
+    }
+}
+.dv-chart {
+    position: relative;
+    color: #374151;
+}
+.dv-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    direction: ltr;
+    overflow: visible;
+}
+.dv-dot {
+    cursor: pointer;
+    outline: none;
+}
+.dv-dot:focus-visible {
+    stroke: #111827;
+}
+.dv-tip {
+    position: absolute;
+    z-index: 5;
+    transform: translate(-50%, calc(-100% - 12px));
+    min-width: 190px;
+    max-width: 260px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #111827;
+    color: #f9fafb;
+    font-size: 11.5px;
+    line-height: 1.8;
+    white-space: pre-line;
+    text-align: right;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+.dv-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 6px 0 12px;
+    font-size: 11px;
+    color: #6b7280;
+}
+.dv-legend i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 5px;
+    border-radius: 50%;
+}
+.dv-observed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    margin: 0 0 12px;
+}
+.dv-observed > div {
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border: 1px solid #f3f4f6;
+}
+.dv-observed dt {
+    font-size: 10.5px;
+    color: #9ca3af;
+    margin-bottom: 2px;
+}
+.dv-observed dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+.dv-interp {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e3a8a;
+    font-size: 12.5px;
+    line-height: 2;
+}
+.dv-interp b {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    font-size: 10.5px;
+    line-height: 1.8;
+}
+.dv-interp-none,
+.dv-interp-limited {
+    background: #f9fafb;
+    color: #4b5563;
+}
+.dv-interp-none b,
+.dv-interp-limited b {
+    background: #e5e7eb;
+}
+
+/* ---------- Compare ---------- */
+.dv-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.dv-list li {
+    padding: 11px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+.dv-list li:last-child {
+    border-bottom: none;
+}
+.dv-list-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.dv-list-main strong {
+    font-size: 13.5px;
+    color: #1f2937;
+}
+.dv-list-sub {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.8;
+}
+.dv-list-sub {
+    margin-top: 3px;
+}
+.dv-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.dv-badge-ok,
+.dv-badge-ceiling {
+    background: #dcfce7;
+    color: #166534;
+}
+.dv-badge-load {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.dv-badge-rep {
+    background: #e0f2fe;
+    color: #075985;
+}
+
+/* ---------- Dark mode ---------- */
+body.dark-mode .dv-card,
+body.dark-mode .dv-kpi {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-card-head h3,
+body.dark-mode .dv-kpi-val,
+body.dark-mode .dv-observed dd,
+body.dark-mode .dv-list-main strong {
+    color: #f8fafc;
+}
+body.dark-mode .dv-card-head p,
+body.dark-mode .dv-kpi-label,
+body.dark-mode .dv-filters label,
+body.dark-mode .dv-legend {
+    color: #94a3b8;
+}
+body.dark-mode .dv-chart {
+    color: #e2e8f0;
+}
+body.dark-mode .dv-empty,
+body.dark-mode .dv-observed > div,
+body.dark-mode .dv-interp-none,
+body.dark-mode .dv-interp-limited {
+    background: #0f172a;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+body.dark-mode .dv-interp {
+    background: #172554;
+    color: #bfdbfe;
+}
+body.dark-mode .dv-interp b {
+    background: #1e3a8a;
+}
+body.dark-mode .dv-list li {
+    border-color: #334155;
+}
+body.dark-mode .dv-badge-ok,
+body.dark-mode .dv-badge-ceiling {
+    background: #052e16;
+    color: #86efac;
+}
+body.dark-mode .dv-badge-load,
+body.dark-mode .dv-badge-rep {
+    background: #172554;
+    color: #bfdbfe;
+}
+body.dark-mode .dv-tip {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+/* =====================================================
+   صفحه‌ی خوش‌آمدگویی (داشبورد بدون برنامه)
+   موبایل = ظاهر قبلی، دسکتاپ = طرح دو ستونه
+   ===================================================== */
+.dv-welcome {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 16px;
+}
+.dv-welcome-hero {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.dv-welcome-hero h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    line-height: 1.5;
+    color: #111827;
+}
+.dv-welcome-hero p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: #6b7280;
+}
+.dv-welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+.dv-welcome-actions .primary-btn,
+.dv-welcome-actions .secondary-btn {
+    width: 100%;
+}
+.dv-welcome-default {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+.dv-welcome-default small {
+    font-size: 11px;
+    line-height: 1.7;
+    color: #9ca3af;
+}
+.dv-welcome-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.dv-welcome-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+.dv-welcome-icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #eff6ff;
+    font-size: 18px;
+}
+.dv-welcome-label {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2563eb;
+}
+.dv-welcome-step strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+.dv-welcome-desc {
+    display: block;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+
+/* دسکتاپ: ستون راست = معرفی و اقدام، ستون چپ = مسیر سه‌مرحله‌ای */
+@media (min-width: 1024px) {
+    .dv-welcome {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 0;
+        padding: 0;
+        min-height: 460px;
+        overflow: hidden;
+    }
+    .dv-welcome-hero {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        text-align: right;
+        margin: 0;
+        padding: 56px 56px;
+        background: #eff6ff;
+        border-left: 1px solid #dbeafe;
+    }
+    .dv-welcome-hero h2 {
+        font-size: 34px;
+        line-height: 1.4;
+        font-weight: 800;
+        color: #1e3a8a;
+    }
+    .dv-welcome-hero p {
+        max-width: 420px;
+        margin-top: 4px;
+        font-size: 15px;
+        line-height: 2;
+        color: #475569;
+    }
+    .dv-welcome-actions {
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 28px;
+    }
+    .dv-welcome-actions .primary-btn,
+    .dv-welcome-actions .secondary-btn {
+        width: auto;
+        min-width: 210px;
+        min-height: 50px;
+        font-size: 14.5px;
+    }
+    .dv-welcome-default {
+        align-items: flex-start;
+        text-align: right;
+        max-width: 240px;
+    }
+    .dv-welcome-steps {
+        justify-content: center;
+        gap: 0;
+        padding: 40px 48px;
+        position: relative;
+    }
+    .dv-welcome-step {
+        position: relative;
+        padding: 0 0 34px;
+        gap: 18px;
+        border: none;
+        border-radius: 0;
+        background: transparent;
+    }
+    .dv-welcome-step:last-child {
+        padding-bottom: 0;
+    }
+    /* خط اتصال بین مراحل: این محتوا واقعاً یک ترتیب است */
+    .dv-welcome-step:not(:last-child)::before {
+        content: "";
+        position: absolute;
+        right: 25px;
+        top: 52px;
+        bottom: 2px;
+        width: 2px;
+        background: #dbeafe;
+    }
+    .dv-welcome-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+        border: 2px solid #bfdbfe;
+        background: #ffffff;
+        position: relative;
+        z-index: 1;
+    }
+    .dv-welcome-label {
+        font-size: 12px;
+    }
+    .dv-welcome-step strong {
+        font-size: 16px;
+    }
+    .dv-welcome-desc {
+        font-size: 13px;
+        max-width: 340px;
+    }
+}
+body.dark-mode .dv-welcome {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-welcome-hero h2,
+body.dark-mode .dv-welcome-step strong {
+    color: #f8fafc;
+}
+body.dark-mode .dv-welcome-hero p,
+body.dark-mode .dv-welcome-desc {
+    color: #94a3b8;
+}
+body.dark-mode .dv-welcome-default small {
+    color: #64748b;
+}
+body.dark-mode .dv-welcome-step {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .dv-welcome-icon {
+    background: #172554;
+}
+body.dark-mode .dv-welcome-label {
+    color: #93c5fd;
+}
+@media (min-width: 1024px) {
+    body.dark-mode .dv-welcome-hero {
+        background: #0f1b3d;
+        border-color: #1e3a8a;
+    }
+    body.dark-mode .dv-welcome-hero h2 {
+        color: #bfdbfe;
+    }
+    body.dark-mode .dv-welcome-step {
+        background: transparent;
+    }
+    body.dark-mode .dv-welcome-step:not(:last-child)::before {
+        background: #1e3a8a;
+    }
+    body.dark-mode .dv-welcome-icon {
+        background: #0f172a;
+        border-color: #1d4ed8;
+    }
+}
+
+/* =====================================================
+   بانک حرکات (نسخه دسکتاپ) — بدون رنگ inline، سازگار با دارک
+   ===================================================== */
+.dv-bank {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.dv-bank-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+.dv-bank-group {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+.dv-bank-group h4 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2563eb;
+}
+.dv-bank-group h4 span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6b7280;
+}
+.dv-bank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+}
+.dv-bank-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-height: 0;
+    padding: 12px;
+    text-align: right;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.dv-bank-item:hover {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+.dv-bank-item strong {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+.dv-bank-item span {
+    font-size: 11px;
+    color: #6b7280;
+    direction: ltr;
+}
+body.dark-mode .dv-bank-title {
+    color: #f8fafc;
+}
+body.dark-mode .dv-bank-group {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-bank-group h4 {
+    color: #60a5fa;
+}
+body.dark-mode .dv-bank-group h4 span {
+    color: #94a3b8;
+}
+body.dark-mode .dv-bank-item {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .dv-bank-item:hover {
+    background: #172554;
+    border-color: #3b82f6;
+}
+body.dark-mode .dv-bank-item strong {
+    color: #f1f5f9;
+}
+body.dark-mode .dv-bank-item span {
+    color: #94a3b8;
+}
+
+/* =====================================================
+   تاریخچه: جزئیات تمرین و نشان «آغاز دوره»
+   ===================================================== */
+.dv-start-badge {
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 10px;
+    font-weight: 700;
+}
+.dv-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: #4b5563;
+}
+.dv-detail-meta strong {
+    color: #111827;
+}
+.dv-detail-body {
+    flex: 1;
+    overflow-y: auto;
+    margin-top: 8px;
+}
+.dv-detail-ex {
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+}
+.dv-detail-ex h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+.dv-detail-sets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px;
+}
+.dv-detail-set {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    font-size: 12px;
+    color: #4b5563;
+}
+.dv-detail-set strong {
+    direction: ltr;
+    color: #111827;
+}
+body.dark-mode .dv-start-badge {
+    border-color: #1d4ed8;
+    background: #1e3a8a;
+    color: #bfdbfe;
+}
+body.dark-mode .dv-detail-meta {
+    color: #94a3b8;
+}
+body.dark-mode .dv-detail-meta strong,
+body.dark-mode .dv-detail-ex h4,
+body.dark-mode .dv-detail-set strong {
+    color: #f8fafc;
+}
+body.dark-mode .dv-detail-ex {
+    border-color: #334155;
+}
+body.dark-mode .dv-detail-set {
+    background: #0f172a;
+    color: #cbd5e1;
+}
+body.dark-mode .dash-detail-modal-overlay {
+    background: rgba(2, 6, 23, 0.75);
+}
+
+/* =====================================================
+   روند عملکرد حرکات: باکس جلسه‌ها، کارت نمودار هر حرکت، مودال
+   ===================================================== */
+.dv-filters-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.dv-filters-inline label {
+    flex: 0 0 auto;
+    min-width: 140px;
+}
+.dv-sessions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.dv-sess-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-height: 0;
+    padding: 10px 12px;
+    text-align: right;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.dv-sess-btn b {
+    font-size: 13px;
+}
+.dv-sess-btn span {
+    font-size: 11px;
+    line-height: 1.6;
+    color: #6b7280;
+}
+.dv-sess-btn:hover {
+    border-color: #93c5fd;
+}
+.dv-sess-btn.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+    color: #1d4ed8;
+}
+.dv-sess-btn.active span {
+    color: #2563eb;
+}
+.dv-ex-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 12px;
+}
+.dv-ex-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    min-height: 0;
+    padding: 12px;
+    text-align: right;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    color: #374151;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dv-ex-card:hover,
+.dv-ex-card:focus-visible {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.08);
+    outline: none;
+}
+.dv-ex-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.dv-ex-head strong {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #1f2937;
+}
+.dv-ex-tag {
+    flex: 0 0 auto;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 10px;
+    white-space: nowrap;
+}
+.dv-ex-card .dv-svg {
+    color: #374151;
+}
+.dv-ex-empty {
+    padding: 36px 8px;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #9ca3af;
+    font-size: 12px;
+    text-align: center;
+}
+.dv-ex-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 11px;
+    color: #6b7280;
+}
+.dv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(17, 24, 39, 0.6);
+}
+.dv-modal {
+    width: 100%;
+    max-width: 760px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    background: #ffffff;
+}
+.dv-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.dv-modal-head h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    color: #111827;
+}
+.dv-modal-head p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =====================================================
+   نمودار عنکبوتی گروه‌های عضلانی
+   ===================================================== */
+.dv-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+.dv-pill {
+    min-height: 36px;
+    padding: 6px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #4b5563;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+.dv-pill.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+}
+.dv-radar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+.dv-radar-chart {
+    width: 100%;
+    max-width: 400px;
+    color: #374151;
+}
+.dv-radar-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    direction: ltr;
+    overflow: visible;
+}
+.dv-radar-side {
+    width: 100%;
+}
+.dv-radar-total {
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    color: #4b5563;
+}
+.dv-mus-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+.dv-mus-row {
+    display: grid;
+    grid-template-columns: 74px 1fr 36px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #374151;
+}
+.dv-mus-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+.dv-mus-bar i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: #2563eb;
+}
+.dv-mus-row b {
+    text-align: left;
+}
+@media (min-width: 900px) {
+    .dv-radar {
+        flex-direction: row;
+        align-items: center;
+    }
+    .dv-radar-chart {
+        flex: 0 0 400px;
+    }
+    .dv-radar-side {
+        flex: 1;
+    }
+}
+
+/* =====================================================
+   برنامه‌های تمرینی: جلسه‌ها به‌صورت جدول ساختاریافته
+   ===================================================== */
+.dv-prog-sessions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+@media (min-width: 1100px) {
+    .dv-prog-sessions {
+        grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+    }
+}
+.dv-prog-session {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+.dv-prog-session-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+.dv-prog-session-head h4 {
+    flex: 1;
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: #1f2937;
+}
+.dv-prog-session-num {
+    flex: 0 0 auto;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.dv-prog-session-count {
+    flex: 0 0 auto;
+    font-size: 11px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+.dv-prog-table-wrap {
+    overflow-x: auto;
+}
+.dv-prog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+.dv-prog-table th {
+    padding: 8px 8px;
+    text-align: center;
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.dv-prog-table td {
+    padding: 9px 8px;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+.dv-prog-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.dv-prog-table tbody tr:nth-child(even) td {
+    background: #fafafa;
+}
+.dv-prog-table th:nth-child(2),
+.dv-prog-table td.dv-prog-name {
+    text-align: right;
+}
+.dv-prog-table td.dv-prog-name {
+    min-width: 150px;
+    font-weight: 600;
+    line-height: 1.7;
+    color: #1f2937;
+}
+.dv-prog-table td.dv-prog-idx {
+    width: 28px;
+    color: #9ca3af;
+}
+.dv-prog-table td.dv-prog-reps {
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+/* =====================================================
+   Dark mode — بخش‌های جدید
+   ===================================================== */
+body.dark-mode .dv-sess-btn,
+body.dark-mode .dv-ex-card,
+body.dark-mode .dv-pill {
+    background: #1e293b;
+    border-color: #475569;
+    color: #e2e8f0;
+}
+body.dark-mode .dv-sess-btn span,
+body.dark-mode .dv-ex-foot,
+body.dark-mode .dv-modal-head p,
+body.dark-mode .dv-radar-total {
+    color: #94a3b8;
+}
+body.dark-mode .dv-sess-btn.active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+    color: #dbeafe;
+}
+body.dark-mode .dv-sess-btn.active span {
+    color: #bfdbfe;
+}
+body.dark-mode .dv-ex-head strong,
+body.dark-mode .dv-modal-head h3,
+body.dark-mode .dv-mus-row {
+    color: #f8fafc;
+}
+body.dark-mode .dv-ex-card .dv-svg,
+body.dark-mode .dv-radar-chart {
+    color: #e2e8f0;
+}
+body.dark-mode .dv-ex-tag {
+    background: #334155;
+    color: #cbd5e1;
+}
+body.dark-mode .dv-ex-empty {
+    background: #0f172a;
+    color: #64748b;
+}
+body.dark-mode .dv-modal {
+    background: #1e293b;
+}
+body.dark-mode .dv-pill.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+body.dark-mode .dv-mus-bar {
+    background: #334155;
+}
+body.dark-mode .dv-prog-session {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-prog-session-head {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .dv-prog-session-head h4,
+body.dark-mode .dv-prog-table td.dv-prog-name {
+    color: #f8fafc;
+}
+body.dark-mode .dv-prog-session-num {
+    background: #1e3a8a;
+    color: #bfdbfe;
+}
+body.dark-mode .dv-prog-session-count,
+body.dark-mode .dv-prog-table th {
+    color: #94a3b8;
+}
+body.dark-mode .dv-prog-table th {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-prog-table td {
+    color: #cbd5e1;
+    border-color: #334155;
+}
+body.dark-mode .dv-prog-table tbody tr:nth-child(even) td {
+    background: #172033;
+}
+body.dark-mode .dv-prog-table td.dv-prog-reps {
+    color: #93c5fd;
+}
+
+/* نمایش در «برنامه‌های من» موبایل */
+.my-program-details .dv-prog-session {
+    margin-bottom: 10px;
+}
+.my-program-details .dv-prog-table {
+    font-size: 11.5px;
+}
+
+/* =====================================================
+   روند حرکات: نمای کل سابقه + دوره انتخاب‌شده (مودال دوبخشی)
+   ===================================================== */
+.dv-mblock {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed #e5e7eb;
+}
+.dv-mblock:last-of-type {
+    border-bottom: none;
+}
+.dv-mblock-title {
+    margin: 0 0 8px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #1d4ed8;
+}
+.dv-mlegend-note {
+    margin: -4px 0 14px;
+}
+body.dark-mode .dv-mblock {
+    border-color: #334155;
+}
+body.dark-mode .dv-mblock-title {
+    color: #93c5fd;
+}
+
+/* =====================================================
+   توضیح محل ذخیره‌ی اطلاعات (صفحه‌ی خوش‌آمدگویی)
+   ===================================================== */
+.dv-data-note {
+    padding: 18px 16px;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    background: #fffbeb;
+}
+.dv-data-note h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #92400e;
+}
+.dv-data-note-lead {
+    margin: 0 0 14px;
+    font-size: 13px;
+    line-height: 2;
+    color: #78350f;
+}
+.dv-data-note-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+.dv-data-note-item {
+    padding: 12px 14px;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    background: #ffffff;
+}
+.dv-data-note-item strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13.5px;
+    color: #1f2937;
+}
+.dv-data-note-item p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.95;
+    color: #4b5563;
+}
+@media (min-width: 900px) {
+    .dv-data-note {
+        padding: 22px 26px;
+    }
+    .dv-data-note-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }
+}
+body.dark-mode .dv-data-note {
+    background: #2a1f0a;
+    border-color: #92400e;
+}
+body.dark-mode .dv-data-note h3 {
+    color: #fde68a;
+}
+body.dark-mode .dv-data-note-lead {
+    color: #fcd34d;
+}
+body.dark-mode .dv-data-note-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+body.dark-mode .dv-data-note-item strong {
+    color: #f8fafc;
+}
+body.dark-mode .dv-data-note-item p {
+    color: #94a3b8;
+}
+
+/* =====================================================
+   GymLog — ساخت برنامه تمرینی، صفحه‌ی کاربر و نام کاربر (prefix: pb-)
+   Mobile-first، RTL، سازگار با body.dark-mode
+   ===================================================== */
+
+/* ---------- نام کاربر کنار عنوان بالای صفحه ---------- */
+.mobile-nav-id {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.user-chip {
+    min-height: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2563eb;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+.user-chip[hidden] {
+    display: none;
+}
+.mobile-nav-id .user-chip {
+    font-size: 12px;
+    max-width: 84px;
+}
+.user-chip:hover {
+    text-decoration: underline;
+}
+body.dark-mode .user-chip {
+    color: #93c5fd;
+}
+
+/* ---------- چارچوب فرم ---------- */
+.pb-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    background: #f2f4f7;
+}
+.pb-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1040px;
+    height: 100%;
+    background: #ffffff;
+}
+@media (min-width: 900px) {
+    .pb-page {
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+}
+.pb-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.pb-head h2 {
+    margin: 0;
+    font-size: 19px;
+}
+.pb-steps {
+    display: flex;
+    gap: 6px;
+    margin: 0;
+    padding: 10px 12px;
+    list-style: none;
+    border-bottom: 1px solid #f3f4f6;
+    overflow-x: auto;
+}
+.pb-steps li {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+.pb-steps li span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #d1d5db;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+}
+.pb-steps li.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+.pb-steps li.active span {
+    background: #2563eb;
+}
+.pb-steps li.done span {
+    background: #16a34a;
+}
+.pb-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+}
+.pb-foot {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #f3f4f6;
+    background: #ffffff;
+}
+.pb-foot button {
+    flex: 1;
+}
+.pb-foot .pb-prev {
+    flex: 0 0 110px;
+}
+.pb-section h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+}
+.pb-muted {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    line-height: 1.9;
+    color: #6b7280;
+}
+.pb-note {
+    margin: 12px 0 0;
+    font-size: 11px;
+    line-height: 1.8;
+    color: #9ca3af;
+}
+.pb-error {
+    min-height: 20px;
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    color: #b91c1c;
+}
+
+/* ---------- چیپ‌ها و تب‌ها ---------- */
+.pb-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.pb-chip {
+    min-height: 40px;
+    padding: 7px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #4b5563;
+    font-size: 13px;
+    cursor: pointer;
+}
+.pb-chip.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+}
+.pb-day-chip {
+    min-width: 88px;
+    min-height: 48px;
+    font-size: 14px;
+}
+.pb-title-field {
+    margin-top: 22px;
+    max-width: 420px;
+}
+.pb-daytabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+}
+.pb-tab {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 6px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13px;
+    cursor: pointer;
+}
+.pb-tab.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+.pb-count {
+    min-width: 20px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: #e5e7eb;
+    color: #4b5563;
+    font-size: 11px;
+    text-align: center;
+}
+.pb-tab.active .pb-count {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+/* ---------- فرم و فیلدها ---------- */
+.pb-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+@media (min-width: 600px) {
+    .pb-form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .pb-form-grid .pb-field-wide {
+        grid-column: 1 / -1;
+    }
+}
+.pb-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #4b5563;
+}
+.pb-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+.pb-input {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pb-input:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.pb-input input {
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+.pb-input input:focus {
+    border: none;
+    box-shadow: none;
+}
+.pb-input em {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    border-right: 1px solid #e5e7eb;
+}
+.pb-field > input[type="text"] {
+    height: 46px;
+}
+
+/* ---------- ساخت‌دهنده‌ی حرکات ---------- */
+.pb-builder {
+    display: block;
+}
+.pb-main {
+    min-width: 0;
+}
+.pb-main > .pb-field {
+    margin-bottom: 14px;
+}
+.pb-dropzone {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 140px;
+    padding: 4px;
+    border: 2px dashed transparent;
+    border-radius: 14px;
+    transition: background 0.15s, border-color 0.15s;
+}
+.pb-dropzone.drag-over {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+.pb-empty {
+    padding: 34px 14px;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 2;
+    color: #9ca3af;
+}
+.pb-open-lib {
+    width: 100%;
+    margin-top: 12px;
+    border-style: dashed;
+    border-color: #2563eb;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+.pb-ex {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+}
+.pb-ex-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.pb-ex-num {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+}
+.pb-ex-name {
+    flex: 1;
+    min-width: 0;
+}
+.pb-ex-name strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.6;
+}
+.pb-ex-name span {
+    font-size: 11px;
+    color: #6b7280;
+}
+.pb-ex-ctl {
+    display: flex;
+    gap: 4px;
+}
+.pb-ex-ctl button {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 15px;
+}
+.pb-ex-ctl button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+.pb-ex-ctl .pb-del {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+.pb-fields {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+}
+.pb-fields label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    font-size: 11px;
+    color: #6b7280;
+}
+.pb-fields label:nth-child(-n + 3) {
+    grid-column: span 2;
+}
+.pb-fields label:nth-child(n + 4) {
+    grid-column: span 3;
+}
+.pb-fields input,
+.pb-fields select {
+    height: 42px;
+    padding: 6px 8px;
+    font-size: 14px;
+    text-align: center;
+}
+@media (min-width: 600px) {
+    .pb-fields {
+        grid-template-columns: 0.8fr 0.8fr 0.8fr 1.3fr 1.3fr;
+    }
+    .pb-fields label:nth-child(n) {
+        grid-column: auto;
+    }
+}
+
+/* ---------- فهرست حرکات: ستون کناری در دسکتاپ، پنجره‌ی پایین در موبایل ---------- */
+.pb-lib {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1200;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 78vh;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+    border-radius: 18px 18px 0 0;
+    background: #ffffff;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18);
+    transform: translateY(105%);
+    transition: transform 0.25s ease;
+}
+.pb-lib.open {
+    transform: translateY(0);
+}
+.pb-sheet-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1150;
+    background: rgba(17, 24, 39, 0.5);
+}
+.pb-sheet-backdrop.open {
+    display: block;
+}
+.pb-lib-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.pb-lib-done {
+    min-height: 36px;
+    padding: 4px 16px;
+    font-size: 13px;
+}
+.pb-cat-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.pb-cat-chips .pb-chip {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 4px 13px;
+    font-size: 12.5px;
+}
+.pb-search {
+    height: 42px;
+}
+.pb-lib-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pb-lib-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+}
+.pb-lib-item[draggable="true"] {
+    cursor: grab;
+}
+.pb-lib-item.dragging {
+    opacity: 0.45;
+}
+.pb-lib-item.added {
+    opacity: 0.55;
+}
+.pb-grip {
+    color: #9ca3af;
+    letter-spacing: -2px;
+    user-select: none;
+}
+.pb-lib-name {
+    flex: 1;
+    min-width: 0;
+}
+.pb-lib-name strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.pb-lib-name span {
+    font-size: 11px;
+    color: #6b7280;
+}
+.pb-add {
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1;
+}
+.pb-add:disabled {
+    background: #16a34a;
+    cursor: default;
+    font-size: 16px;
+}
+@media (min-width: 900px) {
+    .pb-builder {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 18px;
+        align-items: start;
+    }
+    .pb-lib {
+        position: sticky;
+        top: 0;
+        z-index: auto;
+        max-height: calc(100vh - 210px);
+        padding: 14px;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: none;
+        transform: none;
+        transition: none;
+    }
+    .pb-lib-done,
+    .pb-open-lib,
+    .pb-sheet-backdrop {
+        display: none !important;
+    }
+}
+
+/* ---------- مرحله خروجی ---------- */
+.pb-summary {
+    list-style: none;
+    margin: 0 0 22px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pb-summary li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    font-size: 13px;
+}
+.pb-summary li span {
+    flex: 1;
+    min-width: 0;
+}
+.pb-summary li em {
+    font-style: normal;
+    font-size: 11.5px;
+    color: #6b7280;
+}
+.pb-out-title {
+    margin-top: 6px;
+}
+.pb-outputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pb-out {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    background: #ffffff;
+    cursor: pointer;
+}
+.pb-out input {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    flex: 0 0 auto;
+}
+.pb-out strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+.pb-out span {
+    display: block;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+.pb-out.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+/* ---------- صفحه‌ی کاربر ---------- */
+.pb-user-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 760px;
+    margin: 0 auto;
+}
+.pb-user-card {
+    margin: 0;
+    padding: 22px;
+}
+.pb-user-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+}
+.pb-user-head,
+.pb-form-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.pb-form-head .pb-muted {
+    margin: 4px 0 0;
+}
+.pb-avatar,
+.pb-form-icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 800;
+}
+.pb-form-icon {
+    width: 48px;
+    height: 48px;
+    background: #eff6ff;
+    font-size: 22px;
+}
+.pb-user-head .pb-muted {
+    display: block;
+    margin: 4px 0 0;
+}
+.pb-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+.pb-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+.pb-tile span {
+    font-size: 12px;
+    color: #6b7280;
+}
+.pb-tile strong {
+    font-size: 20px;
+    line-height: 1.4;
+    color: #111827;
+}
+.pb-tile strong small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+}
+.pb-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+.pb-actions button {
+    min-width: 160px;
+}
+
+/* ---------- Dark mode ---------- */
+body.dark-mode .pb-overlay {
+    background: #0b0f17;
+}
+body.dark-mode .pb-page,
+body.dark-mode .pb-foot,
+body.dark-mode .pb-lib {
+    background: #111827;
+}
+body.dark-mode .pb-page {
+    box-shadow: 0 0 0 1px #374151;
+}
+body.dark-mode .pb-head,
+body.dark-mode .pb-steps,
+body.dark-mode .pb-foot {
+    border-color: #374151;
+}
+body.dark-mode .pb-head h2,
+body.dark-mode .pb-section h3,
+body.dark-mode .pb-label,
+body.dark-mode .pb-user-title,
+body.dark-mode .pb-tile strong {
+    color: #f3f4f6;
+}
+body.dark-mode .pb-muted,
+body.dark-mode .pb-field,
+body.dark-mode .pb-fields label,
+body.dark-mode .pb-ex-name span,
+body.dark-mode .pb-lib-name span,
+body.dark-mode .pb-summary li em,
+body.dark-mode .pb-out span,
+body.dark-mode .pb-tile span,
+body.dark-mode .pb-tile strong small {
+    color: #9ca3af;
+}
+body.dark-mode .pb-steps li {
+    background: #1f2937;
+    color: #9ca3af;
+}
+body.dark-mode .pb-steps li.active {
+    background: #1e3a8a;
+    color: #dbeafe;
+}
+body.dark-mode .pb-chip,
+body.dark-mode .pb-tab {
+    background: #1f2937;
+    border-color: #4b5563;
+    color: #e5e7eb;
+}
+body.dark-mode .pb-chip.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+body.dark-mode .pb-tab.active {
+    background: #1e3a8a;
+    border-color: #3b82f6;
+    color: #dbeafe;
+}
+body.dark-mode .pb-count {
+    background: #374151;
+    color: #d1d5db;
+}
+body.dark-mode .pb-input {
+    background: #0b1220;
+    border-color: #4b5563;
+}
+body.dark-mode .pb-input input {
+    background: transparent;
+}
+body.dark-mode .pb-input em {
+    background: #1f2937;
+    border-color: #374151;
+    color: #9ca3af;
+}
+body.dark-mode .pb-ex,
+body.dark-mode .pb-out,
+body.dark-mode .pb-user-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+body.dark-mode .pb-ex-name strong,
+body.dark-mode .pb-lib-name strong,
+body.dark-mode .pb-out strong,
+body.dark-mode .pb-summary li {
+    color: #f3f4f6;
+}
+body.dark-mode .pb-ex-ctl button {
+    background: #111827;
+    border-color: #374151;
+    color: #e5e7eb;
+}
+body.dark-mode .pb-ex-ctl .pb-del {
+    background: #450a0a;
+    border-color: #7f1d1d;
+}
+body.dark-mode .pb-empty {
+    border-color: #4b5563;
+    color: #6b7280;
+}
+body.dark-mode .pb-dropzone.drag-over {
+    background: #172554;
+    border-color: #3b82f6;
+}
+body.dark-mode .pb-open-lib {
+    background: #111827;
+    color: #93c5fd;
+}
+body.dark-mode .pb-lib-item,
+body.dark-mode .pb-summary li,
+body.dark-mode .pb-tile {
+    background: #111827;
+    border-color: #374151;
+}
+body.dark-mode .pb-out.active {
+    background: #172554;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+body.dark-mode .pb-form-icon {
+    background: #172554;
+}
+body.dark-mode .pb-error {
+    color: #fca5a5;
+}
+@media (min-width: 900px) {
+    body.dark-mode .pb-lib {
+        border-color: #374151;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pb-lib,
+    .pb-dropzone,
+    .pb-input {
+        transition: none;
+    }
+}
+
+/* ---------- دسکتاپ: فرم داخل چارچوب برنامه، منوی کناری و نوار بالا دیده می‌شوند ---------- */
+@media (min-width: 1024px) {
+    .pb-overlay {
+        left: 0;
+        bottom: 0;
+        z-index: 80;
+        background: #f2f4f7;
+        overflow-y: auto;
+    }
+    .pb-page {
+        max-width: 1000px;
+        height: auto;
+        min-height: calc(100% - 48px);
+        margin: 24px auto;
+        border-radius: 14px;
+        box-shadow: 0 0 0 1px #e5e7eb;
+    }
+    .pb-body {
+        overflow: visible;
+    }
+    .pb-foot {
+        position: sticky;
+        bottom: 0;
+        border-radius: 0 0 14px 14px;
+    }
+    body.dark-mode .pb-overlay {
+        background: #0f172a;
+    }
+    body.dark-mode .pb-page {
+        box-shadow: 0 0 0 1px #334155;
+    }
+}
+
+/* =====================================================
+   چند کاربره: انتخاب کاربر در نوار بالا، فهرست کاربران
+   ===================================================== */
+html body select.user-select {
+    width: auto;
+    height: 36px;
+    min-height: 36px;
+    max-width: 220px;
+    padding: 2px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #2563eb;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+html body select.user-select[hidden] {
+    display: none !important;
+}
+html body .mobile-nav-id select.user-select {
+    height: 34px;
+    min-height: 34px;
+    max-width: 120px;
+    padding: 2px 6px;
+    font-size: 12px;
+    border-width: 1px;
+}
+body.dark-mode select.user-select {
+    background: #1f2937;
+    border-color: #475569;
+    color: #93c5fd;
+}
+.pb-users-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.pb-users-head .pb-muted {
+    margin: 4px 0 0;
+}
+.pb-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.pb-user-item.active {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+.pb-badge-active {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+.pb-user-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+.pb-user-btns button {
+    min-height: 40px;
+    padding: 6px 14px;
+    font-size: 13px;
+}
+.pb-pick-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.pb-pick-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    text-align: right;
+}
+.pb-pick-item span {
+    font-size: 12px;
+    color: #6b7280;
+}
+body.dark-mode .pb-user-item.active {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+body.dark-mode .pb-badge-active {
+    background: #1e3a8a;
+    color: #dbeafe;
+}
+body.dark-mode .pb-pick-item span {
+    color: #9ca3af;
+}
+
+/* =====================================================
+   کاربران: فهرست جمع‌شونده، روند اندازه‌ها، یادداشت
+   ===================================================== */
+.pb-user-list-compact { gap: 10px; }
+.pb-user-row { padding: 0; overflow: hidden; }
+html body button.pb-user-row-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 0;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 14px;
+    text-align: right;
+    cursor: pointer;
+}
+html body button.pb-user-row-head:hover { background: rgba(37, 99, 235, 0.06); }
+.pb-avatar-sm { width: 40px; height: 40px; font-size: 18px; }
+.pb-user-row-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.pb-user-row-main strong { font-size: 15px; line-height: 1.6; }
+.pb-user-row-main small {
+    font-size: 12px;
+    line-height: 1.7;
+    color: #6b7280;
+}
+.pb-user-row-chev {
+    flex: 0 0 auto;
+    color: #6b7280;
+    font-size: 16px;
+    transition: transform 0.2s ease;
+}
+.pb-user-row.open .pb-user-row-chev { transform: rotate(180deg); }
+.pb-user-row.open .pb-user-row-head { border-bottom: 1px solid #f3f4f6; }
+.pb-user-row-body { padding: 16px 18px 18px; }
+.pb-block {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px dashed #e5e7eb;
+}
+.pb-block-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.pb-block-title { margin: 0; font-size: 15px; font-weight: 800; }
+label.pb-block-title { display: block; margin-bottom: 8px; }
+html body button.pb-sm-btn { min-height: 36px; padding: 4px 12px; font-size: 12.5px; border-radius: 10px; }
+.pb-trend-pills { margin-bottom: 8px; }
+html body button.pb-chip-sm {
+    min-height: 34px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+.pb-trend-sum {
+    margin: 4px 0 8px;
+    font-size: 12.5px;
+    line-height: 2;
+    color: #4b5563;
+}
+.pb-delta { font-weight: 800; unicode-bidi: isolate; }
+.pb-trend { color: #374151; }
+.pb-trend-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    direction: ltr;
+    overflow: visible;
+}
+.pb-m-details { margin-top: 10px; }
+.pb-m-details > summary {
+    cursor: pointer;
+    padding: 6px 0;
+    font-size: 13px;
+    color: #6b7280;
+    user-select: none;
+}
+.pb-m-table-wrap { overflow-x: auto; }
+.pb-m-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pb-m-table th,
+.pb-m-table td {
+    padding: 8px 6px;
+    text-align: center;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+}
+.pb-m-table th { color: #6b7280; font-weight: 600; font-size: 12px; }
+html body button.pb-mini-btn {
+    width: 34px;
+    min-height: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fef2f2;
+    font-size: 14px;
+}
+.pb-hint { margin: 0; font-size: 11.5px; line-height: 1.8; color: #9ca3af; }
+.pb-notes-status { color: #16a34a; }
+body.dark-mode .pb-user-row-main small,
+body.dark-mode .pb-user-row-chev,
+body.dark-mode .pb-m-details > summary,
+body.dark-mode .pb-m-table th { color: #9ca3af; }
+body.dark-mode .pb-user-row.open .pb-user-row-head,
+body.dark-mode .pb-block,
+body.dark-mode .pb-m-table th,
+body.dark-mode .pb-m-table td { border-color: #374151; }
+body.dark-mode .pb-trend { color: #e2e8f0; }
+body.dark-mode .pb-trend-sum { color: #cbd5e1; }
+body.dark-mode .pb-m-table td { color: #e5e7eb; }
+body.dark-mode button.pb-mini-btn { background: #450a0a; border-color: #7f1d1d; }
+body.dark-mode button.pb-user-row-head:hover { background: rgba(96, 165, 250, 0.1); }
+
+/* =====================================================
+   GymLog — فرم حرکت (ee-) و کارت‌های بانک حرکات
+   ===================================================== */
+
+/* ---------- بانک حرکات ---------- */
+.dv-bank-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.dv-bank-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.dv-bank-search {
+    width: 240px;
+    height: 42px;
+}
+.dv-bank-add {
+    min-height: 42px;
+    padding: 8px 18px;
+    white-space: nowrap;
+}
+.dv-bank-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dv-bank-card .dv-bank-item {
+    flex: 1;
+    position: relative;
+}
+.dv-bank-badge {
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #dbeafe;
+    color: #1d4ed8 !important;
+    font-size: 10px !important;
+    direction: rtl !important;
+}
+.dv-bank-none {
+    display: none;
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* ---------- فرم ---------- */
+.ee-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(17, 24, 39, 0.6);
+}
+.ee-modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 680px;
+    max-height: 92vh;
+    border-radius: 16px;
+    background: #ffffff;
+    overflow: hidden;
+}
+.ee-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #f3f4f6;
+}
+.ee-head h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+}
+.ee-head p {
+    margin: 4px 0 0;
+    font-size: 12px;
+    line-height: 1.8;
+    color: #6b7280;
+}
+.ee-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.ee-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+}
+@media (min-width: 640px) {
+    .ee-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+.ee-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+.ee-field > span {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+.ee-field > span b {
+    color: #dc2626;
+}
+.ee-field small,
+.ee-check small {
+    font-size: 11px;
+    line-height: 1.8;
+    color: #9ca3af;
+}
+.ee-field input[readonly] {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+.ee-field textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.9;
+    color: #1f2937;
+    resize: vertical;
+}
+.ee-field textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+.ee-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f9fafb;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+}
+.ee-check input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+}
+.ee-check small {
+    display: block;
+}
+.ee-media {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+}
+.ee-media-empty {
+    grid-column: 1 / -1;
+    padding: 18px;
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #9ca3af;
+}
+.ee-media-item {
+    position: relative;
+    height: 96px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #f3f4f6;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #9ca3af;
+}
+.ee-media-item img,
+.ee-media-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.ee-media-item em {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    left: 4px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(17, 24, 39, 0.75);
+    color: #ffffff;
+    font-size: 10px;
+    font-style: normal;
+    direction: ltr;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ee-media-item button {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 26px;
+    height: 26px;
+    min-height: 26px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(17, 24, 39, 0.8);
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 1;
+}
+.ee-upload {
+    align-self: flex-start;
+    padding: 8px 16px;
+}
+.ee-error {
+    min-height: 20px;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: #b91c1c;
+}
+.ee-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 18px;
+    border-top: 1px solid #f3f4f6;
+}
+.ee-foot .primary-btn {
+    min-width: 150px;
+}
+.ee-foot .danger-btn {
+    margin-right: auto;
+}
+
+/* ---------- Dark mode ---------- */
+body.dark-mode .dv-bank-badge {
+    background: #1e3a8a;
+    color: #bfdbfe !important;
+}
+body.dark-mode .ee-modal {
+    background: #1e293b;
+}
+body.dark-mode .ee-head,
+body.dark-mode .ee-foot {
+    border-color: #334155;
+}
+body.dark-mode .ee-head h3,
+body.dark-mode .ee-field > span,
+body.dark-mode .ee-check {
+    color: #f3f4f6;
+}
+body.dark-mode .ee-head p,
+body.dark-mode .dv-bank-none {
+    color: #94a3b8;
+}
+body.dark-mode .ee-field textarea {
+    background: #111827;
+    border-color: #4b5563;
+    color: #f3f4f6;
+}
+body.dark-mode .ee-field input[readonly] {
+    background: #0f172a;
+    color: #94a3b8;
+}
+body.dark-mode .ee-check {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .ee-media-item,
+body.dark-mode .ee-media-empty {
+    background: #0f172a;
+    border-color: #334155;
+}
+body.dark-mode .ee-error {
+    color: #fca5a5;
+}
+.dv-bank-export {
+    min-height: 42px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    direction: ltr;
+}
+.exercise-guide-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+.exercise-guide-actions button {
+    flex: 1;
+}
+
+/* =====================================================
+   GymLog — استایل‌های افزوده
+
+   ۱) متغیرهای تم (--gl-*) برای کلاس‌هایی که جایگزین style="" های ثابت شده‌اند
+   ۲) یادداشت جلسه/حرکت، دکمه‌ی استراحت و تایمر
+   حالت تیره با body.dark-mode فعال می‌شود (همان مکانیزم برنامه).
+   اگر در style.css متغیرهای تم دارید، مقدار --gl-* را به آن‌ها وصل کنید.
+   ===================================================== */
+:root {
+    --gl-surface: #ffffff;
+    --gl-surface-2: #f9fafb;
+    --gl-border: #e2e8f0;
+    --gl-border-soft: #f3f4f6;
+    --gl-text: #0f172a;
+    --gl-muted: #64748b;
+    --gl-faint: #9ca3af;
+    --gl-accent: #2563eb;
+    --gl-accent-soft: #eff6ff;
+    --gl-chip-bg: #f1f5f9;
+    --gl-chip-text: #475569;
+    --gl-danger: #dc2626;
+    --gl-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+body.dark-mode {
+    --gl-surface: #1e293b;
+    --gl-surface-2: #172033;
+    --gl-border: #334155;
+    --gl-border-soft: #2a3649;
+    --gl-text: #f1f5f9;
+    --gl-muted: #94a3b8;
+    --gl-faint: #7c8aa0;
+    --gl-accent: #60a5fa;
+    --gl-accent-soft: rgba(96, 165, 250, 0.16);
+    --gl-chip-bg: #273449;
+    --gl-chip-text: #cbd5e1;
+    --gl-danger: #f87171;
+    --gl-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- عمومی ---------- */
+.gl-view-pad { padding: 24px; }
+.gl-muted-sm { font-size: 12px; color: var(--gl-muted); }
+.gl-unit { color: var(--gl-faint); }
+.gl-empty-pad { padding: 16px; color: var(--gl-faint); }
+.gl-cell-flex { display: flex; align-items: center; gap: 8px; }
+.gl-btn-block { width: 100%; }
+.gl-danger-text { color: var(--gl-danger); }
+.gl-hint { display: block; margin-top: 6px; font-size: 11px; color: var(--gl-faint); }
+
+/* ---------- تاریخچه ---------- */
+.gl-hist-head { flex-wrap: wrap; gap: 12px; }
+.gl-hist-title { margin: 0 0 4px; }
+
+/* ---------- تقویم موبایل ---------- */
+.gl-cal-mobile { max-width: 400px; margin: 0 auto; }
+.gl-cal-mobile-card {
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid var(--gl-border);
+    box-shadow: var(--gl-shadow);
+}
+.gl-cal-title { margin: 0; font-size: 15px; font-weight: 700; }
+.gl-cal-day { margin-top: 16px; }
+
+/* ---------- صفحه‌ی برنامه‌ها ---------- */
+.gl-upload-box {
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--gl-shadow);
+}
+.gl-upload-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+.gl-upload-content { display: flex; align-items: flex-start; gap: 16px; max-width: 640px; }
+.gl-upload-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    background: var(--gl-accent-soft);
+    color: var(--gl-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+.gl-upload-text h3 { margin: 0 0 6px; font-size: 16px; font-weight: 800; color: var(--gl-text); }
+.gl-upload-text p { margin: 0 0 10px; font-size: 13px; color: var(--gl-muted); line-height: 1.6; }
+.gl-upload-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gl-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--gl-chip-bg);
+    color: var(--gl-chip-text);
+}
+.gl-upload-btn {
+    cursor: pointer;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.gl-section-title { margin-bottom: 16px; }
+.gl-section-title h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--gl-text); }
+.gl-program-card { margin-bottom: 16px; padding: 20px; }
+.gl-program-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.gl-program-card-title { margin: 0; font-size: 18px; font-weight: 800; }
+
+/* ---------- پشتیبان و تنظیمات ---------- */
+.gl-panel { padding: 24px; max-width: 640px; margin: 0 auto; }
+.gl-panel-col { display: flex; flex-direction: column; gap: 20px; }
+.gl-panel-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; }
+.gl-panel-col .gl-panel-title { margin: 0; }
+.gl-panel-desc { margin: 0 0 20px; font-size: 13px; color: var(--gl-muted); }
+.gl-info-box {
+    background: var(--gl-surface-2);
+    border: 1px solid var(--gl-border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+.gl-info-box strong { display: block; font-size: 13px; margin-bottom: 4px; }
+.gl-info-box span { font-size: 12px; color: var(--gl-muted); }
+.gl-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.gl-file-label { cursor: pointer; text-align: center; }
+.gl-setting-row { border-bottom: 1px solid var(--gl-border-soft); padding-bottom: 16px; }
+@media (max-width: 520px) {
+    .gl-grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ---------- یادداشت‌ها ---------- */
+.session-note-card { padding: 14px 16px; margin-top: 12px; }
+.session-note-label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.session-note-input,
+.exercise-note-input {
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    font: inherit;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    line-height: 1.7;
+    border: 1px solid var(--gl-border);
+    background: var(--gl-surface-2);
+    color: var(--gl-text);
+}
+.session-note-input:focus,
+.exercise-note-input:focus { outline: 2px solid var(--gl-accent); outline-offset: 0; }
+.exercise-note { margin-top: 10px; }
+.exercise-note > summary { cursor: pointer; font-size: 13px; color: var(--gl-muted); padding: 4px 0; user-select: none; }
+.exercise-note[open] > summary { margin-bottom: 6px; }
+.exercise-prev-note {
+    font-size: 12px;
+    color: var(--gl-muted);
+    background: var(--gl-accent-soft);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    white-space: pre-wrap;
+}
+.exercise-history-note,
+.dv-detail-note {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--gl-muted);
+    white-space: pre-wrap;
+    line-height: 1.7;
+}
+.dv-detail-note-session {
+    background: var(--gl-accent-soft);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 12px;
+}
+
+/* ---------- دکمه‌ی استراحت ---------- */
+.exercise-rest-btn {
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--gl-border);
+    background: var(--gl-surface);
+    color: var(--gl-text);
+}
+.exercise-rest-btn:active { transform: scale(0.97); }
+
+/* ---------- تایمر استراحت ---------- */
+.rest-timer {
+    position: fixed;
+    z-index: 950;
+    right: 12px;
+    left: 12px;
+    margin: 0 auto;
+    max-width: 420px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--gl-surface);
+    color: var(--gl-text);
+    border: 1px solid var(--gl-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.rest-timer[hidden] { display: none; }
+.rest-timer-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rest-timer-label { font-size: 13px; color: var(--gl-muted); }
+.rest-timer-time { font-size: 26px; font-variant-numeric: tabular-nums; direction: ltr; }
+.rest-timer-track { height: 6px; border-radius: 99px; background: var(--gl-chip-bg); overflow: hidden; margin: 8px 0 10px; }
+.rest-timer-track i { display: block; height: 100%; width: 0; background: var(--gl-accent); transition: width 0.25s linear; }
+.rest-timer-actions { display: flex; gap: 8px; }
+.rest-timer-actions button {
+    flex: 1;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid var(--gl-border);
+    background: var(--gl-surface-2);
+    color: var(--gl-text);
+}
+.rest-timer.done { border-color: #16a34a; }
+.rest-timer.done .rest-timer-label { color: #16a34a; font-weight: 700; }
+.rest-timer.done .rest-timer-track i { background: #16a34a; }
+
+/* ---------- هشدار تفاوت زیاد با تمرین قبلی ---------- */
+.set-warning {
+    grid-column: 2 / 4;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.8;
+    text-align: right;
+}
+.set-warning:empty { display: none; }
+.set-row.has-warning input { border-color: #d97706 !important; }
+body.dark-mode .set-warning { background: #451a03; color: #fde68a; }
+@media (max-width: 1023px) {
+    .set-warning { font-size: 14px; }
+}
+
+/* ---------- انیمیشن دکمه‌ها ---------- */
+@keyframes gl-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gl-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35); }
+    50% { box-shadow: 0 0 0 9px rgba(37, 99, 235, 0); }
+}
+@keyframes gl-shine {
+    from { transform: translateX(120%) skewX(-20deg); }
+    to { transform: translateX(-220%) skewX(-20deg); }
+}
+.primary-btn,
+.secondary-btn,
+.dash-start-workout-btn {
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s, color 0.18s, border-color 0.18s;
+}
+.primary-btn:hover,
+.secondary-btn:hover,
+.dash-start-workout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14); }
+.primary-btn:active,
+.secondary-btn:active,
+.dash-start-workout-btn:active { transform: translateY(0) scale(0.97); box-shadow: none; }
+
+/* دکمه‌های صفحه‌ی خوش‌آمدگویی */
+.dv-welcome-actions .primary-btn,
+.dv-welcome-actions .secondary-btn {
+    position: relative;
+    overflow: hidden;
+    animation: gl-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.dv-welcome-actions > :nth-child(1) { animation-delay: 0.05s; }
+.dv-welcome-actions > :nth-child(2) { animation-delay: 0.17s; }
+.dv-welcome-actions > :nth-child(3) { animation-delay: 0.29s; }
+.dv-welcome-actions .dv-welcome-default { animation: gl-rise 0.55s 0.29s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.dv-welcome-actions .dv-welcome-default .secondary-btn { animation: none; }
+.dv-welcome-actions .primary-btn { animation: gl-rise 0.55s 0.05s cubic-bezier(0.2, 0.8, 0.2, 1) both, gl-pulse 2.4s 1s ease-in-out infinite; }
+.dv-welcome-actions .primary-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: translateX(120%) skewX(-20deg);
+    pointer-events: none;
+}
+.dv-welcome-actions .primary-btn:hover::after { animation: gl-shine 0.7s ease; }
+.dv-welcome-actions .primary-btn:hover { animation-play-state: running, paused; }
+.dv-welcome-actions .secondary-btn:hover { border-color: var(--gl-accent); }
+
+/* =====================================================
+   صفحه‌ی راهنما و سوالات متداول (prefix: hp-)
+   ===================================================== */
+.hp-wrap { display: flex; flex-direction: column; gap: 18px; max-width: 900px; margin: 0 auto; }
+.hp-hero {
+    padding: 22px 20px;
+    border-radius: 14px;
+    background: var(--gl-accent-soft);
+    border: 1px solid var(--gl-border);
+}
+.hp-hero h2 { margin: 0 0 8px; font-size: 22px; font-weight: 800; color: var(--gl-text); }
+.hp-hero p { margin: 0; font-size: 14px; line-height: 2; color: var(--gl-muted); }
+.hp-block { display: flex; flex-direction: column; gap: 12px; }
+.hp-block-title { margin: 0; font-size: 17px; font-weight: 800; color: var(--gl-text); }
+.hp-aud-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.hp-aud {
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    box-shadow: var(--gl-shadow);
+}
+.hp-aud-icon { display: block; margin-bottom: 6px; font-size: 26px; }
+.hp-aud strong { display: block; margin-bottom: 6px; font-size: 15px; color: var(--gl-text); }
+.hp-aud p { margin: 0; font-size: 13px; line-height: 2; color: var(--gl-muted); }
+.hp-features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+.hp-features li {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+}
+.hp-features strong { font-size: 14px; color: var(--gl-accent); }
+.hp-features span { font-size: 12.5px; line-height: 1.9; color: var(--gl-muted); }
+.hp-search { width: 100%; }
+.hp-group { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.hp-group-title { margin: 8px 0 0; font-size: 15px; font-weight: 800; color: var(--gl-text); }
+.hp-q {
+    border-radius: 12px;
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    overflow: hidden;
+}
+.hp-q > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.8;
+    color: var(--gl-text);
+}
+.hp-q > summary::-webkit-details-marker { display: none; }
+.hp-q > summary::after {
+    content: "+";
+    flex: 0 0 auto;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gl-chip-bg);
+    color: var(--gl-chip-text);
+    font-size: 18px;
+    line-height: 1;
+}
+.hp-q[open] > summary::after { content: "−"; background: var(--gl-accent); color: #ffffff; }
+.hp-q[open] > summary { border-bottom: 1px solid var(--gl-border-soft); }
+.hp-a { padding: 12px 16px 16px; font-size: 13.5px; line-height: 2.1; color: var(--gl-muted); }
+.hp-a p { margin: 0 0 8px; }
+.hp-a p:last-child { margin-bottom: 0; }
+.hp-a ul, .hp-a ol { margin: 0 0 8px; padding-right: 22px; }
+.hp-a li { margin-bottom: 4px; }
+.hp-a b { color: var(--gl-text); }
+.hp-none { padding: 22px; text-align: center; font-size: 13px; color: var(--gl-muted); }
+.hp-none[hidden] { display: none; }
+.hp-contact {
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    background: var(--gl-surface);
+    border: 1px solid var(--gl-border);
+    box-shadow: var(--gl-shadow);
+}
+.hp-contact h3 { margin: 0 0 6px; font-size: 17px; font-weight: 800; color: var(--gl-text); }
+.hp-contact p { margin: 0 0 14px; font-size: 13px; color: var(--gl-muted); }
+.hp-contact-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.hp-contact-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    min-width: 200px;
+}
+@media (min-width: 900px) {
+    .hp-aud-grid { grid-template-columns: repeat(3, 1fr); }
+    .hp-features { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 1023px) {
+    .gl-view-pad { padding: 14px 12px; }
+}
+
+/* ---------- دکمه‌های ویرایش/حذف برنامه ---------- */
+.gl-program-card-head { gap: 12px; flex-wrap: wrap; }
+.gl-program-card-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.gl-program-card-actions button { min-height: 38px; padding: 6px 14px; font-size: 13px; }
+
+/* ---------- برنامه‌های قبلی: جمع‌شونده ---------- */
+.gl-program-card.collapsed .gl-program-card-head { margin-bottom: 0; }
+.gl-program-card-head[data-prog-toggle] { cursor: pointer; }
+.gl-program-card-head[data-prog-toggle]:hover .gl-program-card-title { color: var(--gl-accent); }
+.gl-prog-chev { display: inline-block; margin-right: 6px; color: var(--gl-muted); transition: transform 0.2s ease; }
+.gl-program-card.open .gl-prog-chev { transform: rotate(180deg); }
+.gl-program-card .dv-prog-sessions[hidden] { display: none; }
+
+/* =====================================================
+   همگام‌سازی با بله (prefix: bs-)
+   ===================================================== */
+.gl-gap-top { margin-top: 16px; }
+.bale-setting { align-items: flex-start; flex-direction: column; }
+.bs-panel { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+.bs-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
+.bs-head strong { font-size: 15px; color: var(--gl-text); }
+.bs-status { font-size: 12px; line-height: 1.8; color: var(--gl-muted); }
+.bs-status.ok { color: #16a34a; }
+.bs-status.pending { color: #d97706; }
+.bs-status.err { color: var(--gl-danger); }
+.bs-desc { margin: 0; font-size: 12.5px; line-height: 1.9; color: var(--gl-muted); }
+.bs-sync-btn { width: 100%; }
+.bs-fields { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 600px) {
+    .bs-fields { grid-template-columns: 1.6fr 1fr; }
+}
+.bs-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.bs-label { font-size: 13px; font-weight: 600; color: var(--gl-muted); }
+.bs-input-row { display: flex; gap: 6px; }
+.bs-input-row input { flex: 1; min-width: 0; }
+.bs-input-row button { flex: 0 0 auto; min-height: 44px; padding: 6px 12px; font-size: 12px; }
+.bs-field input[dir="ltr"] { text-align: left; }
+.bs-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.8;
+    cursor: pointer;
+    color: var(--gl-text);
+}
+.bs-check input { flex: 0 0 auto; width: 20px; height: 20px; min-height: 0; margin-top: 3px; }
+.bs-check small { display: block; font-size: 11px; color: var(--gl-faint); }
+.bs-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.bs-actions button { min-height: 42px; padding: 6px 14px; font-size: 13px; }
+.bs-msg { min-height: 18px; margin: 0; font-size: 12.5px; line-height: 1.8; color: var(--gl-muted); }
+.bs-msg.ok { color: #16a34a; }
+.bs-msg.err { color: var(--gl-danger); }
+.backup-warning-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.backup-warning-actions .secondary-btn { min-height: 38px; font-size: 12px; }
+.backup-warning-actions [hidden] { display: none; }
+
+/* =====================================================
+   GymLog — سوپرست (حرکات پشت‌سرهم بدون استراحت)
+   بعد از gl-extras.css و redesign.css لود می‌شود.
+   ===================================================== */
+:root { --ss-color: #7c3aed; --ss-soft: rgba(124, 58, 237, 0.08); }
+body.dark-mode { --ss-color: #c4b5fd; --ss-soft: rgba(196, 181, 253, 0.1); }
+
+/* ---------- صفحه‌ی ثبت تمرین ---------- */
+.superset-group {
+    margin-bottom: 14px;
+    padding: 8px;
+    border: 2px solid var(--ss-color);
+    border-radius: 16px;
+    background: var(--ss-soft);
+}
+.superset-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 4px 6px 10px;
+}
+.superset-badge {
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: var(--ss-color);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+body.dark-mode .superset-badge { color: #1e1b4b; }
+.superset-hint { font-size: 12px; line-height: 1.8; color: var(--gl-muted); }
+.superset-group .exercise-card { margin-bottom: 8px; }
+.superset-group .exercise-card:last-child { margin-bottom: 0; }
+.superset-tag {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--ss-soft);
+    color: var(--ss-color);
+    border: 1px solid var(--ss-color);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ---------- جدول برنامه‌ها ---------- */
+.dv-prog-table tr.dv-ss-head td {
+    padding: 7px 10px;
+    text-align: right;
+    background: var(--ss-soft);
+    color: var(--ss-color);
+    border-bottom: 1px solid var(--ss-color);
+    font-size: 12px;
+    font-weight: 800;
+}
+.dv-prog-table tr.dv-ss-head td span { font-weight: 500; opacity: 0.85; }
+.dv-prog-table tr.dv-ss-row td { background: var(--ss-soft) !important; }
+.dv-prog-table tr.dv-ss-row td:first-child { box-shadow: inset -4px 0 0 var(--ss-color); }
+.dv-prog-table tr.dv-ss-row.dv-ss-last td { border-bottom: 1px solid var(--ss-color); }
+.dv-ss-chip {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--ss-color);
+    color: #ffffff;
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+body.dark-mode .dv-ss-chip { color: #1e1b4b; }
+.dv-ss-chip-head { margin: 0; }
+
+/* ---------- ساخت برنامه ---------- */
+.pb-ex.pb-ex-linked { border-color: var(--ss-color); box-shadow: inset -4px 0 0 var(--ss-color); }
+.pb-ss-chip {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--ss-color);
+    color: #ffffff;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 700;
+}
+body.dark-mode .pb-ss-chip { color: #1e1b4b; }
+.pb-ss-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--ss-color);
+    border-radius: 10px;
+    background: var(--ss-soft);
+    font-size: 13px;
+    cursor: pointer;
+}
+.pb-ss-toggle input { flex: 0 0 auto; width: 20px; height: 20px; min-height: 0; }
+.pb-ss-toggle small { font-size: 11px; opacity: 0.75; }
+
+/* =====================================================
+   GymLog — بازطراحی ورزشی (لایه‌ی override)
+   بعد از gl-extras.css لود شود. به JS دست نمی‌زند.
+   ساده، خوانا (پیرچشمی)، مناسب استفاده در باشگاه
+   ===================================================== */
+:root {
+    --rd-bg: #f4f5f7;
+    --rd-card: #ffffff;
+    --rd-line: #cfd5de;
+    --rd-text: #111827;
+    --rd-sub: #4b5563;
+    --rd-accent: #c2410c;
+    --rd-ink: #ffffff;
+    --rd-soft: #fff1e8;
+    --rd-ok: #15803d;
+    --rd-input: #ffffff;
+    --rd-nav: #ffffff;
+}
+body.dark-mode {
+    --rd-bg: #0a0c0f;
+    --rd-card: #14181d;
+    --rd-line: #3a4452;
+    --rd-text: #ffffff;
+    --rd-sub: #cbd5e1;
+    --rd-accent: #c6f432;
+    --rd-ink: #0a0c0f;
+    --rd-soft: #1d280a;
+    --rd-ok: #4ade80;
+    --rd-input: #0a0c0f;
+    --rd-nav: #0f1318;
+}
+body:not(.rd) {
+    font-family: Vazirmatn, "Segoe UI", Tahoma, system-ui, sans-serif;
+    background: var(--rd-bg);
+    color: var(--rd-text);
+    .app-shell { background: var(--rd-bg); }
+    .card,
+    .exercise-card,
+    .summary-card,
+    .dv-card,
+    .dv-kpi,
+    .dash-overview-card,
+    .dash-cycle-card,
+    .dash-table-card,
+    .dv-ex-card,
+    .dv-welcome,
+    .dv-prog-session {
+        background: var(--rd-card);
+        border: 2px solid var(--rd-line);
+        border-radius: 16px;
+        color: var(--rd-text);
+    }
+    .exercise-header { background: transparent; border-color: var(--rd-line); }
+    .page-header p,
+    .selector-title,
+    .exercise-meta,
+    .field label,
+    .section-title p,
+    .dv-card-head p,
+    .dv-kpi-label,
+    .dv-kpi-sub,
+    .dv-note,
+    .setting-info span,
+    .summary-card span,
+    .summary-card small,
+    .history-empty,
+    .dv-empty {
+        color: var(--rd-sub);
+    }
+    /* ---------- دکمه‌ها ---------- */
+    button, .secondary-btn { min-height: 52px; border-radius: 14px; font-size: 16px; }
+    .primary-btn, .dash-start-workout-btn {
+        background: var(--rd-accent);
+        color: var(--rd-ink);
+        border-color: var(--rd-accent);
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+    .secondary-btn {
+        background: var(--rd-card);
+        color: var(--rd-text);
+        border: 2px solid var(--rd-line);
+    }
+    .danger-btn { border-width: 2px; }
+    /* ---------- فرم‌ها ---------- */
+    input, select, .date-picker-btn {
+        background: var(--rd-input);
+        color: var(--rd-text);
+        border: 2px solid var(--rd-line);
+        border-radius: 12px;
+        min-height: 52px;
+    }
+    input:focus, select:focus {
+        border-color: var(--rd-accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--rd-accent) 30%, transparent);
+    }
+    .session-note { background: var(--rd-soft); color: var(--rd-text); font-size: 14px; }
+    /* ---------- انتخاب جلسه ---------- */
+    .session-btn {
+        background: var(--rd-card);
+        color: var(--rd-text);
+        border: 2px solid var(--rd-line);
+        border-radius: 14px;
+        min-height: 76px;
+    }
+    .session-btn strong { font-size: 16px; }
+    .session-btn span { font-size: 13px; color: var(--rd-sub); }
+    .session-btn.active {
+        background: var(--rd-accent);
+        border-color: var(--rd-accent);
+        color: var(--rd-ink);
+    }
+    .session-btn.active span { color: var(--rd-ink); opacity: 0.85; }
+    /* ---------- حرکت ---------- */
+    .exercise-header { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px; }
+    .exercise-title { flex: 1 0 100%; }
+    .exercise-header h2 { font-size: 22px; font-weight: 800; }
+    .exercise-number {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+        background: var(--rd-accent);
+        color: var(--rd-ink);
+    }
+    .exercise-meta { font-size: 15px; }
+    .exercise-help-btn, .exercise-history-btn, .exercise-rest-btn {
+        flex: 1 1 0;
+        margin: 0;
+        min-height: 50px;
+        padding: 6px 8px;
+        font-size: 14px;
+        font-weight: 700;
+        background: var(--rd-card);
+        color: var(--rd-text);
+        border: 2px solid var(--rd-line);
+        border-radius: 12px;
+    }
+    .exercise-rest-btn { background: var(--rd-soft); border-color: var(--rd-accent); }
+    /* ---------- ست‌ها ---------- */
+    .sets-container { padding: 12px; }
+    .set-row { grid-template-columns: 64px 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .set-label { font-size: 17px; color: var(--rd-text); }
+    .set-row input {
+        height: 60px;
+        font-size: 24px;
+        font-weight: 800;
+        border-radius: 14px;
+    }
+    .set-row input::placeholder { font-size: 14px; font-weight: 500; color: var(--rd-sub); opacity: 1; }
+    .set-difference { font-size: 15px; color: var(--rd-sub); font-weight: 600; }
+    /* ---------- خلاصه و ذخیره ---------- */
+    .summary-card strong { font-size: 26px; color: var(--rd-accent); }
+    .summary-card span { font-size: 14px; }
+    #finishWorkoutBtn { min-height: 64px; font-size: 18px; }
+    /* ---------- جدول‌ها ---------- */
+    .history-table, .dash-table { font-size: 14px; }
+    .history-table th, .dash-table th { background: transparent; color: var(--rd-sub); }
+    .history-table td, .dash-table td, .history-table th, .dash-table th { border-color: var(--rd-line); }
+    /* ---------- تقویم/انتخاب تاریخ ---------- */
+    .date-picker-modal, .dash-detail-modal, .dv-modal, .exercise-guide-modal, .ee-modal {
+        background: var(--rd-card);
+        color: var(--rd-text);
+    }
+    .date-picker-day { font-size: 16px; height: 46px; color: var(--rd-text); }
+    .date-picker-day.selected { background: var(--rd-accent); color: var(--rd-ink); }
+    .date-picker-day.today { box-shadow: inset 0 0 0 2px var(--rd-accent); }
+    .date-picker-day.has-workout .date-picker-day-circle { border-color: var(--rd-ok); }
+    .date-picker-weekdays { font-size: 13px; color: var(--rd-sub); }
+    .date-picker-legend { font-size: 13px; color: var(--rd-sub); }
+    .date-picker-nav { background: var(--rd-line); color: var(--rd-text); width: 44px; height: 44px; }
+    .exercise-guide-instructions { font-size: 18px; color: var(--rd-text); }
+    .exercise-guide-close { background: var(--rd-line); color: var(--rd-text); width: 46px; height: 46px; }
+    .setting-row .setting-btn { min-height: 52px; font-size: 14px; }
+    .setting-info strong { font-size: 16px; color: var(--rd-text); }
+    /* ---------- تایمر ---------- */
+    .rest-timer { background: var(--rd-card); border: 2px solid var(--rd-accent); }
+    .rest-timer-time { font-size: 38px; font-weight: 800; color: var(--rd-text); }
+    .rest-timer-label { font-size: 15px; color: var(--rd-sub); }
+    .rest-timer-track i { background: var(--rd-accent); }
+    .rest-timer-track { height: 10px; }
+    .rest-timer-actions button { min-height: 48px; font-size: 14px; background: var(--rd-input); color: var(--rd-text); border: 2px solid var(--rd-line); }
+    /* ---------- نوار بالا و منوی کناری ---------- */
+    .mobile-nav-bar {
+        background: var(--rd-nav);
+        border-color: var(--rd-line);
+        color: var(--rd-text);
+    }
+    .mobile-nav-brand { color: var(--rd-text); }
+    .user-chip { color: var(--rd-accent); }
+    .settings-icon-btn { background: var(--rd-card); color: var(--rd-text); border: 2px solid var(--rd-line); width: 48px; height: 48px; }
+    .settings-page-overlay, .settings-page, .my-programs-overlay, .my-programs-page { background: var(--rd-bg); color: var(--rd-text); }
+    /* ---------- داشبورد: رنگ‌های آبی ثابت ---------- */
+    .dash-program-kicker, .dv-prog-table td.dv-prog-reps { color: var(--rd-accent); }
+    .dash-progress-bar-fill, .dv-mus-bar i { background: var(--rd-accent); }
+    .dash-progress-bar-bg, .dv-mus-bar { background: var(--rd-line); }
+    .dv-kpi-val, .dash-overview-title, .dv-card-head h3 { color: var(--rd-text); }
+    .dv-pill.active { background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-ink); }
+    .dv-pill, .dv-sess-btn { background: var(--rd-card); color: var(--rd-text); border: 2px solid var(--rd-line); }
+    .dv-sess-btn.active { background: var(--rd-accent); border-color: var(--rd-accent); color: var(--rd-ink); }
+    .dv-sess-btn.active span { color: var(--rd-ink); }
+    .dash-cycle-week-col { background: var(--rd-bg); border-color: var(--rd-line); }
+    .dash-cycle-session-item { background: var(--rd-card); border-color: var(--rd-line); }
+    .dash-cycle-session-info strong { color: var(--rd-text); }
+    .dash-cycle-session-info span { color: var(--rd-sub); font-size: 12px; }
+    .dash-cycle-session-item.done { border-color: var(--rd-ok); background: var(--rd-card); }
+    .dash-cycle-session-item.active-next { border-color: var(--rd-accent); box-shadow: 0 0 0 2px var(--rd-accent); background: var(--rd-soft); }
+}
+
+/* =====================================================
+   موبایل: خوانایی بیشتر + نوار پایین بزرگ
+   ===================================================== */
+@media (max-width: 1023px) {
+    body:not(.rd) {
+        font-size: 18px;
+        padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+        .container { padding: 12px 12px 24px; }
+        /* حداقل اندازه‌ی متن */
+        .setting-info span,
+        .dv-note,
+        .dv-kpi-sub,
+        .dv-list-sub,
+        .dv-ex-foot,
+        .my-program-dates,
+        .history-table,
+        .dv-prog-table,
+        .exercise-history-info,
+        .dash-cycle-week-badge,
+        .gl-hint {
+            font-size: 14px;
+        }
+        .history-table th, .history-table td { padding: 12px 6px; }
+        .exercise-history-info { font-size: 14px; }
+        .history-set { font-size: 17px; min-height: 56px; }
+        .exercise-note > summary { font-size: 15px; color: var(--rd-sub); padding: 10px 0; }
+        .exercise-note-input, .session-note-input { font-size: 17px; color: var(--rd-text); background: var(--rd-input); border: 2px solid var(--rd-line); }
+        /* نوار بالا: فقط نام برنامه و تنظیمات */
+        .mobile-nav-bar { padding: 10px 14px; }
+        .mobile-nav-brand { font-size: 20px; font-weight: 800; color: var(--rd-accent); }
+        /* نوار پایین */
+        .mobile-tab-switch {
+            position: fixed;
+            z-index: 960;
+            right: 0;
+            left: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+            background: var(--rd-nav);
+            border-top: 2px solid var(--rd-line);
+            border-radius: 0;
+        }
+        .mobile-tab-btn {
+            min-height: 58px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 800;
+            background: var(--rd-card);
+            color: var(--rd-text);
+            border: 2px solid var(--rd-line);
+        }
+        .mobile-tab-btn.active {
+            background: var(--rd-accent);
+            color: var(--rd-ink);
+            border-color: var(--rd-accent);
+            box-shadow: none;
+        }
+        /* تایمر بالای نوار پایین */
+        .rest-timer { bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+        .app-toast { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); font-size: 16px; }
+        /* مودال راهنما */
+        .exercise-guide-header h2 { font-size: 24px; }
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
+
+/* =====================================================
+   موبایل: نوار پایین باریک‌تر و کم‌رنگ‌تر
+   ===================================================== */
+@media (max-width: 1023px) {
+    body:not(.rd) {
+        padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+        .mobile-tab-switch {
+            gap: 8px;
+            padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px));
+            border-top-width: 1px;
+        }
+        .mobile-tab-btn {
+            min-height: 40px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            background: transparent;
+            color: var(--rd-sub);
+            border: 1px solid var(--rd-line);
+        }
+        .mobile-tab-btn.active {
+            background: var(--rd-soft);
+            color: var(--rd-accent);
+            border-color: var(--rd-accent);
+        }
+        .rest-timer { bottom: calc(66px + env(safe-area-inset-bottom, 0px)); }
+        .app-toast { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+    }
+}
+
+/* =====================================================
+   دسکتاپ: اندازه‌های متعادل (نه درشت)
+   ===================================================== */
+@media (min-width: 1024px) {
+    #viewWorkout .container { max-width: 720px; margin: 20px auto; }
+    body:not(.rd) {
+        font-size: 15px;
+        button, .secondary-btn { min-height: 40px; border-radius: 10px; font-size: 14px; }
+        input, select, .date-picker-btn { min-height: 42px; border-width: 1px; border-radius: 10px; font-size: 14px; }
+        .card,
+        .exercise-card,
+        .summary-card,
+        .dv-card,
+        .dv-kpi,
+        .dash-overview-card,
+        .dash-cycle-card,
+        .dash-table-card,
+        .dv-ex-card,
+        .dv-welcome,
+        .dv-prog-session {
+            border-width: 1px;
+            border-radius: 12px;
+        }
+        /* انتخاب جلسه */
+        .session-btn { min-height: 60px; border-width: 1px; border-radius: 10px; }
+        .session-btn strong { font-size: 13.5px; }
+        .session-btn span { font-size: 11.5px; }
+        /* حرکت */
+        .exercise-header { padding: 12px 14px; gap: 8px; }
+        .exercise-header h2 { font-size: 17px; font-weight: 700; }
+        .exercise-number { width: 30px; height: 30px; font-size: 13px; }
+        .exercise-meta { font-size: 12.5px; }
+        .exercise-help-btn, .exercise-history-btn, .exercise-rest-btn {
+            flex: 0 0 auto;
+            min-height: 36px;
+            padding: 4px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            border-width: 1px;
+            border-radius: 8px;
+        }
+        /* ست‌ها */
+        .sets-container { padding: 10px 12px; }
+        .set-row { grid-template-columns: 56px 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .set-label { font-size: 13.5px; }
+        .set-row input { height: 42px; min-height: 42px; font-size: 16px; font-weight: 700; border-radius: 10px; }
+        .set-row input::placeholder { font-size: 12.5px; }
+        .set-difference { font-size: 12px; }
+        /* خلاصه و ذخیره */
+        .summary-card strong { font-size: 20px; }
+        .summary-card span { font-size: 12px; }
+        #finishWorkoutBtn { min-height: 46px; font-size: 15px; }
+        /* منو و جدول‌ها */
+        .history-table, .dash-table { font-size: 13px; }
+        /* تقویم انتخاب تاریخ و مودال‌ها */
+        .date-picker-day { font-size: 13px; height: 40px; }
+        .date-picker-nav, .exercise-guide-close { width: 34px; height: 34px; min-height: 34px; }
+        .date-picker-weekdays, .date-picker-legend { font-size: 12px; }
+        .exercise-guide-instructions { font-size: 15px; }
+        .exercise-guide-header h2 { font-size: 20px; }
+        /* تایمر */
+        .rest-timer { border-width: 1px; }
+        .rest-timer-time { font-size: 28px; }
+        .rest-timer-label { font-size: 13px; }
+        .rest-timer-track { height: 6px; }
+        .rest-timer-actions button { min-height: 38px; font-size: 13px; border-width: 1px; }
+    }
+    /* تنظیمات: دکمه‌ها هم‌اندازه */
+    #viewSettingsContainer .setting-row > button,
+    #viewSettingsContainer .setting-row > .secondary-btn,
+    #viewSettingsContainer .setting-row > .danger-btn {
+        flex: 0 0 170px;
+        width: 170px;
+        min-height: 40px;
+        padding: 8px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+        text-align: center;
+    }
+}
+
+/* =====================================================
+   موبایل: ساختار گروه‌بندی‌شده‌ی منوی تنظیمات + دکمه‌های همگام‌سازی
+   ===================================================== */
+@media (max-width: 1023px) {
+    html body .settings-content { padding: 12px 12px 32px; }
+    html body .settings-group {
+        margin-bottom: 14px;
+        background: var(--gl-surface);
+        border: 1px solid var(--gl-border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    html body .settings-group-title {
+        margin: 0;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--gl-accent);
+        background: var(--gl-surface-2);
+        border-bottom: 1px solid var(--gl-border);
+    }
+    html body .settings-group-danger .settings-group-title { color: var(--gl-danger); }
+    html body .settings-group .setting-row { padding: 12px 14px; gap: 10px; }
+    html body .settings-group .setting-info strong { font-size: 14px; }
+    html body .settings-group .setting-info span { font-size: 12px; color: var(--gl-muted); }
+    html body .settings-group .setting-row .setting-btn {
+        flex: 0 0 116px;
+        width: 116px;
+        min-height: 44px;
+        padding: 6px 8px;
+        font-size: 13px;
+        line-height: 1.4;
+        white-space: normal;
+        text-align: center;
+    }
+    html body .bs-actions { display: flex; flex-wrap: nowrap; gap: 8px; }
+    html body .bs-actions button {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 48px;
+        padding: 6px 4px;
+        font-size: 12.5px;
+        line-height: 1.5;
+        white-space: normal;
+        text-align: center;
+    }
+}
+
+/* =====================================================
+   GymLog — لایه‌ی طراحی نهایی (prefix: gl-)
+   بعد از redesign.css لود می‌شود. فقط ظاهر؛ به منطق برنامه دست نمی‌زند.
+   پالت رنگ همان --rd-* قبلی است (روشن: نارنجی، تیره: لیمویی) و تغییر نکرده.
+   ===================================================== */
+
+/* ---------- توکن‌های فاصله، گوشه و سایه (بدون رنگ جدید) ---------- */
+:root {
+    --gl-r-sm: 10px;
+    --gl-r: 14px;
+    --gl-r-lg: 22px;
+    --gl-sp-1: 4px;
+    --gl-sp-2: 8px;
+    --gl-sp-3: 12px;
+    --gl-sp-4: 16px;
+    --gl-sp-5: 24px;
+    --gl-sp-6: 32px;
+    --gl-sh-1: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .05);
+    --gl-sh-2: 0 10px 30px rgba(15, 23, 42, .09);
+    --gl-ease: cubic-bezier(.2, .7, .2, 1);
+    --gl-touch: 48px;
+}
+body.dark-mode {
+    --gl-sh-1: 0 1px 2px rgba(0, 0, 0, .55);
+    --gl-sh-2: 0 12px 32px rgba(0, 0, 0, .55);
+}
+
+/* ---------- تایپوگرافی ---------- */
+html body:not(.rd) {
+    font-family: Vazirmatn, "Segoe UI", Tahoma, system-ui, sans-serif;
+    line-height: 1.7;
+    font-feature-settings: "tnum" 1;
+    -webkit-font-smoothing: antialiased;
+}
+html body:not(.rd) h1, html body:not(.rd) h2, html body:not(.rd) h3, html body:not(.rd) h4 {
+    letter-spacing: 0;
+    line-height: 1.45;
+}
+
+/* ---------- فوکوس قابل‌دیدن برای همه ---------- */
+html body:not(.rd) :is(button, a, input, select, textarea, summary, [role="button"]):focus-visible {
+    outline: 3px solid var(--rd-accent);
+    outline-offset: 2px;
+}
+
+/* ---------- آیکون‌ها ---------- */
+.gl-ic { display: block; flex: 0 0 auto; }
+html body:not(.rd) .gl-brand-link { cursor: pointer; }
+
+/* ---------- کارت‌ها: یک زبان واحد ---------- */
+html body:not(.rd) :is(.card, .exercise-card, .summary-card, .dv-card, .dv-kpi, .dash-overview-card, .dash-cycle-card, .dash-table-card, .dv-ex-card, .dv-welcome, .dv-prog-session, .hp-aud, .hp-q, .hp-contact) {
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r);
+    box-shadow: var(--gl-sh-1);
+}
+html body:not(.rd) :is(.date-picker-modal, .dash-detail-modal, .dv-modal, .exercise-guide-modal, .ee-modal) {
+    border-radius: var(--gl-r-lg);
+    box-shadow: var(--gl-sh-2);
+}
+
+/* ---------- دکمه‌ها ---------- */
+html body:not(.rd) :is(button, .secondary-btn, .primary-btn) {
+    transition: transform .18s var(--gl-ease), box-shadow .18s var(--gl-ease), background .18s, border-color .18s, color .18s;
+}
+html body:not(.rd) :is(.primary-btn, .secondary-btn, .danger-btn) { border-radius: var(--gl-r-sm); }
+html body:not(.rd) .primary-btn { box-shadow: 0 2px 0 color-mix(in srgb, var(--rd-accent) 70%, #000); }
+html body:not(.rd) .primary-btn:active { transform: translateY(1px) scale(.98); box-shadow: none; }
+
+/* =====================================================
+   هیرو (صفحه‌ی خانه)
+   ===================================================== */
+.gl-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    gap: var(--gl-sp-5);
+    align-items: center;
+    margin-bottom: var(--gl-sp-4);
+    padding: var(--gl-sp-6);
+    overflow: hidden;
+    background: var(--rd-card);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r-lg);
+    box-shadow: var(--gl-sh-2);
+    color: var(--rd-text);
+    animation: gl-hero-in .45s var(--gl-ease) both;
+}
+@keyframes gl-hero-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+.gl-hero-body { display: flex; flex-direction: column; gap: var(--gl-sp-3); min-width: 0; }
+.gl-hero-mark {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: var(--rd-accent);
+    color: var(--rd-ink);
+    font-size: 15px;
+    font-weight: 800;
+}
+.gl-hero h2 { margin: 0; font-size: 30px; font-weight: 800; color: var(--rd-text); }
+.gl-hero-sub { margin: 0; font-size: 15px; color: var(--rd-sub); line-height: 1.9; }
+.gl-hero-sub b { color: var(--rd-text); }
+html body:not(.rd) .gl-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    align-self: flex-start;
+    min-height: 56px;
+    padding: 0 28px;
+    font-size: 17px;
+    font-weight: 800;
+    border-radius: var(--gl-r);
+}
+html body:not(.rd) .gl-cta .gl-ic { width: 20px; height: 20px; fill: currentColor; stroke: none; }
+html body:not(.rd) .gl-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 22px color-mix(in srgb, var(--rd-accent) 35%, transparent); }
+.gl-hero-art { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.gl-hero-art svg { width: 100%; max-width: 340px; height: auto; }
+.gl-quick { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--gl-sp-2); }
+html body:not(.rd) .gl-quick button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    background: var(--rd-card);
+    color: var(--rd-text);
+    border: 1px solid var(--rd-line);
+}
+html body:not(.rd) .gl-quick button:hover { border-color: var(--rd-accent); color: var(--rd-accent); }
+.gl-quick .gl-ic { width: 18px; height: 18px; }
+@media (max-width: 1023px) {
+    .gl-hero { grid-template-columns: 1fr; padding: var(--gl-sp-4); gap: var(--gl-sp-4); }
+    .gl-hero-art { order: -1; }
+    .gl-hero-art svg { max-width: 190px; }
+    .gl-hero h2 { font-size: 24px; }
+    html body:not(.rd) .gl-cta { align-self: stretch; min-height: 60px; font-size: 18px; }
+    .gl-quick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    html body:not(.rd) .gl-quick button { justify-content: center; border-radius: var(--gl-r-sm); min-height: 48px; }
+}
+
+/* =====================================================
+   موبایل: نوار بالا و منوی همبرگری
+   ===================================================== */
+@media (max-width: 1023px) {
+    html body:not(.rd) .mobile-nav-bar { box-shadow: var(--gl-sh-1); }
+    html body:not(.rd) .mobile-nav-brand { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; }
+    html body:not(.rd) .settings-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0;
+        width: var(--gl-touch);
+        height: var(--gl-touch);
+        min-height: var(--gl-touch);
+        padding: 0;
+        border-radius: var(--gl-r-sm);
+    }
+    html body:not(.rd) .settings-icon-btn .gl-ic { width: 22px; height: 22px; }
+    html body:not(.rd) .mobile-tab-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    html body:not(.rd) .mobile-tab-btn .gl-ic { width: 18px; height: 18px; }
+}
+.gl-menu-group { margin-bottom: 14px; }
+.gl-menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; }
+html body:not(.rd) .gl-menu-grid button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    min-height: 72px;
+    padding: 12px 14px;
+    text-align: right;
+    background: var(--rd-card);
+    color: var(--rd-text);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r);
+    font-weight: 700;
+    font-size: 14px;
+}
+html body:not(.rd) .gl-menu-grid button .gl-ic { width: 22px; height: 22px; color: var(--rd-accent); }
+html body:not(.rd) .gl-menu-grid button:active { transform: scale(.98); border-color: var(--rd-accent); }
+html body:not(.rd) .gl-menu-grid button.is-current { background: var(--rd-soft); border-color: var(--rd-accent); }
+
+/* =====================================================
+   ثبت تمرین: ست‌ها سریع و درشت
+   ===================================================== */
+html body:not(.rd) .set-row { align-items: center; }
+html body:not(.rd) .set-row input { text-align: center; }
+html body:not(.rd) .set-row input:focus {
+    border-color: var(--rd-accent);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--rd-accent) 28%, transparent);
+}
+html body:not(.rd) .gl-copy-prev {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    margin-inline-start: 8px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--rd-soft);
+    color: var(--rd-text);
+    border: 1px solid var(--rd-accent);
+}
+html body:not(.rd) .gl-copy-prev:active { transform: scale(.96); }
+@media (max-width: 1023px) {
+    html body:not(.rd) .gl-copy-prev { min-height: 44px; font-size: 14px; }
+}
+
+/* خلاصه و دکمه‌ی پایان جلسه */
+html body:not(.rd) #finishWorkoutBtn { border-radius: var(--gl-r); }
+
+/* =====================================================
+   تنظیمات و پیمایش: یکدستی
+   ===================================================== */
+html body:not(.rd) .settings-group { border-radius: var(--gl-r); box-shadow: var(--gl-sh-1); }
+@media (prefers-reduced-motion: reduce) {
+    .gl-hero { animation: none; }
+}
+
+/* =====================================================
+   منوی افقی سراسری (دسکتاپ) + صفحه‌ی خانه
+   ===================================================== */
+.gl-topnav { display: none; }
+.gl-home-wrap { max-width: 1100px; margin: 0 auto; padding: 12px; }
+@media (min-width: 1024px) {
+    html body .pb-overlay { top: 60px; right: 0 !important; }
+    .gl-topnav {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: var(--gl-sp-4);
+        position: sticky;
+        top: 0;
+        z-index: 90;
+        min-height: 60px;
+        padding: 6px 28px;
+        background: var(--rd-nav);
+        border-bottom: 1px solid var(--rd-line);
+        box-shadow: var(--gl-sh-1);
+    }
+    .gl-topnav-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        color: var(--rd-text);
+        text-decoration: none;
+        justify-self: start;
+    }
+    .gl-topnav-links { display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .gl-topnav-tools { display: flex; align-items: center; gap: 10px; justify-self: end; }
+    html body:not(.rd) .gl-topnav-links > button,
+    html body:not(.rd) .gl-more > summary {
+        min-height: 40px;
+        padding: 0 14px;
+        border: none;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--rd-sub);
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+    }
+    html body:not(.rd) .gl-topnav-links > button:hover,
+    html body:not(.rd) .gl-more > summary:hover { background: var(--rd-soft); color: var(--rd-text); }
+    html body:not(.rd) .gl-topnav .is-active { background: var(--rd-soft); color: var(--rd-accent); }
+    .gl-more { position: relative; }
+    .gl-more > summary { display: inline-flex; align-items: center; }
+    .gl-more > summary::-webkit-details-marker { display: none; }
+    .gl-more-panel {
+        position: absolute;
+        top: calc(100% + 6px);
+        inset-inline-start: 0;
+        min-width: 180px;
+        z-index: 5;
+        display: flex;
+        flex-direction: column;
+        padding: 6px;
+        background: var(--rd-card);
+        border: 1px solid var(--rd-line);
+        border-radius: var(--gl-r);
+        box-shadow: var(--gl-sh-2);
+    }
+    html body:not(.rd) .gl-more-panel button {
+        min-height: 40px;
+        padding: 0 12px;
+        border: none;
+        border-radius: var(--gl-r-sm);
+        background: transparent;
+        color: var(--rd-text);
+        text-align: right;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    html body:not(.rd) .gl-more-panel button:hover { background: var(--rd-soft); }
+    .gl-home-wrap { padding: 32px 28px 24px; }
+    .gl-home-wrap .gl-hero { min-height: 380px; }
+}
+
+/* بخش‌های معرفی */
+.gl-sec { margin-top: 40px; }
+.gl-sec > h3 { margin: 0 0 16px; font-size: 22px; font-weight: 800; color: var(--rd-text); }
+.gl-ico-box {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--rd-soft);
+    color: var(--rd-accent);
+}
+.gl-why, .gl-feat-grid { display: grid; gap: 12px; grid-template-columns: 1fr; }
+.gl-why-item, .gl-feat, .gl-steps li {
+    background: var(--rd-card);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r);
+    box-shadow: var(--gl-sh-1);
+}
+.gl-why-item { display: flex; }
+.gl-why-item h4, .gl-feat h4, .gl-steps h4 { margin: 0 0 4px; font-size: 16px; font-weight: 800; color: var(--rd-text); }
+.gl-why-item p, .gl-feat p, .gl-steps p { margin: 0; font-size: 14px; line-height: 1.9; color: var(--rd-sub); }
+.gl-feat { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+.gl-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 1fr;
+    counter-reset: s;
+}
+.gl-steps li { display: flex; gap: 14px; padding: 18px; }
+.gl-step-n {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--rd-accent);
+    color: var(--rd-ink);
+    font-weight: 800;
+    font-size: 18px;
+}
+@media (min-width: 700px) {
+    .gl-why { grid-template-columns: 1fr 1fr; }
+    .gl-feat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    .gl-feat-grid { grid-template-columns: repeat(4, 1fr); }
+    .gl-steps { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* نوار تیره‌ی پایین: راه‌های ارتباط */
+.gl-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 28px;
+    margin-top: 32px;
+    padding: 20px 28px;
+    background: #0f1318;
+    color: #cbd5e1;
+    border-top: 1px solid #3a4452;
+}
+.gl-footer-text { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.gl-footer-text b { color: #ffffff; font-size: 15px; }
+.gl-footer-links { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 14px; }
+.gl-footer-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    color: #ffffff;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    font-weight: 700;
+}
+.gl-footer-links a:hover, .gl-footer-links a:focus-visible { color: #c6f432; border-bottom-color: #c6f432; }
+
+/* =====================================================
+   رنگ نمودارها متناسب با تم (رنگ‌های inline در SVG با انتخابگر صفت بازنویسی می‌شوند)
+   ===================================================== */
+:is(.dv-svg, .dv-radar-svg, .pb-trend-svg) [stroke="#2563eb"] { stroke: var(--rd-accent); }
+.dv-radar-svg [fill="#2563eb"] { fill: var(--rd-accent); }
+:is(.dv-svg, .dv-radar-svg, .pb-trend-svg) [fill="#9ca3af"] { fill: var(--rd-sub); }
+:is(.dv-svg, .dv-radar-svg) [stroke="#9ca3af"] { stroke: var(--rd-sub); }
+:is(.dv-svg, .dv-radar-svg, .pb-trend-svg) [stroke="#fff"] { stroke: var(--rd-card); }
+.pb-trend-svg [fill="#2563eb"] { fill: var(--rd-accent); }
+.dv-svg [fill="#16a34a"] { fill: var(--rd-ok); }
+.dv-legend i[style*="#16a34a"] { background: var(--rd-ok) !important; }
+body.dark-mode .dv-svg [fill="#2563eb"] { fill: #60a5fa; }
+body.dark-mode .dv-svg [fill="#d97706"] { fill: #fbbf24; }
+body.dark-mode .dv-legend i[style*="#2563eb"] { background: #60a5fa !important; }
+body.dark-mode .dv-legend i[style*="#d97706"] { background: #fbbf24 !important; }
+body.dark-mode .dv-svg [fill="#9ca3af"][r], body.dark-mode .dv-svg circle[fill="#9ca3af"] { fill: var(--rd-sub); }
+.dv-mus-bar i, .dash-progress-bar-fill { background: var(--rd-accent); }
+@media (prefers-reduced-motion: reduce) {
+    .gl-hero { animation: none; }
+}
+
+/* =====================================================
+   بازطراحی هیرو (چیدمان تمام‌صفحه) + عرض یکسان صفحات
+   فقط ظاهر؛ رنگ‌ها همان --rd-* قبلی است.
+   ===================================================== */
+:root { --gl-page-w: 1200px; }
+.app-body { position: relative; }
+html body .gl-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: calc(100svh - 124px);
+    margin: 0;
+    padding: 40px 0 88px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--rd-bg);
+    animation: none;
+}
+.gl-hero-bg { position: absolute; inset: 0; z-index: -1; }
+.gl-hero-grid {
+    position: absolute;
+    inset: 0;
+    opacity: .32;
+    background-image: linear-gradient(var(--rd-line) 1px, transparent 1px), linear-gradient(90deg, var(--rd-line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(ellipse at 70% 50%, #000 15%, transparent 72%);
+    mask-image: radial-gradient(ellipse at 70% 50%, #000 15%, transparent 72%);
+}
+.gl-hero-glow {
+    position: absolute;
+    width: 70vmax;
+    height: 70vmax;
+    inset-inline-end: -15vmax;
+    top: 50%;
+    transform: translateY(-50%);
+    background: radial-gradient(circle, var(--rd-soft), transparent 62%);
+}
+html body .gl-hero-art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: 58%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: .28;
+}
+html body .gl-hero-art svg { width: 100%; height: auto; max-width: none; max-height: 86%; }
+html body .gl-hero-body {
+    position: relative;
+    width: 100%;
+    max-width: var(--gl-page-w);
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    min-width: 0;
+}
+.gl-hero-brandword { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--rd-accent); direction: ltr; }
+html body .gl-hero h2 { margin: 0; font-size: clamp(32px, 6vw, 60px); line-height: 1.3; font-weight: 800; color: var(--rd-text); max-width: 14ch; }
+html body .gl-hero .gl-hero-sub { max-width: 52ch; font-size: clamp(15px, 2vw, 18px); line-height: 2; color: var(--rd-sub); }
+.gl-hero-feats { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px 26px; }
+.gl-hero-feats li { display: flex; flex-direction: column; gap: 2px; padding-inline-start: 12px; border-inline-start: 3px solid var(--rd-accent); }
+.gl-hero-feats b { font-size: 14px; font-weight: 800; color: var(--rd-text); }
+.gl-hero-feats span { font-size: 12.5px; color: var(--rd-sub); }
+.gl-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+html body:not(.rd) .gl-cta-2 { min-height: 56px; padding: 0 26px; font-size: 16px; font-weight: 800; border-radius: var(--gl-r); }
+.gl-hero-scroll {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rd-card);
+    color: var(--rd-accent);
+    border: 1px solid var(--rd-line);
+}
+.gl-privacy {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    background: var(--rd-card);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r);
+    box-shadow: var(--gl-sh-1);
+}
+.gl-privacy h4 { margin: 0 0 4px; font-size: 16px; font-weight: 800; color: var(--rd-text); }
+.gl-privacy p { margin: 0; font-size: 14px; line-height: 1.9; color: var(--rd-sub); }
+.gl-home-wrap .gl-quick { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 1023px) {
+    html body .gl-hero-art { width: 100%; opacity: .16; }
+    html body .gl-hero h2 { max-width: none; }
+    html body:not(.rd) .gl-hero-cta .gl-cta, html body:not(.rd) .gl-cta-2 { flex: 1 1 100%; justify-content: center; }
+    .gl-hero-feats { gap: 10px 18px; }
+}
+@media (min-width: 1024px) {
+    html body .gl-hero { min-height: 100svh; padding: 110px 0 96px; }
+    html body.gl-home .gl-topnav {
+        position: absolute;
+        inset-inline: 0;
+        top: 0;
+        background: transparent;
+        border-bottom: 0;
+        box-shadow: none;
+    }
+    html body .gl-topnav { padding-inline: max(28px, calc((100% - var(--gl-page-w)) / 2 + 20px)); }
+    /* عرض یکسان همه‌ی صفحات */
+    html body :is(#viewDashboard, #viewWorkout, #viewPrograms, #viewHistory, #viewBank, #viewCalendar, #viewUser, #viewBackup, #viewHelp, #viewSettings) {
+        width: 100%;
+        max-width: var(--gl-page-w);
+        margin-inline: auto;
+        padding: 0;
+    }
+    html body #viewWorkout .container { max-width: none; margin: 0; padding: 24px 24px 40px; }
+    html body .dashboard-content { max-width: none; margin: 0; padding: 24px; }
+    html body .gl-view-pad { padding: 24px; }
+    html body .gl-home-wrap { max-width: var(--gl-page-w); padding: 32px 24px 24px; }
+    html body :is(.pb-user-wrap, .hp-wrap, .gl-panel, .gl-cal-mobile) { max-width: none; }
+    html body .pb-page { max-width: var(--gl-page-w); }
+}
+
+/* =====================================================
+   هیرو دسکتاپ مطابق نمونه + هاور دکمه‌ها + نورانی‌شدن نمودارها
+   (فقط ظاهر؛ رنگ‌ها همان --rd-* است)
+   ===================================================== */
+.gl-feat-ico, .gl-hero-brandrow .gl-hero-mark { display: none; }
+@media (min-width: 1024px) {
+    html body .gl-hero::after {
+        content: "";
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        height: 140px;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(to bottom, transparent, var(--rd-bg));
+    }
+    html body.gl-home .gl-topnav-brand { visibility: hidden; }
+    html body .gl-topnav-links > button, html body .gl-more > summary { font-size: 13px; }
+    .gl-hero-brandrow { display: flex; align-items: center; gap: 12px; }
+    .gl-hero-brandrow .gl-hero-mark { display: flex; width: 44px; height: 44px; border-radius: 12px; font-size: 16px; }
+    html body .gl-hero-brandrow .gl-hero-brandword { font-size: 30px; font-weight: 800; letter-spacing: 0; color: var(--rd-text); }
+    html body .gl-hero h2 { font-size: clamp(40px, 4.6vw, 60px); font-weight: 800; max-width: none; line-height: 1.35; }
+    html body .gl-hero .gl-hero-sub { max-width: 46ch; font-size: 17px; line-height: 2.1; }
+    html body .gl-hero-feats {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+        max-width: 780px;
+        margin: 10px 0 6px;
+    }
+    html body .gl-hero-feats li {
+        align-items: center;
+        text-align: center;
+        gap: 6px;
+        padding: 0 4px;
+        border: 0;
+    }
+    .gl-feat-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 4px;
+        border-radius: 50%;
+        color: var(--rd-accent);
+        background: color-mix(in srgb, var(--rd-bg) 70%, transparent);
+        border: 1.5px solid color-mix(in srgb, var(--rd-accent) 60%, transparent);
+        transition: transform .25s var(--gl-ease), background .25s, box-shadow .25s;
+    }
+    .gl-hero-feats li:hover .gl-feat-ico {
+        transform: translateY(-3px);
+        background: var(--rd-soft);
+        box-shadow: 0 0 18px color-mix(in srgb, var(--rd-accent) 45%, transparent);
+    }
+    html body .gl-hero-feats b { font-size: 13.5px; }
+    html body .gl-hero-feats span:not(.gl-feat-ico) { font-size: 12px; line-height: 1.7; }
+    html body:not(.rd) .gl-hero-cta { gap: 14px; margin-top: 14px; }
+    html body:not(.rd) .gl-hero-cta .gl-cta, html body:not(.rd) .gl-hero-cta .gl-cta-2 {
+        min-height: 52px;
+        padding: 0 30px;
+        border-radius: 999px;
+        font-size: 15.5px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    html body:not(.rd) .gl-cta .gl-ic.gl-arrow { fill: none; stroke: currentColor; stroke-width: 2.2; }
+    html body:not(.rd) .gl-cta-2 {
+        background: transparent;
+        color: var(--rd-text);
+        border: 1.5px solid var(--rd-text);
+    }
+    html body:not(.rd) .gl-cta-2:hover { background: var(--rd-text); color: var(--rd-bg); border-color: var(--rd-text); }
+    html body:not(.rd) .gl-cta-2 .gl-ic { width: 18px; height: 18px; }
+    /* عنوان بخش‌ها: وسط‌چین با خط تأکید کوتاه */
+    .gl-sec > h3 { text-align: center; }
+    .gl-sec > h3::after {
+        content: "";
+        display: block;
+        width: 44px;
+        height: 3px;
+        margin: 10px auto 0;
+        border-radius: 3px;
+        background: var(--rd-accent);
+    }
+}
+
+/* ---------- هاور دکمه‌ها (ماوس) ---------- */
+@media (hover: hover) {
+    html body :is(button, .file-btn, summary, [role="button"], a.secondary-btn):not(:disabled) { cursor: pointer; }
+    html body:not(.rd) :is(.primary-btn, .dash-start-workout-btn):not(:disabled):hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px color-mix(in srgb, var(--rd-accent) 45%, transparent);
+    }
+    html body:not(.rd) :is(.secondary-btn, .file-btn.secondary-btn, .dash-table-action-btn, .exercise-help-btn, .exercise-history-btn, .exercise-rest-btn, .pb-chip, .pb-tab, .dv-pill, .dv-sess-btn, .session-btn, .mobile-tab-btn, .settings-icon-btn, .date-picker-nav, .exercise-guide-close, .history-set, .gl-quick button, .gl-menu-grid button, .pb-lib-item, .pb-out):not(:disabled):hover {
+        border-color: var(--rd-accent);
+        background-color: var(--rd-soft);
+        color: var(--rd-accent);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px color-mix(in srgb, var(--rd-accent) 25%, transparent);
+    }
+    html body:not(.rd) .session-btn.active:hover,
+    html body:not(.rd) .dv-sess-btn.active:hover,
+    html body:not(.rd) .dv-pill.active:hover { background-color: var(--rd-accent); color: var(--rd-ink); filter: brightness(1.1); }
+    html body:not(.rd) .danger-btn:not(:disabled):hover {
+        filter: brightness(.95);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(220, 38, 38, .3);
+    }
+    html body:not(.rd) .date-picker-day:not(.empty):not(.selected):hover { background: var(--rd-soft); color: var(--rd-accent); }
+    html body:not(.rd) .gl-topnav-links > button:hover, html body:not(.rd) .gl-more > summary:hover { color: var(--rd-accent); }
+    html body:not(.rd) :is(button, .secondary-btn, .primary-btn):not(:disabled):active { transform: translateY(0) scale(.97); }
+}
+
+/* ---------- داشبورد: نور ساده دور نمودارها با رفتن ماوس ---------- */
+@keyframes gl-glow {
+    0%, 100% { box-shadow: 0 0 0 1px var(--rd-accent), 0 0 12px color-mix(in srgb, var(--rd-accent) 30%, transparent); }
+    50% { box-shadow: 0 0 0 1px var(--rd-accent), 0 0 28px color-mix(in srgb, var(--rd-accent) 55%, transparent); }
+}
+html body:not(.rd) :is(.dv-ex-card, .dv-radar-chart, .dv-chart, .dv-kpi, .dv-mus-list, .dash-cycle-week-col) {
+    transition: transform .25s var(--gl-ease), border-color .25s, box-shadow .25s;
+}
+html body:not(.rd) :is(.dv-radar-chart, .dv-chart) { border-radius: var(--gl-r); padding: 6px; }
+@media (hover: hover) {
+    html body:not(.rd) :is(.dv-ex-card, .dv-radar-chart, .dv-chart, .dv-kpi):hover {
+        border-color: var(--rd-accent);
+        transform: translateY(-3px);
+        animation: gl-glow 1.8s ease-in-out infinite;
+    }
+    html body:not(.rd) .dv-ex-card:hover .dv-svg,
+    html body:not(.rd) .dv-radar-chart:hover .dv-radar-svg {
+        filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rd-accent) 55%, transparent));
+    }
+    .dv-dot { transform-box: fill-box; transform-origin: center; transition: transform .18s var(--gl-ease), filter .18s; }
+    .dv-dot:hover { transform: scale(1.4); filter: drop-shadow(0 0 5px var(--rd-accent)); }
+}
+
+/* =====================================================
+   اصلاحات جدید هیرو و صفحه‌ی خانه
+   ===================================================== */
+
+/* فلش «شروع تمرین» رو به چپ */
+html body:not(.rd) .gl-cta .gl-ic.gl-arrow { transform: scaleX(-1); }
+
+/* دسترسی سریع: وسط‌چین */
+html body .gl-home-wrap .gl-quick { justify-content: center; }
+
+/* آیتم‌های معرفی امکانات در هیرو: جمع‌تر */
+@media (min-width: 1024px) {
+    html body .gl-hero-feats {
+        max-width: 560px;
+        gap: 6px;
+        margin: 4px 0 2px;
+    }
+    .gl-feat-ico { width: 38px; height: 38px; margin-bottom: 2px; }
+    .gl-feat-ico .gl-ic { width: 18px; height: 18px; }
+    html body .gl-hero-feats li { gap: 3px; }
+    html body .gl-hero-feats b { font-size: 12.5px; }
+    html body .gl-hero-feats span:not(.gl-feat-ico) { font-size: 11px; line-height: 1.6; }
+}
+
+/* بخش «چرا GymLog؟»: آیکن بالا با هاله‌ی دایره‌ای، بعد عنوان، بعد توضیح */
+.gl-why { grid-template-columns: 1fr; gap: 16px; }
+.gl-why-item {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 26px 18px 22px;
+}
+.gl-why-item .gl-ico-box {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--rd-soft);
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--rd-accent) 14%, transparent), 0 0 24px color-mix(in srgb, var(--rd-accent) 35%, transparent);
+}
+.gl-why-item p { max-width: 28ch; margin-inline: auto; }
+@media (min-width: 600px) {
+    .gl-why { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+    .gl-why { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* منوی بالا در صفحه‌ی هیرو: واضح‌تر */
+@media (min-width: 1024px) {
+    html body.gl-home .gl-topnav {
+        background: color-mix(in srgb, var(--rd-nav) 90%, transparent);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--rd-line);
+        box-shadow: var(--gl-sh-1);
+    }
+    html body.gl-home:not(.rd) .gl-topnav-links > button,
+    html body.gl-home:not(.rd) .gl-more > summary {
+        color: var(--rd-text);
+        font-size: 14px;
+    }
+    html body.gl-home:not(.rd) .gl-topnav-links > button:hover,
+    html body.gl-home:not(.rd) .gl-more > summary:hover,
+    html body.gl-home:not(.rd) .gl-topnav .is-active { color: var(--rd-accent); }
+}

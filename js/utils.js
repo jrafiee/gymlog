@@ -166,7 +166,7 @@ function parseRestSeconds(str) {
    GymLogWakeLock.request(reason) / release(reason)
    تا وقتی حداقل یک «دلیل» فعال باشد صفحه قفل نمی‌شود.
    - "workout": خودکار، وقتی صفحه‌ی «ثبت تمرین» در موبایل باز است
-   - "timer"  : وقتی تایمر استراحت در حال اجراست (rest-timer.js)
+   - "timer"  : وقتی تایمر استراحت در حال اجراست (تایمر داخل app.js)
    اگر مرورگر پشتیبانی نکند (مثلاً iOS قدیمی‌تر از ۱۶.۴) بی‌صدا نادیده گرفته می‌شود. */
 const GymLogWakeLock = (function () {
     const reasons = new Set();

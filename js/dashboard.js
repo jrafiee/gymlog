@@ -6,9 +6,7 @@
 
    صفحه‌ی اصلی داشبورد (renderDesktopDashboard) در
      js/dashboard-overview.js
-   و محاسبات آن در
-     js/dashboard-analytics.js
-   قرار دارد و باید بعد از این فایل لود شود.
+   (همراه با محاسبات آن) قرار دارد و باید بعد از این فایل لود شود.
 ===================================================== */
 
 let currentDesktopView = "dashboard";
@@ -50,23 +48,12 @@ function switchView(viewName) {
         targetView.classList.add("active");
     }
 
-    // 2. Update desktop sidebar active item
-    document.querySelectorAll(".sidebar-nav-item").forEach(item => {
-        item.classList.toggle("active", item.dataset.nav === viewName);
-    });
-
-    // 3. Update mobile tab switcher
+    // 2. Update mobile tab switcher
     document.querySelectorAll(".mobile-tab-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.nav === viewName);
     });
 
-    // 4. Update topbar title
-    const topbarTitle = document.getElementById("desktopTopbarTitle");
-    if (topbarTitle) {
-        topbarTitle.textContent = VIEW_TITLES[viewName];
-    }
-
-    // 5. Trigger view-specific renderers
+    // 3. Trigger view-specific renderers
     if (viewName === "dashboard") {
         renderDesktopDashboard();
     } else if (viewName === "programs") {
@@ -1472,15 +1459,7 @@ document.addEventListener("click", e => {
    Init Dashboard & Desktop Shell
 ===================================================== */
 function initDashboardShell() {
-    // 1. Sidebar Nav Click Handlers
-    document.querySelectorAll(".sidebar-nav-item").forEach(item => {
-        item.addEventListener("click", () => {
-            const nav = item.dataset.nav;
-            if (nav) switchView(nav);
-        });
-    });
-
-    // 2. Mobile Tab Switcher Click Handlers
+    // 1. Mobile Tab Switcher Click Handlers
     document.querySelectorAll(".mobile-tab-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             const nav = btn.dataset.nav;

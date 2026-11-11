@@ -3,44 +3,33 @@
    (مثلاً v17). تغییر همین فایل باعث می‌شود مرورگر نسخه‌ی جدید را
    پیدا کند و دکمه‌ی «به‌روزرسانی» در تنظیمات فعال شود.
 */
-const CACHE_NAME = "gym-tracker-v47";
+const CACHE_NAME = "gym-tracker-v48";
 
 // کش فایل‌های آموزشی برنامه‌ها (تصویر/ویدیو). این کش با تغییر نسخه پاک نمی‌شود.
 const MEDIA_CACHE = "gym-media-v1";
+
+// فونت‌ها (Vazirmatn از Google Fonts) برای استفاده‌ی آفلاین
+const FONT_CACHE = "gym-fonts-v1";
+const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
 
 const FILES_TO_CACHE = [
     "./",
     "./index.html",
     "./manifest.json",
-
-    "./css/style.css",
-    "./css/dashboard.css",
-    "./css/dashboard-overview.css",
-    "./css/program-builder.css",
-    "./css/exercise-editor.css",
-    "./css/gl-extras.css",
-    "./css/superset.css",
-	"./css/redesign.css",
-    "./css/gl-ui.css",
+    "./css/app.css",
 
     "./js/utils.js",
+    "./js/exercise-catalog.js",
+    "./js/default-program.js",
+    "./js/storage.js",
     "./js/app.js",
     "./js/dashboard.js",
-    "./js/dashboard-analytics.js",
     "./js/dashboard-overview.js",
     "./js/program-builder.js",
     "./js/exercise-editor.js",
-    "./js/rest-timer.js",
     "./js/gl-ui.js",
-    "./js/storage.js",
-    "./js/exercise-catalog.js",
-    "./js/workout-programs.js",
-    "./js/default-program.js",
-    "./js/workout-data.js",
 
     // Exercise media
-    "./assets/exercises/machine-chest-press.svg",
-    "./assets/exercises/incline-dumbbell-press.svg",
     "./assets/exercises/dead-bug.jpg",
 
     // App icons
@@ -186,9 +175,6 @@ self.addEventListener("fetch", event => {
     if (event.request.method !== "GET") return;
     event.respondWith(handleFetch(event));
 });
-const FONT_CACHE = "gym-fonts-v1";
-const FONT_HOSTS = ["fonts.googleapis.com", "fonts.gstatic.com"];
-
 async function fontCacheFirst(request) {
     const cache = await caches.open(FONT_CACHE);
     const cached = await cache.match(request);

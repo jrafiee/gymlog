@@ -916,8 +916,6 @@
         history.pushState({ modal: "programBuilder" }, "");
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
-        const topTitle = document.getElementById("desktopTopbarTitle");
-        if (topTitle) topTitle.textContent = PB.editKey ? "ویرایش برنامه تمرینی" : "ساخت برنامه تمرینی";
         renderStep();
     }
 
@@ -928,10 +926,6 @@
         document.body.style.overflow = "";
         if (onKey) document.removeEventListener("keydown", onKey);
         onKey = null;
-        const topTitle = document.getElementById("desktopTopbarTitle");
-        if (topTitle && typeof VIEW_TITLES !== "undefined" && typeof currentDesktopView !== "undefined") {
-            topTitle.textContent = VIEW_TITLES[currentDesktopView] || topTitle.textContent;
-        }
     }
 
     function closeBuilder(force) {
