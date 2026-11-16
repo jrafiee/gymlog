@@ -88,9 +88,8 @@
 
     function heroHtml() {
         const feats = [
-            ["ثبت سریع ست", "با دکمه‌ی «مثل قبل»"],
-            ["تایمر استراحت", "با بوق و لرزش"],
-            ["داشبورد تحلیلی", "نمودار و رکوردها"],
+            ["همگام‌سازی گوشی و کامپیوتر", "یک دفترچه روی همه‌ی دستگاه‌ها"],
+                        ["داشبورد تحلیلی", "نمودار و رکوردها"],
             ["سوپرست و یادداشت", "برای هر جلسه و حرکت"],
             ["بدون اینترنت", "اطلاعات روی دستگاه تو"]
         ];
@@ -105,7 +104,7 @@
                 <h2>ثبت تمرینات بدنسازی</h2>
                 <p class="gl-hero-sub">تمرین‌ها را ثبت کن، پیشرفتت را ببین و همه‌چیز را پیش خودت نگه دار؛ بدون حساب کاربری و بدون سرور.</p>
                 <ul class="gl-hero-feats">
-                    ${feats.map(([t, d], i) => `<li><span class="gl-feat-ico" aria-hidden="true">${ic(["workout", "timer", "chart", "note", "offline"][i], 22)}</span><b>${t}</b><span>${d}</span></li>`).join("")}
+                    ${feats.map(([t, d], i) => `<li><span class="gl-feat-ico" aria-hidden="true">${ic(["sync", "chart", "note", "offline"][i], 22)}</span><b>${t}</b><span>${d}</span></li>`).join("")}
                 </ul>
                 <div class="gl-hero-cta">
                     <button type="button" class="primary-btn gl-cta" data-hero="start">شروع تمرین ${ic("arrow", 20).replace('class="gl-ic"', 'class="gl-ic gl-arrow"')}</button>
@@ -185,6 +184,65 @@
         if (more) more.classList.toggle("is-active", NAV_MORE.some(([v]) => v === cur));
     }
 
+    /* بخش «گوشی و کامپیوتر، یک دفترچه» */
+    const SYNC_ART = `
+        <svg viewBox="0 0 520 232" role="img" aria-label="مانیتور و گوشی با دایره‌ی همگام‌سازی میان آن‌ها">
+            <rect x="20" y="28" width="200" height="132" rx="12" fill="var(--rd-card)" stroke="var(--rd-text)" stroke-width="3"/>
+            <rect x="32" y="40" width="176" height="108" rx="6" fill="var(--rd-soft)"/>
+            <rect x="48" y="104" width="18" height="30" rx="3" fill="var(--rd-accent)" opacity=".55"/>
+            <rect x="74" y="88" width="18" height="46" rx="3" fill="var(--rd-accent)" opacity=".75"/>
+            <rect x="100" y="72" width="18" height="62" rx="3" fill="var(--rd-accent)"/>
+            <rect x="126" y="94" width="18" height="40" rx="3" fill="var(--rd-accent)" opacity=".75"/>
+            <rect x="152" y="80" width="18" height="54" rx="3" fill="var(--rd-accent)" opacity=".9"/>
+            <path d="M46 62h60M46 72h36" stroke="var(--rd-line)" stroke-width="3" stroke-linecap="round"/>
+            <rect x="110" y="160" width="20" height="22" fill="var(--rd-text)"/>
+            <rect x="78" y="182" width="84" height="9" rx="4.5" fill="var(--rd-text)"/>
+            <text x="120" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="var(--rd-sub)">کامپیوتر</text>
+
+            <rect x="400" y="14" width="100" height="184" rx="18" fill="var(--rd-card)" stroke="var(--rd-text)" stroke-width="3"/>
+            <rect x="409" y="30" width="82" height="152" rx="10" fill="var(--rd-soft)"/>
+            <rect x="438" y="20" width="24" height="4" rx="2" fill="var(--rd-text)"/>
+            <rect x="417" y="42" width="66" height="22" rx="6" fill="var(--rd-card)" stroke="var(--rd-line)"/>
+            <rect x="417" y="70" width="66" height="22" rx="6" fill="var(--rd-card)" stroke="var(--rd-line)"/>
+            <rect x="417" y="98" width="66" height="22" rx="6" fill="var(--rd-card)" stroke="var(--rd-line)"/>
+            <rect x="423" y="48" width="26" height="4" rx="2" fill="var(--rd-accent)"/>
+            <rect x="423" y="76" width="34" height="4" rx="2" fill="var(--rd-accent)"/>
+            <rect x="423" y="104" width="20" height="4" rx="2" fill="var(--rd-accent)"/>
+            <rect x="417" y="148" width="66" height="24" rx="8" fill="var(--rd-accent)"/>
+            <text x="450" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="var(--rd-sub)">گوشی</text>
+
+            <path d="M222 110h40M358 110h40" stroke="var(--rd-accent)" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+            <circle cx="310" cy="110" r="46" fill="var(--rd-card)" stroke="var(--rd-accent)" stroke-width="3"/>
+            <g class="gl-sync-spin">
+                <path d="M289.2 98A24 24 0 0 1 332.6 101.8" fill="none" stroke="var(--rd-accent)" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="335.3,109.3 337.5,97.8 326.3,102" fill="var(--rd-accent)"/>
+                <path d="M330.8 122A24 24 0 0 1 287.4 118.2" fill="none" stroke="var(--rd-accent)" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="284.7,110.7 282.5,122.2 293.7,118" fill="var(--rd-accent)"/>
+            </g>
+        </svg>`;
+
+    function syncHtml() {
+        const steps = [
+            ["دستگاه اول", "در «تنظیمات»، توکن ربات بله و chat_id را وارد کن و «همگام‌سازی» را بزن."],
+            ["دستگاه دوم", "همان توکن و chat_id را وارد کن و «همگام‌سازی» را بزن تا اطلاعات برسد."],
+            ["هر وقت خواستی", "بعد از هر تمرین دوباره «همگام‌سازی» بزن؛ نسخه‌ی جدیدتر جای قدیمی‌تر می‌نشیند."]
+        ];
+        return `
+        <section class="gl-sec gl-sync" aria-labelledby="glSync">
+            <h3 id="glSync">گوشی و کامپیوتر، یک دفترچه</h3>
+            <div class="gl-sync-card">
+                <div class="gl-sync-art">${SYNC_ART}</div>
+                <div class="gl-sync-text">
+                    <p class="gl-sync-lead">در باشگاه با گوشی تمرین را ثبت کن، در خانه روی کامپیوتر نمودارها و پیشرفتت را ببین. با دکمه‌ی همگام‌سازی، اطلاعات خودش بین دستگاه‌هایت یکی می‌شود.</p>
+                    <ol class="gl-sync-steps">
+                        ${steps.map(([t, d], i) => `<li><span class="gl-step-n">${toFa(i + 1)}</span><div><h4>${t}</h4><p>${d}</p></div></li>`).join("")}
+                    </ol>
+                    <button type="button" class="primary-btn gl-sync-btn" data-hero="sync-setup">${ic("sync", 18)} راه‌اندازی همگام‌سازی</button>
+                </div>
+            </div>
+        </section>`;
+    }
+
     function sectionsHtml() {
         const why = [
             ["shield", "همه‌چیز پیش خودت", "حساب کاربری و سرور ندارد. تمرین‌ها فقط روی دستگاه خودت می‌مانند؛ فقط اگر همگام‌سازی با بله را روشن کنی، پشتیبان به چت خودت می‌رود."],
@@ -214,6 +272,7 @@
                 ${why.map(([i, t, d]) => `<article class="gl-why-item"><span class="gl-ico-box">${ic(i, 22)}</span><div><h4>${t}</h4><p>${d}</p></div></article>`).join("")}
             </div>
         </section>
+        ${syncHtml()}
         <section class="gl-sec" aria-labelledby="glHow">
             <h3 id="glHow">چطور کار می‌کند؟</h3>
             <ol class="gl-steps">
@@ -278,6 +337,8 @@
                 currentSession = d.session;
                 if (typeof weekNumber !== "undefined" && weekNumber) weekNumber.value = d.week;
                 go("workout");
+            } else if (act === "sync-setup") {
+                if (typeof goToBaleSettings === "function") goToBaleSettings(); else go("settings");
             } else if (act === "help") {
                 go("help");
             } else if (act === "scroll") {

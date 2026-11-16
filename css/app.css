@@ -6608,3 +6608,36 @@ html body .gl-home-wrap .gl-quick { justify-content: center; }
     html body.gl-home:not(.rd) .gl-more > summary:hover,
     html body.gl-home:not(.rd) .gl-topnav .is-active { color: var(--rd-accent); }
 }
+
+
+/* =====================================================
+   بخش «گوشی و کامپیوتر، یک دفترچه» + آیتم‌های هیرو (۴ ستونه)
+   ===================================================== */
+@keyframes gl-spin { to { transform: rotate(360deg); } }
+.gl-sync-spin { transform-origin: 310px 110px; animation: gl-spin 7s linear infinite; }
+.gl-sync-card {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: center;
+    padding: 24px 18px;
+    background: var(--rd-card);
+    border: 1px solid var(--rd-line);
+    border-radius: var(--gl-r-lg);
+    box-shadow: var(--gl-sh-1);
+}
+.gl-sync-art svg { display: block; width: 100%; max-width: 520px; height: auto; margin: 0 auto; direction: ltr; }
+.gl-sync-lead { margin: 0 0 16px; font-size: 15px; line-height: 2; color: var(--rd-text); }
+.gl-sync-steps { list-style: none; margin: 0 0 18px; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.gl-sync-steps li { display: flex; gap: 12px; align-items: flex-start; }
+.gl-sync-steps .gl-step-n { width: 34px; height: 34px; font-size: 15px; }
+.gl-sync-steps h4 { margin: 0 0 2px; font-size: 15px; font-weight: 800; color: var(--rd-text); }
+.gl-sync-steps p { margin: 0; font-size: 13.5px; line-height: 1.9; color: var(--rd-sub); }
+html body:not(.rd) .gl-sync-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+@media (max-width: 1023px) {
+    html body:not(.rd) .gl-sync-btn { width: 100%; }
+}
+@media (min-width: 1024px) {
+    .gl-sync-card { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; padding: 32px 36px; }
+    html body .gl-hero-feats { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 520px; }
+}
