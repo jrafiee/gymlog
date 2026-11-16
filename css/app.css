@@ -6641,3 +6641,11 @@ html body:not(.rd) .gl-sync-btn { display: inline-flex; align-items: center; jus
     .gl-sync-card { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; padding: 32px 36px; }
     html body .gl-hero-feats { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 520px; }
 }
+
+/* روش‌های همگام‌سازی (خودکار / دستی) */
+.gl-sync-methods { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+.gl-sync-method { padding: 14px 16px; background: var(--rd-bg); border: 1px solid var(--rd-line); border-radius: var(--gl-r); }
+.gl-sync-method h4 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; font-size: 15px; font-weight: 800; color: var(--rd-text); }
+.gl-sync-method .gl-ico-box { width: 34px; height: 34px; border-radius: 10px; }
+.gl-sync-method ol { margin: 0; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; line-height: 1.9; color: var(--rd-sub); }
+@media (min-width: 1280px) { .gl-sync-methods { grid-template-columns: 1fr 1fr; } }
