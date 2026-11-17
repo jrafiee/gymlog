@@ -1444,7 +1444,19 @@ if (backupWarningBtn) {
    ذخیره‌ی آفلاین فایل‌های آموزشی
 ========================================================= */
 
-const MEDIA_CACHE_NAME = "gym-media-v1";
+/* ---------- هماهنگ‌سازی فایل‌های آموزشی با کش آفلاین ----------
+   - ⚠ MEDIA_CACHE_NAME و MEDIA_SYNC_HEADER باید با service-worker.js یکی باشند.
+   - هر فایل با «اعتبارسنجی شرطی» (ETag / Last-Modified) بررسی می‌شود:
+     اگر فایلی با همان نام روی سرور عوض شده باشد جایگزین می‌شود؛
+     اگر تغییری نکرده باشد چیزی دانلود نمی‌شود (پاسخ ۳۰۴).
+   - درخواست‌های بررسی هدر مخصوص دارند تا service worker آن‌ها را از کش پاسخ ندهد. */
+const MEDIA_CACHE_NAME = "gym-media-v2";
+const MEDIA_SYNC_HEADER = "X-GymLog-Sync";
+const MEDIA_CHECK_KEY = "gymMediaCheckedAt";
+const MEDIA_CHECK_INTERVAL = 10 * 60 * 1000;   // فاصله‌ی بررسی خودکار (هنگام برگشت به برنامه)
+const MEDIA_CONCURRENCY = 3;
+/* true: فایل‌های همه‌ی حرکات بانک حرکات هم برای آفلاین ذخیره شود، نه فقط حرکات برنامه */
+const CACHE_ALL_CATALOG_MEDIA = true;
 
 function collectProgramAssetUrls(programsRaw, catalog) {
     const urls = new Set();
@@ -1464,37 +1476,151 @@ function collectProgramAssetUrls(programsRaw, catalog) {
     return Array.from(urls);
 }
 
-async function cacheProgramAssets(programsRaw, catalog) {
-    if (!("caches" in window)) return { ok: 0, fail: 0 };
-    const urls = collectProgramAssetUrls(programsRaw, catalog);
-    const cache = await caches.open(MEDIA_CACHE_NAME);
-    let ok = 0;
-    let fail = 0;
-
-    await Promise.all(urls.map(async url => {
-        try {
-            if (await cache.match(url)) { ok += 1; return; }
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 8000);
-            let response;
+function collectCatalogAssetUrls(catalog) {
+    const urls = new Set();
+    Object.keys(catalog || {}).forEach(id => {
+        ((catalog[id] && catalog[id].images) || []).forEach(path => {
+            if (typeof path !== "string" || path.startsWith("data:")) return;
             try {
-                response = await fetch(url, { cache: "reload", signal: ctrl.signal });
-            } finally {
-                clearTimeout(timer);
-            }
-            if (response.ok && response.status === 200) {
-                await cache.put(url, response);
-                ok += 1;
-            } else {
-                fail += 1;
-            }
-        } catch (e) {
-            fail += 1;
-        }
-    }));
-
-    return { ok, fail };
+                urls.add(new URL(path, location.href).href);
+            } catch (e) { /* مسیر نامعتبر */ }
+        });
+    });
+    return Array.from(urls);
 }
+
+async function fetchWithTimeout(url, init, ms) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ms);
+    try {
+        return await fetch(url, { ...init, signal: ctrl.signal });
+    } finally {
+        clearTimeout(timer);   // فقط تا رسیدن هدر؛ دانلود بدنه قطع نمی‌شود
+    }
+}
+
+/* یک فایل را با کش مقایسه می‌کند. خروجی: "fresh" | "updated" | "added" | "fail" */
+async function syncMediaFile(cache, url) {
+    let cached = null;
+    try {
+        cached = await cache.match(url, { ignoreVary: true });
+        if (cached && cached.status !== 200) {
+            await cache.delete(url);
+            cached = null;
+        }
+
+        const headers = { [MEDIA_SYNC_HEADER]: "1" };
+        const init = { headers };
+        if (cached) {
+            const etag = cached.headers.get("etag");
+            const lastMod = cached.headers.get("last-modified");
+            if (etag) headers["If-None-Match"] = etag;
+            else if (lastMod) headers["If-Modified-Since"] = lastMod;
+            else init.cache = "no-cache";     // سرور شناسه‌ی نسخه نمی‌دهد: دوباره بگیر
+        } else {
+            init.cache = "no-cache";
+        }
+
+        const res = await fetchWithTimeout(url, init, 15000);
+
+        if (res.status === 304) return "fresh";
+
+        const type = res.headers.get("content-type") || "";
+        if (res.status !== 200 || /text\/html/i.test(type)) {
+            return cached ? "fresh" : "fail";   // خطای سرور: نسخه‌ی قبلی را نگه دار
+        }
+
+        await cache.put(url, res);
+        return cached ? "updated" : "added";
+    } catch (e) {
+        return cached ? "fresh" : "fail";       // آفلاین یا قطع شدن: اگر کش داریم همان کافی است
+    }
+}
+
+async function syncMediaUrls(urls) {
+    const stats = { ok: 0, fail: 0, updated: 0, added: 0 };
+    if (!("caches" in window) || !urls.length) return stats;
+
+    const cache = await caches.open(MEDIA_CACHE_NAME);
+    let next = 0;
+    const worker = async () => {
+        while (next < urls.length) {
+            const url = urls[next++];
+            const r = await syncMediaFile(cache, url);
+            if (r === "fail") {
+                stats.fail += 1;
+            } else {
+                stats.ok += 1;
+                if (r === "updated") stats.updated += 1;
+                if (r === "added") stats.added += 1;
+            }
+        }
+    };
+    await Promise.all(Array.from({ length: Math.min(MEDIA_CONCURRENCY, urls.length) }, worker));
+    return stats;
+}
+
+/* فایل‌های حرکات برنامه‌ی فعال را ذخیره/به‌روز می‌کند (برای cacheAndReport) */
+async function cacheProgramAssets(programsRaw, catalog) {
+    return syncMediaUrls(collectProgramAssetUrls(programsRaw, catalog));
+}
+
+/* همه‌ی فایل‌های آموزشی: اول حرکات برنامه، بعد بقیه‌ی بانک حرکات.
+   force=false: اگر کمتر از MEDIA_CHECK_INTERVAL از آخرین بررسی کامل گذشته باشد انجام نمی‌شود. */
+let _mediaSyncPromise = null;
+
+function syncAllMedia(force) {
+    if (!("caches" in window) || !navigator.onLine) return Promise.resolve(null);
+    if (!(window.GymLogStoreCache && window.GymLogStoreCache.isReady)) return Promise.resolve(null);
+    if (_mediaSyncPromise) return _mediaSyncPromise;
+
+    if (!force) {
+        let last = 0;
+        try { last = Number(localStorage.getItem(MEDIA_CHECK_KEY)) || 0; } catch (e) { /* ignore */ }
+        if (Date.now() - last < MEDIA_CHECK_INTERVAL) return Promise.resolve(null);
+    }
+
+    const run = async () => {
+        try {
+            const catalog = getEffectiveCatalog();
+            const first = collectProgramAssetUrls(getEffectiveProgramsRaw(), catalog);
+
+            let rest = [];
+            const saveData = navigator.connection && navigator.connection.saveData;
+            if (CACHE_ALL_CATALOG_MEDIA && !saveData) {
+                const inFirst = new Set(first);
+                rest = collectCatalogAssetUrls(catalog).filter(u => !inFirst.has(u));
+            }
+
+            const a = await syncMediaUrls(first);
+            const b = await syncMediaUrls(rest);
+            const total = {
+                ok: a.ok + b.ok,
+                fail: a.fail + b.fail,
+                updated: a.updated + b.updated,
+                added: a.added + b.added
+            };
+            if (total.fail === 0) {
+                try { localStorage.setItem(MEDIA_CHECK_KEY, String(Date.now())); } catch (e) { /* ignore */ }
+            }
+            return total;
+        } catch (err) {
+            console.warn("[GymLog Media] هماهنگ‌سازی فایل‌های آموزشی انجام نشد:", err);
+            return null;
+        }
+    };
+
+    _mediaSyncPromise = run().finally(() => { _mediaSyncPromise = null; });
+    return _mediaSyncPromise;
+}
+
+window.syncAllMedia = syncAllMedia;
+
+/* با وصل شدن دوباره‌ی اینترنت یا برگشتن به برنامه، تغییر فایل‌ها بررسی شود */
+window.addEventListener("online", () => { syncAllMedia(true); });
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") syncAllMedia(false);
+});
 
 async function cacheAndReport(message) {
     let note = "";
@@ -1677,10 +1803,12 @@ async function bootApp() {
     getFirstUseAt();
     renderAll();
 
-    // 4. Background asset caching for offline usage
-    if (navigator.onLine) {
-        cacheProgramAssets(getEffectiveProgramsRaw(), getEffectiveCatalog()).catch(() => {});
+    // 4. ذخیره‌ی فایل‌های آموزشی برای آفلاین + جایگزینی فایل‌هایی که با همان نام عوض شده‌اند
+    //    (درخواست «ذخیره‌ی پایدار» باعث می‌شود مرورگر کش را در کمبود فضا پاک نکند)
+    if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().catch(() => {});
     }
+    syncAllMedia(true).catch(() => {});
 
     // 5. ارسال معوق به بله (اگر دفعه‌ی قبل اینترنت نبود)
     if (typeof retryPendingBaleSync === "function") {
