@@ -201,7 +201,7 @@ ${blocks.join(",\n\n\n")}
         <div class="ee-modal" role="dialog" aria-modal="true" aria-label="${isEdit ? "ویرایش حرکت" : "حرکت جدید"}">
             <header class="ee-head">
                 <div>
-                    <h3>${isEdit ? "ویرایش حرکت" : "افزودن حرکت جدید"}</h3>
+                    <h3 id="eeTitle">${isEdit ? "ویرایش حرکت" : "افزودن حرکت جدید"}</h3>
                     <p>${isEdit ? esc(src.name || editId) : "حرکت جدید به بانک حرکات اضافه می‌شود و در ساخت برنامه قابل انتخاب است."}</p>
                 </div>
                 <button type="button" class="exercise-guide-close ee-close" aria-label="بستن">×</button>
@@ -281,7 +281,7 @@ ${blocks.join(",\n\n\n")}
             box.innerHTML = items.map((m, i) => `
                 <div class="ee-media-item">
                     ${isVideo(m.src)
-                        ? `<video src="${esc(m.src)}" muted playsinline preload="metadata"></video>`
+                        ? `<video src="${esc(m.src)}" aria-label="پیش‌نمایش ویدیو ${esc(m.name)}" muted playsinline preload="metadata"></video>`
                         : `<img src="${esc(m.src)}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'فایل پیدا نشد'}))">`}
                     <em class="ee-fname" data-i="${i}">${esc(m.name)}</em>
                     <button type="button" data-rm="${i}" aria-label="حذف فایل">×</button>
@@ -399,7 +399,7 @@ ${blocks.join(",\n\n\n")}
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
         renderMedia();
-        field("nameFa").focus();
+        glDialogAttach(overlay, { dialog: $(".ee-modal"), labelledby: "eeTitle", onClose: close, initialFocus: field("nameFa") });
     }
 
     window.openExerciseEditor = openExerciseEditor;

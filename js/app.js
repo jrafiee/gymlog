@@ -24,6 +24,7 @@ let currentMonth = getLatestMonthKey();
 let viewingMonth = currentMonth;
 let currentSession = 1;
 let keepSelectedWeek = false;
+let settingsDlgRelease = null;
 let settingsReturnView = null;   // صفحه‌ای که از داخل تنظیمات موبایل باز شده
 
 /* -------------------------
@@ -137,12 +138,18 @@ function openSettingsPage() {
     if (typeof renderBaleSyncPanels === "function") renderBaleSyncPanels(settingsPage);
     history.pushState({ modal: "settings" }, "");
     document.addEventListener("keydown", closeSettingsWithEscape);
+    settingsDlgRelease = glDialogAttach(settingsPage, {
+        dialog: settingsPage.querySelector(".settings-page"),
+        labelledby: "settingsTitle",
+        onClose: () => closeSettingsPage(false)
+    });
 }
 
 function closeSettingsPage(fromPopstate = false) {
     if (!settingsPage || settingsPage.style.display === "none") return;
     settingsPage.style.display = "none";
     document.removeEventListener("keydown", closeSettingsWithEscape);
+    if (settingsDlgRelease) { settingsDlgRelease(); settingsDlgRelease = null; }
 
     if (!fromPopstate && history.state && history.state.modal === "settings") {
         history.back();
@@ -536,7 +543,7 @@ function showMyProgramsPage() {
     overlay.innerHTML = `
         <div class="my-programs-page">
             <div class="my-programs-header">
-                <h2>برنامه‌های من</h2>
+                <h2 id="myProgramsTitle">برنامه‌های من</h2>
                 <button type="button" class="exercise-guide-close my-programs-close" aria-label="بستن">×</button>
             </div>
             <div class="my-programs-list">${listHtml}</div>
@@ -558,6 +565,7 @@ function showMyProgramsPage() {
     });
 
     document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay.querySelector(".my-programs-page"), labelledby: "myProgramsTitle", onClose: closeOverlay });
 }
 
 if (openMyProgramsBtn) {
@@ -656,7 +664,7 @@ function renderExercises() {
             <details class="exercise-note" ${exNote ? "open" : ""}>
                 <summary>${ico("note")}یادداشت این حرکت</summary>
                 ${prevExNote ? `<div class="exercise-prev-note">جلسه قبل: ${esc(prevExNote)}</div>` : ""}
-                <textarea class="exercise-note-input" rows="2" maxlength="1000" placeholder="مثلاً تنظیم دستگاه، حس حرکت، دلیل کم‌شدن وزنه…">${esc(exNote)}</textarea>
+                <textarea class="exercise-note-input" aria-label="یادداشت حرکت ${esc(exercise.name)}" rows="2" maxlength="1000" placeholder="مثلاً تنظیم دستگاه، حس حرکت، دلیل کم‌شدن وزنه…">${esc(exNote)}</textarea>
             </details>
         `;
 
@@ -766,7 +774,7 @@ function showExerciseHistory(exerciseId) {
     overlay.innerHTML = `
         <div class="exercise-guide-modal">
             <div class="exercise-guide-header">
-                <h2>سابقه — ${esc(exercise.name)}</h2>
+                <h2 id="exHistTitle">سابقه — ${esc(exercise.name)}</h2>
                 <button type="button" class="exercise-guide-close" aria-label="بستن">×</button>
             </div>
             ${historyHtml}
@@ -781,6 +789,7 @@ function showExerciseHistory(exerciseId) {
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
 
     document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay.querySelector(".exercise-guide-modal"), labelledby: "exHistTitle", onClose: closeOverlay });
 }
 
 function formatHistorySets(sets) {
@@ -797,12 +806,12 @@ function formatHistorySets(sets) {
 function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
         return `
-            <video class="exercise-guide-video" src="${esc(mediaPath)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" src="${esc(mediaPath)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
         `;
     }
     if (isVideoSrc(mediaPath)) {
         return `
-            <video class="exercise-guide-video" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
                 <source src="${esc(mediaPath)}" type="${videoMime(mediaPath)}">
                 مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
             </video>
@@ -857,7 +866,7 @@ function showExerciseGuide(exerciseId) {
     overlay.innerHTML = `
         <div class="exercise-guide-modal">
             <div class="exercise-guide-header">
-                <h2>${esc(exercise.name)}</h2>
+                <h2 id="exGuideTitle">${esc(exercise.name)}</h2>
                 <button type="button" class="exercise-guide-close" aria-label="بستن">×</button>
             </div>
             ${imagesHtml}
@@ -893,6 +902,7 @@ function showExerciseGuide(exerciseId) {
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
 
     document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay.querySelector(".exercise-guide-modal"), labelledby: "exGuideTitle", onClose: closeOverlay });
 }
 
 /* =========================
@@ -1019,11 +1029,11 @@ function createSetRows(exercise, previousExercise, currentExercise, refSets) {
             <div class="set-row" data-set="${i}" data-bw="${isBw ? 1 : 0}" data-ref-w="${refSet ? esc(refSet.weight) : ""}" data-ref-r="${refSet ? esc(refSet.reps) : ""}">
                 <div class="set-label">ست ${toFa(i + 1)}</div>
                 <div>
-                    <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" max="${SET_INPUT_LIMITS.weightMax}" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
+                    <input type="number" class="weight-input" aria-label="${esc(exercise.name)}، ست ${toFa(i + 1)}، وزنه (کیلوگرم)" placeholder="وزنه (kg)" min="0" max="${SET_INPUT_LIMITS.weightMax}" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
                     <small class="field-error" role="alert"></small>
                 </div>
                 <div>
-                    <input type="number" class="reps-input" placeholder="تکرار" min="0" max="${SET_INPUT_LIMITS.repsMax}" step="1" inputmode="numeric" value="${esc(currentReps)}">
+                    <input type="number" class="reps-input" aria-label="${esc(exercise.name)}، ست ${toFa(i + 1)}، تعداد تکرار" placeholder="تکرار" min="0" max="${SET_INPUT_LIMITS.repsMax}" step="1" inputmode="numeric" value="${esc(currentReps)}">
                     <small class="field-error" role="alert"></small>
                 </div>
                 <div class="set-difference">
@@ -1339,7 +1349,7 @@ function buildDatePickerGrid(jy, jm, selectedIso, todayIso, workoutDatesSet, pro
         else if (progressDatesSet && progressDatesSet.has(iso)) classes.push("in-progress");
 
         cellsHtml += `
-            <button type="button" class="${classes.join(" ")}" data-iso="${iso}">
+            <button type="button" class="${classes.join(" ")}" data-iso="${iso}" aria-label="${esc(formatPersianDate(iso, true))}${workoutDatesSet.has(iso) ? "، جلسه پایان‌یافته" : ""}" aria-pressed="${iso === selectedIso}"${iso === todayIso ? ' aria-current="date"' : ""}>
                 <span class="date-picker-day-circle">${toFa(day)}</span>
             </button>
         `;
@@ -1392,6 +1402,8 @@ function showDatePickerCalendar() {
                 if (view.jm < 1) { view.jm = 12; view.jy -= 1; }
                 if (view.jm > 12) { view.jm = 1; view.jy += 1; }
                 render();
+                const navBtn = overlay.querySelector(`.date-picker-nav[data-dir="${button.dataset.dir}"]`);
+                if (navBtn) navBtn.focus();
             });
         });
 
@@ -1408,6 +1420,7 @@ function showDatePickerCalendar() {
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
     render();
     document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay, label: "انتخاب تاریخ تمرین", onClose: closeOverlay });
 }
 
 if (workoutDateBtn) {
@@ -1828,8 +1841,20 @@ function applyTheme(theme) {
     }
 }
 
-const savedTheme = localStorage.getItem("gymTrackerTheme");
-applyTheme(savedTheme === "dark" ? "dark" : "light");
+/* تا وقتی کاربر دستی انتخاب نکرده، تم از prefers-color-scheme خوانده می‌شود */
+const darkSchemeMq = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function getSavedTheme() {
+    try {
+        const t = localStorage.getItem("gymTrackerTheme");
+        return t === "dark" || t === "light" ? t : null;
+    } catch (e) { return null; }
+}
+applyTheme(getSavedTheme() || (darkSchemeMq && darkSchemeMq.matches ? "dark" : "light"));
+if (darkSchemeMq) {
+    const onSchemeChange = e => { if (!getSavedTheme()) applyTheme(e.matches ? "dark" : "light"); };
+    if (darkSchemeMq.addEventListener) darkSchemeMq.addEventListener("change", onSchemeChange);
+    else if (darkSchemeMq.addListener) darkSchemeMq.addListener(onSchemeChange);
+}
 
 if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", () => {

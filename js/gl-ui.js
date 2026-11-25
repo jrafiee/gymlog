@@ -75,7 +75,7 @@
             </div>
             <div class="gl-hero-body">
                 <div class="gl-hero-brandrow"><span class="gl-hero-mark" aria-hidden="true">GL</span><span class="gl-hero-brandword">GymLog</span></div>
-                <h2>ثبت تمرینات بدنسازی</h2>
+                <h1>ثبت تمرینات بدنسازی</h1>
                 <p class="gl-hero-sub">تمرین‌ها را ثبت کن، پیشرفتت را ببین و همه‌چیز را پیش خودت نگه دار؛ بدون حساب کاربری و بدون سرور.</p>
                 <ul class="gl-hero-feats">
                     ${feats.map(([t, d], i) => `<li><span class="gl-feat-ico" aria-hidden="true">${ic(["sync", "chart", "note", "offline"][i], 22)}</span><b>${t}</b><span>${d}</span></li>`).join("")}
@@ -304,7 +304,7 @@
         const d = document.createElement("div");
         d.id = "viewHome";
         d.className = "app-view";
-        const host = $(".app-body");
+        const host = $("#mainContent") || $(".app-body");
         if (host) host.appendChild(d);
     }
 
@@ -461,6 +461,13 @@
 
     /* ---------- راه‌اندازی ---------- */
     function init() {
+        /* لینک «رفتن به محتوا»: hash را عوض نمی‌کند تا روتر دست‌نخورده بماند */
+        const skip = document.getElementById("skipLink");
+        if (skip) skip.addEventListener("click", e => {
+            e.preventDefault();
+            const m = document.getElementById("mainContent");
+            if (m) m.focus();
+        });
         ensureHomeView();
         buildTopNav();
         applyIcons();

@@ -782,7 +782,7 @@
 
         const x = i => (n === 1 ? (pl + (W - pl - pr) / 2) : pl + (i * (W - pl - pr)) / (n - 1));
         const y = v => H - pb - ((v - lo) / (hi - lo)) * (H - pt - pb);
-        const fs = compact ? 9 : 10;
+        const fs = 12;
         const mixed = new Set(sessions.map(s => s.month)).size > 1;
         const dim = s => mixed && !s.inCycle;
 
@@ -808,11 +808,11 @@
             const sx = ((x(i - 1) + x(i)) / 2).toFixed(1);
             seps += `<line x1="${sx}" y1="${pt - 12}" x2="${sx}" y2="${H - pb}" stroke="#9ca3af" stroke-opacity="0.55" stroke-dasharray="4 3"/>`;
             if (!compact) {
-                seps += `<text x="${(Number(sx) + 4).toFixed(1)}" y="${pt - 14}" font-size="9.5" fill="#9ca3af">${esc(sessions[i].programTitle)}</text>`;
+                seps += `<text x="${(Number(sx) + 4).toFixed(1)}" y="${pt - 14}" font-size="12" fill="#9ca3af">${esc(sessions[i].programTitle)}</text>`;
             }
         }
         if (!compact && mixed) {
-            seps += `<text x="${pl + 2}" y="${pt - 14}" font-size="9.5" fill="#9ca3af">${esc(sessions[0].programTitle)}</text>`;
+            seps += `<text x="${pl + 2}" y="${pt - 14}" font-size="12" fill="#9ca3af">${esc(sessions[0].programTitle)}</text>`;
         }
 
         const step = compact ? 1 : (n > 10 ? Math.ceil(n / 8) : 1);
@@ -824,10 +824,10 @@
             const cx = x(i).toFixed(1), cy = y(val(s)).toFixed(1);
             const op = dim(s) ? 0.5 : 1;
             const label = showVal(i)
-                ? `<text x="${cx}" y="${(y(val(s)) - 9).toFixed(1)}" font-size="${compact ? 9.5 : 10.5}" font-weight="700" fill="currentColor" fill-opacity="${dim(s) ? 0.6 : 1}" text-anchor="middle">${text(s)}</text>`
+                ? `<text x="${cx}" y="${(y(val(s)) - 9).toFixed(1)}" font-size="12" font-weight="700" fill="currentColor" fill-opacity="${dim(s) ? 0.6 : 1}" text-anchor="middle">${text(s)}</text>`
                 : "";
             const xl = showDate(i)
-                ? `<text x="${cx}" y="${H - (compact ? 8 : 18)}" font-size="${compact ? 9 : 9.5}" fill="#9ca3af" text-anchor="middle">${shortDate(s.date)}</text>`
+                ? `<text x="${cx}" y="${H - (compact ? 8 : 18)}" font-size="12" fill="#9ca3af" text-anchor="middle">${shortDate(s.date)}</text>`
                 : "";
 
             if (compact) {
@@ -974,7 +974,7 @@
             <div class="dv-modal" role="dialog" aria-modal="true" aria-label="${esc(item.name)}">
                 <div class="dv-modal-head">
                     <div>
-                        <h3>${esc(item.name)}</h3>
+                        <h3 id="dvModalTitle">${esc(item.name)}</h3>
                         <p>${esc(item.sessionTitle)}${itemTag(item) ? " · " + esc(itemTag(item)) : ""}</p>
                     </div>
                     <button type="button" class="exercise-guide-close dv-modal-close" aria-label="بستن">×</button>
@@ -999,6 +999,7 @@
         document.addEventListener("keydown", onKey);
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
+        glDialogAttach(overlay, { dialog: overlay.querySelector(".dv-modal"), labelledby: "dvModalTitle", onClose: close });
         mountTips(overlay);
     }
 
@@ -1108,7 +1109,7 @@
         const rings = [0.25, 0.5, 0.75, 1].map(f =>
             `<polygon points="${poly(f)}" fill="none" stroke="currentColor" stroke-opacity="0.14"/>`).join("");
         const ringLabels = [0.25, 0.5, 0.75, 1].map(f =>
-            `<text x="${c + 4}" y="${(c - R * f - 2).toFixed(1)}" font-size="9" fill="#9ca3af">${fa(top * f, 0)}</text>`).join("");
+            `<text x="${c + 4}" y="${(c - R * f - 2).toFixed(1)}" font-size="12" fill="#9ca3af">${fa(top * f, 0)}</text>`).join("");
         const axes = groups.map((_, i) => {
             const p = pt(i, 1);
             return `<line x1="${c}" y1="${c}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="currentColor" stroke-opacity="0.12"/>`;

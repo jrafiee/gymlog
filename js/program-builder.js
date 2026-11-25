@@ -247,7 +247,7 @@
             const v = lo + f * (hi - lo);
             const yy = y(v);
             return `<line x1="${pl}" y1="${yy.toFixed(1)}" x2="${W - pr}" y2="${yy.toFixed(1)}" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="3 3"/>
-                    <text x="${pl - 6}" y="${(yy + 3).toFixed(1)}" font-size="10" fill="#9ca3af" text-anchor="end">${fmtNum(v)}</text>`;
+                    <text x="${pl - 6}" y="${(yy + 3).toFixed(1)}" font-size="12" fill="#9ca3af" text-anchor="end">${fmtNum(v)}</text>`;
         }).join("");
 
         const line = n > 1
@@ -262,10 +262,10 @@
             let dateLbl = "";
             if (showVal && cx - lastLabelX >= 62) {
                 lastLabelX = cx;
-                dateLbl = `<text x="${cx.toFixed(1)}" y="${H - 16}" font-size="9.5" fill="#9ca3af" text-anchor="middle">${faDate(p.date)}</text>`;
+                dateLbl = `<text x="${cx.toFixed(1)}" y="${H - 16}" font-size="12" fill="#9ca3af" text-anchor="middle">${faDate(p.date)}</text>`;
             }
             const valLbl = showVal
-                ? `<text x="${cx.toFixed(1)}" y="${(cy - 10).toFixed(1)}" font-size="10.5" font-weight="700" fill="currentColor" text-anchor="middle">${fmtNum(p.v)}</text>`
+                ? `<text x="${cx.toFixed(1)}" y="${(cy - 10).toFixed(1)}" font-size="12" font-weight="700" fill="currentColor" text-anchor="middle">${fmtNum(p.v)}</text>`
                 : "";
             return `${valLbl}${dateLbl}<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5.5" fill="${M.color}" stroke="#fff" stroke-width="2"><title>${faDate(p.date)} — ${fmtNum(p.v)} ${M.unit}</title></circle>`;
         }).join("");
@@ -605,7 +605,7 @@
         <div class="dv-modal pb-pick" role="dialog" aria-modal="true" aria-label="ثبت اندازه‌گیری جدید">
             <div class="dv-modal-head">
                 <div>
-                    <h3>ثبت اندازه‌گیری جدید</h3>
+                    <h3 id="pbMTitle">ثبت اندازه‌گیری جدید</h3>
                     <p>${esc(getUserDisplayName(u))}</p>
                 </div>
                 <button type="button" class="exercise-guide-close pb-m-x" aria-label="بستن">×</button>
@@ -685,7 +685,7 @@
 
         document.addEventListener("keydown", onKey);
         document.body.appendChild(ov);
-        q('[name="weight"]').focus();
+        glDialogAttach(ov, { dialog: q(".dv-modal"), labelledby: "pbMTitle", onClose: close, initialFocus: q('[name="weight"]') });
     }
 
     async function deleteUserFlow(uid) {
@@ -718,7 +718,7 @@
             <div class="dv-modal pb-pick" role="dialog" aria-modal="true" aria-label="انتخاب کاربر فایل پشتیبان">
                 <div class="dv-modal-head">
                     <div>
-                        <h3>اطلاعات کدام کاربر؟</h3>
+                        <h3 id="pbPickTitle">اطلاعات کدام کاربر؟</h3>
                         <p>این فایل اطلاعات چند کاربر دارد. یکی را انتخاب کن.</p>
                     </div>
                     <button type="button" class="exercise-guide-close pb-pick-x" aria-label="بستن">×</button>
@@ -738,6 +738,7 @@
                 if (b) done(sources[Number(b.dataset.i)].id);
             });
             document.body.appendChild(ov);
+            glDialogAttach(ov, { dialog: ov.querySelector(".dv-modal"), labelledby: "pbPickTitle", onClose: () => done(undefined) });
         });
     }
 
@@ -889,13 +890,10 @@
 
         overlay = document.createElement("div");
         overlay.className = "pb-overlay";
-        overlay.setAttribute("role", "dialog");
-        overlay.setAttribute("aria-modal", "true");
-        overlay.setAttribute("aria-label", "ساخت برنامه تمرینی");
         overlay.innerHTML = `
         <div class="pb-page">
             <header class="pb-head">
-                <h2>${PB.editKey ? "ویرایش برنامه" : "ساخت برنامه تمرینی"}${getUsers().length > 1 ? " · " + esc(getUserDisplayName(getUserById(PB.userId))) : ""}</h2>
+                <h2 id="pbHeading">${PB.editKey ? "ویرایش برنامه" : "ساخت برنامه تمرینی"}${getUsers().length > 1 ? " · " + esc(getUserDisplayName(getUserById(PB.userId))) : ""}</h2>
                 <button type="button" class="exercise-guide-close pb-close" aria-label="بستن">×</button>
             </header>
             <ol class="pb-steps" id="pbSteps"></ol>
@@ -916,6 +914,13 @@
         history.pushState({ modal: "programBuilder" }, "");
         document.body.style.overflow = "hidden";
         document.body.appendChild(overlay);
+        /* در دسکتاپ فرم داخل چارچوب برنامه است و منو فعال می‌ماند؛ پس غیرمودال */
+        glDialogAttach(overlay, {
+            dialog: overlay.querySelector(".pb-page"),
+            labelledby: "pbHeading",
+            modal: !window.matchMedia("(min-width: 1024px)").matches,
+            onClose: () => { if (PB.sheetOpen) toggleSheet(false); else closeBuilder(false); }
+        });
         renderStep();
     }
 
@@ -1041,7 +1046,7 @@
                     <button type="button" class="secondary-btn pb-lib-done" id="pbLibDone">تمام</button>
                 </div>
                 <div class="pb-chips pb-cat-chips" id="pbCats"></div>
-                <input type="search" class="pb-search" id="pbSearch" placeholder="جستجوی حرکت…" value="${esc(PB.search)}">
+                <input type="search" class="pb-search" id="pbSearch" aria-label="جستجوی حرکت" placeholder="جستجوی حرکت…" value="${esc(PB.search)}">
                 <p class="pb-hint" id="pbHint"></p>
                 <div class="pb-lib-list" id="pbLibList"></div>
             </aside>
@@ -1063,6 +1068,9 @@
         body.querySelector("#pbLibDone").addEventListener("click", () => toggleSheet(false));
         body.querySelector("#pbBackdrop").addEventListener("click", () => toggleSheet(false));
 
+        const libEl = body.querySelector("#pbLib");
+        if (libEl && !isDesktopLayout()) libEl.inert = true;
+
         wireDayTabs(body);
         wireList(body);
         wireLib(body);
@@ -1077,8 +1085,13 @@
         PB.sheetOpen = open;
         const lib = overlay.querySelector("#pbLib");
         const bd = overlay.querySelector("#pbBackdrop");
-        if (lib) lib.classList.toggle("open", open);
+        if (lib) {
+            lib.classList.toggle("open", open);
+            lib.inert = !open && !isDesktopLayout();
+        }
         if (bd) bd.classList.toggle("open", open);
+        if (open && lib) { const s = lib.querySelector("#pbSearch"); if (s) s.focus(); }
+        else if (!open) { const b = overlay.querySelector("#pbOpenLib"); if (b && !isDesktopLayout()) b.focus(); }
     }
 
     function autoTitle(day) {

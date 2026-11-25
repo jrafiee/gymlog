@@ -6,7 +6,7 @@
      با همان نام عوض شده‌اند خودکار جایگزین می‌شوند. منطق آن در js/app.js است (syncAllMedia).
    • MEDIA_CACHE را فقط وقتی بالا ببر که بخواهی همه‌ی فایل‌های آموزشی از اول دانلود شوند.
 */
-const CACHE_NAME = "gym-tracker-v54";
+const CACHE_NAME = "gym-tracker-v55";
 
 // کش فایل‌های آموزشی (تصویر/ویدیو). با تغییر CACHE_NAME پاک نمی‌شود.
 // ⚠ باید با MEDIA_CACHE_NAME در js/app.js یکی باشد.

@@ -97,7 +97,7 @@ function syncRouteHash(view, opts) {
 function focusRouteHeading(view) {
     const el = document.getElementById("view" + capitalize(view));
     if (!el) return;
-    let h = view === "home" ? el.querySelector(".gl-hero h2") : null;
+    let h = view === "home" ? el.querySelector(".gl-hero h1") : null;
     if (!h) {
         h = el.querySelector(":scope > h1.gl-route-h1");
         if (!h) {
@@ -155,13 +155,13 @@ function switchView(viewName, opts) {
     currentDesktopView = viewName;
 
     // 1. Update views visibility
-    document.querySelectorAll(".app-view").forEach(view => {
-        view.classList.remove("active");
-    });
     const targetView = document.getElementById("view" + capitalize(viewName));
-    if (targetView) {
-        targetView.classList.add("active");
-    }
+    document.querySelectorAll(".app-view").forEach(view => {
+        const on = view === targetView;
+        view.classList.toggle("active", on);
+        view.hidden = !on;
+        view.inert = !on;
+    });
 
     // 2. Update mobile tab switcher
     document.querySelectorAll(".mobile-tab-btn").forEach(btn => {
@@ -363,7 +363,7 @@ function showWorkoutDetailModal(workout) {
     overlay.innerHTML = `
         <div class="dash-detail-modal">
             <div class="dash-detail-modal-header">
-                <h3>جزئیات تمرین — ${dStr}</h3>
+                <h3 id="dashDetailTitle">جزئیات تمرین — ${dStr}</h3>
                 <button type="button" class="exercise-guide-close" id="closeDetailModalBtn" aria-label="بستن">×</button>
             </div>
             <div class="dv-detail-meta">
@@ -385,6 +385,7 @@ function showWorkoutDetailModal(workout) {
     overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
 
     document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay.querySelector(".dash-detail-modal"), labelledby: "dashDetailTitle", onClose: close });
 }
 
 /* =====================================================
@@ -446,12 +447,12 @@ function renderFullHistoryView() {
 
             <!-- Filters Bar -->
             <div class="history-filters-bar">
-                <select id="historySortSelect" class="history-filter-select">
+                <select id="historySortSelect" class="history-filter-select" aria-label="ترتیب نمایش جلسات">
                     <option value="asc" ${historySortOrder === "asc" ? "selected" : ""}>ترتیب: از شروع دوره (هفته ۱ جلسه ۱)</option>
                     <option value="desc" ${historySortOrder === "desc" ? "selected" : ""}>ترتیب: جدیدترین جلسه ابتدا</option>
                 </select>
 
-                <select id="historyWeekSelect" class="history-filter-select">
+                <select id="historyWeekSelect" class="history-filter-select" aria-label="فیلتر بر اساس هفته">
                     <option value="all" ${historyFilterWeek === "all" ? "selected" : ""}>همه هفته‌ها</option>
                     <option value="1" ${historyFilterWeek === "1" ? "selected" : ""}>هفته ۱ (جلسه ۱، ۲، ۳)</option>
                     <option value="2" ${historyFilterWeek === "2" ? "selected" : ""}>هفته ۲</option>
@@ -459,7 +460,7 @@ function renderFullHistoryView() {
                     <option value="4" ${historyFilterWeek === "4" ? "selected" : ""}>هفته ۴</option>
                 </select>
 
-                <input type="text" id="historySearchInput" class="history-search-input" placeholder="جستجو بر اساس نام حرکت (فارسی/انگلیسی) یا تاریخ..." value="${esc(historySearchQuery)}">
+                <input type="text" id="historySearchInput" class="history-search-input" aria-label="جستجو در تاریخچه تمرینات" placeholder="جستجو بر اساس نام حرکت (فارسی/انگلیسی) یا تاریخ..." value="${esc(historySearchQuery)}">
             </div>
 
             <div class="dash-table-wrap">
@@ -937,7 +938,7 @@ function renderBankView() {
             <div class="dv-bank-head">
                 <h3 class="dv-bank-title">کاتالوگ حرکات بدنسازی (${keys.length.toLocaleString("fa-IR")} حرکت)</h3>
                 <div class="dv-bank-tools">
-                    <input type="search" id="bankSearchInput" class="dv-bank-search" placeholder="جستجوی حرکت…">
+                    <input type="search" id="bankSearchInput" class="dv-bank-search" aria-label="جستجوی حرکت" placeholder="جستجوی حرکت…">
                     <button type="button" class="primary-btn dv-bank-add" id="bankAddBtn">+ افزودن حرکت جدید</button>
                     <button type="button" class="secondary-btn dv-bank-export" id="bankExportBtn" title="دریافت فایل exercise-catalog.js با همه‌ی حرکت‌ها">${ico("download", 16)}exercise-catalog.js</button>
                     <button type="button" class="secondary-btn dv-bank-export" id="bankMediaBtn" title="دانلود تصویر/ویدیوهای بارگذاری‌شده با نام شناسه‌ی یکتا">${ico("download", 16)}فایل‌های رسانه</button>

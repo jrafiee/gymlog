@@ -355,3 +355,148 @@ function validateSetNumber(kind, raw, badInput) {
     }
     return { ok: true, value: n };
 }
+
+
+/* =====================================================
+   مودال مشترک (دسترس‌پذیری)
+   glDialogAttach(overlay, opts): پنجره‌ی موجود را دیالوگ می‌کند (role، aria-modal، برچسب،
+     Escape، به‌دام‌انداختن فوکوس، inert کردن پس‌زمینه، بازگرداندن فوکوس) و تابع release برمی‌گرداند.
+     با حذف overlay از DOM، release خودکار اجرا می‌شود.
+     opts: dialog, label | labelledby, describedby, onClose, initialFocus, modal(=true), alert, opener
+   glDialog / glAlert / glConfirm: جایگزین Promise-محور alert و confirm
+===================================================== */
+let _glDlgN = 0;
+const _glDlgStack = [];
+const GL_FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+
+function glDialogAttach(overlay, opts) {
+    opts = opts || {};
+    const dlg = opts.dialog || overlay.firstElementChild || overlay;
+    const opener = opts.opener || document.activeElement;
+    const modal = opts.modal !== false;
+
+    dlg.setAttribute("role", opts.alert ? "alertdialog" : "dialog");
+    if (modal) dlg.setAttribute("aria-modal", "true"); else dlg.removeAttribute("aria-modal");
+    if (opts.labelledby) {
+        dlg.setAttribute("aria-labelledby", opts.labelledby);
+        dlg.removeAttribute("aria-label");
+    } else if (opts.label) {
+        dlg.setAttribute("aria-label", opts.label);
+    }
+    if (opts.describedby) dlg.setAttribute("aria-describedby", opts.describedby);
+    if (!dlg.hasAttribute("tabindex")) dlg.setAttribute("tabindex", "-1");
+
+    const entry = {};
+    const inerted = [];
+    let released = false;
+
+    const focusables = () => Array.from(dlg.querySelectorAll(GL_FOCUSABLE))
+        .filter(el => !el.closest("[inert]") && !el.closest("[hidden]") && el.getClientRects().length > 0);
+
+    function onKey(e) {
+        if (_glDlgStack[_glDlgStack.length - 1] !== entry) return;
+        if (e.key === "Escape") {
+            if (opts.onClose) {
+                e.preventDefault();
+                e.stopPropagation();
+                opts.onClose();
+            }
+            return;
+        }
+        if (e.key !== "Tab" || !modal) return;
+        const f = focusables();
+        if (!f.length) { e.preventDefault(); dlg.focus(); return; }
+        const first = f[0], last = f[f.length - 1], cur = document.activeElement;
+        if (!dlg.contains(cur)) { e.preventDefault(); first.focus(); }
+        else if (e.shiftKey && (cur === first || cur === dlg)) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+    }
+
+    function release() {
+        if (released) return;
+        released = true;
+        document.removeEventListener("keydown", onKey, true);
+        mo.disconnect();
+        const i = _glDlgStack.indexOf(entry);
+        if (i !== -1) _glDlgStack.splice(i, 1);
+        inerted.forEach(el => el.removeAttribute("inert"));
+        if (opener && opener !== document.body && opener.isConnected && typeof opener.focus === "function") {
+            try { opener.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+        }
+    }
+
+    const mo = new MutationObserver(() => { if (!overlay.isConnected) release(); });
+    mo.observe(document.body, { childList: true });
+
+    if (modal) {
+        Array.from(document.body.children).forEach(el => {
+            if (el === overlay || el.tagName === "SCRIPT" || el.hasAttribute("inert")) return;
+            if (el.classList.contains("app-toast") || el.classList.contains("rest-timer")) return;
+            el.setAttribute("inert", "");
+            inerted.push(el);
+        });
+    }
+
+    entry.overlay = overlay;
+    _glDlgStack.push(entry);
+    document.addEventListener("keydown", onKey, true);
+
+    let target = opts.initialFocus;
+    if (typeof target === "string") target = dlg.querySelector(target);
+    if (!target) target = focusables()[0] || dlg;
+    try { target.focus(); } catch (e) { /* ignore */ }
+
+    return release;
+}
+
+/* buttons: [{label, value, primary, danger}] ؛ خروجی Promise با value دکمه‌ی انتخاب‌شده (یا dismissValue با Escape/کلیک بیرون) */
+function glDialog(o) {
+    o = o || {};
+    return new Promise(resolve => {
+        const id = "glDlg" + (++_glDlgN);
+        const btns = o.buttons || [{ label: "باشه", value: true, primary: true }];
+        const ov = document.createElement("div");
+        ov.className = "dv-modal-overlay gl-dlg-overlay";
+        ov.innerHTML = `
+        <div class="dv-modal gl-dlg">
+            ${o.title ? `<div class="dv-modal-head"><h3 id="${id}t">${esc(o.title)}</h3></div>` : ""}
+            <p class="gl-dlg-msg" id="${id}m">${esc(o.message || "")}</p>
+            <div class="pb-actions">
+                ${btns.map((b, i) => `<button type="button" class="${b.danger ? "danger-btn" : b.primary ? "primary-btn" : "secondary-btn"}" data-i="${i}">${esc(b.label)}</button>`).join("")}
+            </div>
+        </div>`;
+        let done = false;
+        const finish = v => { if (done) return; done = true; ov.remove(); resolve(v); };
+        ov.addEventListener("click", e => {
+            const b = e.target.closest("[data-i]");
+            if (b) finish(btns[Number(b.dataset.i)].value);
+            else if (e.target === ov) finish(o.dismissValue);
+        });
+        document.body.appendChild(ov);
+        glDialogAttach(ov, {
+            alert: true,
+            labelledby: o.title ? id + "t" : id + "m",
+            describedby: o.title ? id + "m" : "",
+            initialFocus: ov.querySelectorAll("[data-i]")[o.focusIndex || 0],
+            onClose: () => finish(o.dismissValue)
+        });
+    });
+}
+
+function glAlert(message, title) {
+    return glDialog({ title: title || "", message });
+}
+
+function glConfirm(message, o) {
+    o = o || {};
+    return glDialog({
+        title: o.title || "",
+        message,
+        dismissValue: false,
+        focusIndex: o.danger ? 1 : 0,
+        buttons: [
+            { label: o.ok || "تأیید", value: true, primary: !o.danger, danger: !!o.danger },
+            { label: o.cancel || "انصراف", value: false }
+        ]
+    });
+}
