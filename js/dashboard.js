@@ -100,8 +100,10 @@ function renderCycleGrid(data) {
             const sessInfo = data.programData.sessions[sKey];
 
             // Find if this session was done in this week
-            const doneWorkout = (data.cycleWorkouts || []).find(w => Number(w.week) === wk && Number(w.session) === sNum);
-            const isNext = (data.detected.week === wk && data.detected.session === sNum && !doneWorkout);
+            const matches = (data.cycleWorkouts || []).filter(w => Number(w.week) === wk && Number(w.session) === sNum);
+            const doneWorkout = matches.find(isWorkoutDone);
+            const progressWorkout = doneWorkout ? null : matches.find(w => !isWorkoutDone(w));
+            const isNext = (data.detected.week === wk && data.detected.session === sNum && !doneWorkout && !progressWorkout);
 
             let itemClass = "dash-cycle-session-item";
             let statusIcon = "○";
@@ -111,6 +113,10 @@ function renderCycleGrid(data) {
                 itemClass += " done";
                 statusIcon = "✓";
                 subText = typeof formatPersianDate === "function" ? formatPersianDate(doneWorkout.date) : doneWorkout.date;
+            } else if (progressWorkout) {
+                itemClass += " active-next in-progress";
+                statusIcon = "◐";
+                subText = "در حال انجام";
             } else if (isNext) {
                 itemClass += " active-next";
                 statusIcon = "▶";
@@ -118,7 +124,7 @@ function renderCycleGrid(data) {
             }
 
             sessionItems += `
-                <div class="${itemClass}" data-week="${wk}" data-session="${sNum}" title="کلیک برای باز کردن جلسه">
+                <div class="${itemClass}" data-week="${wk}" data-session="${sNum}" data-date="${progressWorkout ? esc(progressWorkout.date) : ""}" title="کلیک برای باز کردن جلسه">
                     <div class="dash-cycle-session-info">
                         <strong>جلسه ${sNum}: ${esc(sessInfo.title)}</strong>
                         <span>${subText}</span>
@@ -153,11 +159,12 @@ function renderWorkoutsTableSnippet(workoutsList) {
     const rows = workoutsList.map(w => {
         const dStr = typeof formatPersianDate === "function" ? formatPersianDate(w.date, true) : w.date;
         const vol = typeof calculateVolume === "function" ? calculateVolume(w) : 0;
-        const totalSets = (w.exercises || []).reduce((acc, ex) => acc + (ex.sets || []).length, 0);
+        const totalSets = countWorkoutSets(w);
 
         // Highlight Week 1 Session 1
         const isW1S1 = Number(w.week) === 1 && Number(w.session) === 1;
-        const badgeHtml = isW1S1 ? `<span class="dv-start-badge">آغاز دوره</span>` : "";
+        const badgeHtml = (isW1S1 ? `<span class="dv-start-badge">آغاز دوره</span>` : "") +
+            (isWorkoutDone(w) ? "" : `<span class="dv-progress-badge">در حال انجام</span>`);
 
         return `
             <tr class="${isW1S1 ? 'w1s1-row' : ''}">
@@ -169,7 +176,7 @@ function renderWorkoutsTableSnippet(workoutsList) {
                 </td>
                 <td><strong>هفته ${w.week || 1}</strong></td>
                 <td>جلسه ${w.session || 1}</td>
-                <td>${(w.exercises || []).length} حرکت</td>
+                <td>${countWorkoutExercises(w)} حرکت</td>
                 <td>${totalSets} ست</td>
                 <td><strong>${Math.round(vol).toLocaleString("fa-IR")}</strong> <small class="gl-unit">kg×reps</small></td>
                 <td>
@@ -212,14 +219,15 @@ function showWorkoutDetailModal(workout) {
     const vol = typeof calculateVolume === "function" ? calculateVolume(workout) : 0;
     const catalog = typeof getEffectiveCatalog === "function" ? getEffectiveCatalog() : {};
 
-    const exercisesHtml = (workout.exercises || []).map((ex, idx) => {
+    const exercisesHtml = (workout.exercises || []).filter(ex => countFilledSets(ex) > 0).map((ex, idx) => {
         const exName = catalog[ex.id] ? catalog[ex.id].name : ex.id;
-        const setsHtml = (ex.sets || []).map((s, sIdx) => `
+        /* ست خالی نمایش داده نمی‌شود؛ شماره‌ی ست همان شماره‌ی واقعی در فرم می‌ماند */
+        const setsHtml = (ex.sets || []).map((s, sIdx) => isSetFilled(s) ? `
             <div class="dv-detail-set">
                 <span>ست ${sIdx + 1}</span>
                 <strong>${esc(s.weight || "—")} kg × ${esc(s.reps || "—")}</strong>
             </div>
-        `).join("");
+        ` : "").join("");
 
         return `
             <div class="dv-detail-ex">
@@ -242,9 +250,11 @@ function showWorkoutDetailModal(workout) {
                 <span>هفته: <strong>${workout.week}</strong></span>
                 <span>جلسه: <strong>${workout.session}</strong></span>
                 <span>حجم کل: <strong>${Math.round(vol).toLocaleString("fa-IR")} kg×reps</strong></span>
+                <span>ست: <strong>${countWorkoutSets(workout).toLocaleString("fa-IR")}</strong></span>
+                ${isWorkoutDone(workout) ? "" : '<span class="dv-progress-badge">در حال انجام</span>'}
             </div>
             ${workout.note ? `<p class="dv-detail-note dv-detail-note-session">📝 یادداشت جلسه: ${esc(workout.note)}</p>` : ""}
-            <div class="dv-detail-body">${exercisesHtml}</div>
+            <div class="dv-detail-body">${exercisesHtml || '<div class="dv-empty">ستی ثبت نشده است.</div>'}</div>
             <button type="button" class="secondary-btn gl-btn-block" id="doneDetailModalBtn">بستن</button>
         </div>
     `;
@@ -397,7 +407,9 @@ function renderCalendarView() {
     if (!container) return;
 
     const allWorkouts = typeof getWorkouts === "function" ? getWorkouts() : [];
-    const datesSet = new Set(allWorkouts.map(w => w.date));
+    const doneWorkouts = allWorkouts.filter(isWorkoutDone);
+    const datesSet = new Set(doneWorkouts.map(w => w.date));
+    const progressSet = new Set(allWorkouts.filter(w => !isWorkoutDone(w) && !datesSet.has(w.date)).map(w => w.date));
     const todayIso = getToday();
     const fmt = (iso, long) => (typeof formatPersianDate === "function" ? formatPersianDate(iso, long) : iso);
     const vol = w => Math.round(typeof calculateVolume === "function" ? calculateVolume(w) : 0).toLocaleString("fa-IR");
@@ -422,9 +434,9 @@ function renderCalendarView() {
                 ${selectedDateWorkouts.map(w => `
                     <div class="calendar-day-item">
                         <div>
-                            <strong>هفته ${w.week} · جلسه ${w.session}</strong>
+                            <strong>هفته ${w.week} · جلسه ${w.session}${isWorkoutDone(w) ? "" : ' <span class="dv-progress-badge">در حال انجام</span>'}</strong>
                             <span class="calendar-day-sub">
-                                ${(w.exercises || []).length} حرکت · حجم: ${vol(w)} kg×reps
+                                ${countWorkoutExercises(w).toLocaleString("fa-IR")} حرکت · ${countWorkoutSets(w).toLocaleString("fa-IR")} ست · حجم: ${vol(w)} kg×reps
                             </span>
                         </div>
                         <div class="calendar-day-actions">
@@ -465,7 +477,7 @@ function renderCalendarView() {
             const len = jalaliMonthLength(jy, jm);
             const start = jalaliToIsoDate(jy, jm, 1);
             const end = jalaliToIsoDate(jy, jm, len);
-            const count = allWorkouts.filter(w => w.date >= start && w.date <= end).length;
+            const count = doneWorkouts.filter(w => w.date >= start && w.date <= end).length;
             rangeCount += count;
             const isCurrent = todayJ.jy === jy && todayJ.jm === jm;
             const yFa = jy.toLocaleString("fa-IR", { useGrouping: false });
@@ -476,7 +488,7 @@ function renderCalendarView() {
                         <span>${count ? count.toLocaleString("fa-IR") + " جلسه" : ""}</span>
                     </header>
                     <div class="date-picker-weekdays">${weekdays}</div>
-                    <div class="date-picker-grid">${buildDatePickerGrid(jy, jm, calendarSelectedDate, todayIso, datesSet)}</div>
+                    <div class="date-picker-grid">${buildDatePickerGrid(jy, jm, calendarSelectedDate, todayIso, datesSet, progressSet)}</div>
                 </section>`;
         }).join("");
 
@@ -497,7 +509,7 @@ function renderCalendarView() {
                         <span class="cal-wide-count">${rangeCount.toLocaleString("fa-IR")} جلسه در این بازه</span>
                     </div>
                     <div class="cal-year-grid">${cards}</div>
-                    <div class="date-picker-legend"><span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده</div>
+                    <div class="date-picker-legend"><span class="date-picker-legend-circle"></span> جلسه‌ی پایان‌یافته <span class="date-picker-legend-circle in-progress"></span> در حال انجام</div>
                 </div>
                 <aside class="cal-wide-side">${selectedDayHtml}</aside>
             </div>
@@ -516,10 +528,11 @@ function renderCalendarView() {
                     </div>
                     <div class="date-picker-weekdays">${weekdays}</div>
                     <div class="date-picker-grid">
-                        ${buildDatePickerGrid(calendarState.jy, calendarState.jm, calendarSelectedDate, todayIso, datesSet)}
+                        ${buildDatePickerGrid(calendarState.jy, calendarState.jm, calendarSelectedDate, todayIso, datesSet, progressSet)}
                     </div>
                     <div class="date-picker-legend">
-                        <span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده
+                        <span class="date-picker-legend-circle"></span> جلسه‌ی پایان‌یافته
+                        <span class="date-picker-legend-circle in-progress"></span> در حال انجام
                     </div>
                 </div>
                 <div class="gl-cal-day">${selectedDayHtml}</div>

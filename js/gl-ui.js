@@ -344,9 +344,7 @@
             const hasProg = typeof workoutPrograms !== "undefined" && Object.keys(workoutPrograms).length > 0;
             if (act === "start") {
                 if (!hasProg) { go("dashboard"); return; }
-                const d = detectNextWeekAndSession(currentMonth);
-                currentSession = d.session;
-                if (typeof weekNumber !== "undefined" && weekNumber) weekNumber.value = d.week;
+                applyDetectedSession(detectNextWeekAndSession(currentMonth));
                 go("workout");
             } else if (act === "sync-setup") {
                 if (typeof goToBaleSettings === "function") goToBaleSettings(); else go("settings");
@@ -444,7 +442,6 @@
                     if (rw) w.value = rw;
                     if (rr) r.value = rr;
                     [w, r].forEach(el => el.dispatchEvent(new Event("input", { bubbles: true })));
-                    r.focus();
                 });
                 slot.appendChild(b);
             }

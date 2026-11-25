@@ -256,6 +256,9 @@ function sanitizeWorkout(rawWorkout) {
 
     const note = cleanNote(rawWorkout.note, 2000);
 
+    /* وضعیت جلسه: فقط مقدار معتبر نگه داشته می‌شود؛ رکورد قدیمی بدون status دست‌نخورده می‌ماند (= انجام‌شده) */
+    const status = rawWorkout.status === "in_progress" || rawWorkout.status === "done" ? rawWorkout.status : null;
+
     const userId = typeof rawWorkout.userId === "string" && rawWorkout.userId
         ? rawWorkout.userId
         : (_storeCache.activeUserId || null);
@@ -269,6 +272,7 @@ function sanitizeWorkout(rawWorkout) {
         exercises,
         ...(userId ? { userId } : {}),
         ...(note ? { note } : {}),
+        ...(status ? { status } : {}),
         updatedAt: rawWorkout.updatedAt || new Date().toISOString()
     };
 }

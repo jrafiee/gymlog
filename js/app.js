@@ -75,6 +75,17 @@ function detectNextWeekAndSession(monthKey) {
     });
 
     const last = sorted[sorted.length - 1];
+
+    /* جلسه‌ی ناتمام (هنوز «پایان جلسه» نخورده): همان جلسه باز بماند */
+    if (!isWorkoutDone(last)) {
+        return {
+            week: Number(last.week) || 1,
+            session: Number(last.session) || 1,
+            inProgress: true,
+            resumeDate: last.date
+        };
+    }
+
     let nextWeek = Number(last.week) || 1;
     let nextSession = Number(last.session) || 1;
 
@@ -91,6 +102,18 @@ function detectNextWeekAndSession(monthKey) {
     }
 
     return { week: nextWeek, session: nextSession };
+}
+
+/* نتیجه‌ی detectNextWeekAndSession را روی فرم ثبت تمرین اعمال می‌کند
+   (برای جلسه‌ی در حال انجام، تاریخ همان جلسه هم برمی‌گردد تا داده‌هایش بارگذاری شود) */
+function applyDetectedSession(d) {
+    if (!d) return;
+    currentSession = d.session;
+    if (weekNumber) weekNumber.value = d.week;
+    if (d.resumeDate && workoutDate) {
+        workoutDate.value = d.resumeDate;
+        updatePersianWorkoutDate();
+    }
 }
 
 /* =========================================================
@@ -693,8 +716,7 @@ function getExerciseHistory(exerciseId) {
     workouts.forEach(workout => {
         const exercise = workout.exercises?.find(item => item.id === exerciseId);
         if (!exercise) return;
-        const hasData = exercise.sets?.some(set => set.weight !== "" || set.reps !== "");
-        if (!hasData) return;
+        if (countFilledSets(exercise) === 0) return;
 
         history.push({
             date: workout.date,
@@ -762,11 +784,11 @@ function showExerciseHistory(exerciseId) {
 }
 
 function formatHistorySets(sets) {
-    if (!sets || sets.length === 0) return "—";
-    return sets.map(set => {
-        if (set.weight === "" && set.reps === "") return "—";
-        return `<span class="history-set">${esc(set.weight || "—")}kg × ${esc(set.reps || "—")}</span>`;
-    }).join("");
+    const filled = (sets || []).filter(isSetFilled);
+    if (filled.length === 0) return "—";
+    return filled.map(set =>
+        `<span class="history-set">${esc(set.weight || "—")}kg × ${esc(set.reps || "—")}</span>`
+    ).join("");
 }
 
 /* =========================
@@ -878,7 +900,7 @@ function showExerciseGuide(exerciseId) {
 ========================= */
 /* ست‌های مرجع برای مقایسه: جلسه‌ی قبلِ همین جلسه‌ی برنامه، وگرنه آخرین سابقه‌ی همان حرکت */
 function getReferenceSets(exerciseId, previousExercise) {
-    const hasData = sets => Array.isArray(sets) && sets.some(s => s.weight !== "" || s.reps !== "");
+    const hasData = sets => Array.isArray(sets) && sets.some(isSetFilled);
     if (previousExercise && hasData(previousExercise.sets)) return previousExercise.sets;
     const hist = getExerciseHistory(exerciseId).find(r => r.date < workoutDate.value && hasData(r.sets));
     return hist ? hist.sets : [];
@@ -897,19 +919,61 @@ function getSetRowState(row) {
     return { hasW, hasR, bw, complete: hasR && (hasW || bw), partial: (hasW || hasR) && !(hasR && (hasW || bw)) };
 }
 
+/* ---------- اعتبارسنجی ورودی ست ---------- */
+function validateSetInput(input) {
+    if (!input) return { ok: true, value: null };
+    const kind = input.classList.contains("weight-input") ? "weight" : "reps";
+    return validateSetNumber(kind, input.value, !!(input.validity && input.validity.badInput));
+}
+
+function setFieldError(input, msg) {
+    const holder = input.parentElement;
+    const el = holder && holder.querySelector(".field-error");
+    if (el) el.textContent = msg || "";
+    input.classList.toggle("invalid", !!msg);
+    if (msg) input.setAttribute("aria-invalid", "true");
+    else input.removeAttribute("aria-invalid");
+}
+
+/* آخرین مقدار «ذخیره‌شده/معتبر» هر فیلد در data-last-valid نگه داشته می‌شود؛
+   مقدار نامعتبر هرگز جمع‌آوری و ذخیره نمی‌شود (initial=true: مقدار ذخیره‌شده‌ی قبلی همان‌طور که هست مبنا می‌شود) */
+function applyInputValidation(input, initial) {
+    const res = validateSetInput(input);
+    setFieldError(input, res.ok ? "" : res.error);
+    if (res.ok || initial) input.dataset.lastValid = input.value;
+    return res;
+}
+
+function readSetValue(input) {
+    return validateSetInput(input).ok ? input.value : (input.dataset.lastValid || "");
+}
+
+function getInvalidSetInputs() {
+    return Array.from(document.querySelectorAll(".weight-input, .reps-input")).filter(i => !validateSetInput(i).ok);
+}
+
 /* final=true: کاربر از ست خارج شده (یا بارگذاری اولیه)؛ فقط آن‌وقت خالی‌بودن فیلد هشدار می‌دهد */
 function checkSetWarning(row, final) {
     if (!row) return;
     const warnEl = row.querySelector(".set-warning");
     if (!warnEl) return;
 
+    const L = SET_INPUT_LIMITS;
+    const wRes = validateSetInput(row.querySelector(".weight-input"));
+    const rRes = validateSetInput(row.querySelector(".reps-input"));
     const st = getSetRowState(row);
+    const w = wRes.ok && wRes.value !== null ? wRes.value : NaN;
+    const r = rRes.ok && rRes.value !== null ? rRes.value : NaN;
     const msgs = [];
 
-    if (st.complete) {
-        /* مقایسه با سابقه فقط وقتی اطلاعات کل ست وارد شده */
-        const w = parseFloat(toLatinDigits(row.querySelector(".weight-input").value));
-        const r = parseFloat(toLatinDigits(row.querySelector(".reps-input").value));
+    /* ۱) مقدار نامعقول؛ بدون نیاز به سابقه‌ی قبلی (جلسه‌ی اول هم کار می‌کند) */
+    if (isFinite(w) && w >= L.suspiciousWeight) msgs.push(`وزنه ${toFa(w)} kg خیلی زیاد است`);
+    const repsLimit = st.bw ? L.suspiciousRepsBodyweight : L.suspiciousReps;
+    if (isFinite(r) && r >= repsLimit) msgs.push(`تکرار ${toFa(r)} خیلی زیاد است`);
+    if (isFinite(r) && r === 0 && isFinite(w) && w > 0) msgs.push("تکرار ۰ است در حالی که وزنه ثبت شده");
+
+    /* ۲) مقایسه با سابقه، فقط وقتی اطلاعات کل ست وارد شده و معتبر است */
+    if (st.complete && wRes.ok && rRes.ok) {
         const pw = parseFloat(row.dataset.refW);
         const pr = parseFloat(row.dataset.refR);
 
@@ -925,8 +989,11 @@ function checkSetWarning(row, final) {
                 msgs.push(`تکرار ${diff > 0 ? "بیشتر" : "کمتر"} از قبل است (${toFa(pr)} ← ${toFa(r)})`);
             }
         }
-        if (msgs.length) msgs.push("مطمئنی درست وارد کرده‌ای؟");
-    } else if (st.partial && final) {
+    }
+    if (msgs.length) msgs.push("مطمئنی درست وارد کرده‌ای؟");
+
+    /* ۳) ست ناقص (فقط بعد از خروج از ست) */
+    if (st.partial && final && wRes.ok && rRes.ok) {
         msgs.push(!st.hasR ? "تکرار این ست خالی مانده است." : "وزنه این ست خالی مانده است.");
     }
 
@@ -952,10 +1019,12 @@ function createSetRows(exercise, previousExercise, currentExercise, refSets) {
             <div class="set-row" data-set="${i}" data-bw="${isBw ? 1 : 0}" data-ref-w="${refSet ? esc(refSet.weight) : ""}" data-ref-r="${refSet ? esc(refSet.reps) : ""}">
                 <div class="set-label">ست ${i + 1}</div>
                 <div>
-                    <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
+                    <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" max="${SET_INPUT_LIMITS.weightMax}" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
+                    <small class="field-error" role="alert"></small>
                 </div>
                 <div>
-                    <input type="number" class="reps-input" placeholder="تکرار" min="0" step="1" inputmode="numeric" value="${esc(currentReps)}">
+                    <input type="number" class="reps-input" placeholder="تکرار" min="0" max="${SET_INPUT_LIMITS.repsMax}" step="1" inputmode="numeric" value="${esc(currentReps)}">
+                    <small class="field-error" role="alert"></small>
                 </div>
                 <div class="set-difference">
                     ${previousSet && (previousSet.weight || previousSet.reps)
@@ -979,6 +1048,10 @@ function collectWorkout() {
         exercises: []
     };
 
+    /* وضعیت: جلسه‌ی قبلاً «پایان‌یافته» همان‌طور می‌ماند؛ غیر از آن تا «پایان جلسه» در حال انجام است */
+    const savedNow = getCurrentSavedWorkout();
+    result.status = savedNow && isWorkoutDone(savedNow) ? "done" : "in_progress";
+
     const sessionNoteText = sessionNote ? sessionNote.value.trim() : "";
     if (sessionNoteText) result.note = sessionNoteText;
 
@@ -986,8 +1059,8 @@ function collectWorkout() {
         const exerciseId = container.dataset.exercise;
         const sets = [];
         container.querySelectorAll(".set-row").forEach(row => {
-            const weight = row.querySelector(".weight-input").value;
-            const reps = row.querySelector(".reps-input").value;
+            const weight = readSetValue(row.querySelector(".weight-input"));
+            const reps = readSetValue(row.querySelector(".reps-input"));
             sets.push({ weight, reps });
         });
         const card = container.closest(".exercise-card");
@@ -1002,19 +1075,18 @@ function collectWorkout() {
 }
 
 function workoutHasData(workout) {
-    return workout.exercises.some(exercise =>
-        exercise.sets.some(set => set.weight !== "" || set.reps !== "")
-    );
+    return workout.exercises.some(exercise => countFilledSets(exercise) > 0);
 }
 
 /* ذخیره‌ی فوری (برای «پایان جلسه»). شناسه‌ی رکورد موجود را addWorkout حفظ می‌کند. */
-async function autoSaveWorkout() {
+async function autoSaveWorkout(markDone) {
     clearTimeout(saveTimer);
     saveTimer = null;
     pendingWorkout = null;
     if (!workoutDate.value || viewingMonth !== currentMonth) return false;
     const workout = collectWorkout();
     if (!workoutHasData(workout)) return false;
+    if (markDone) workout.status = "done";
 
     await addWorkout(workout);
     return true;
@@ -1107,6 +1179,15 @@ if (finishWorkoutBtn) {
             alert("برنامه‌های قبلی فقط برای مشاهده هستند.");
             return;
         }
+        const invalidInputs = getInvalidSetInputs();
+        if (invalidInputs.length > 0) {
+            invalidInputs.forEach(i => applyInputValidation(i, false));
+            showToast("اول مقدارهای نامعتبر را اصلاح کن.", "warning");
+            invalidInputs[0].focus();
+            if (invalidInputs[0].scrollIntoView) invalidInputs[0].scrollIntoView({ block: "center" });
+            return;
+        }
+
         const workout = collectWorkout();
         if (!workoutHasData(workout)) {
             alert("هنوز اطلاعاتی برای این جلسه ثبت نشده است.");
@@ -1123,7 +1204,7 @@ if (finishWorkoutBtn) {
         // ۱) عملیات اصلی: ذخیره قطعی در پایگاه‌داده IndexedDB
         let saved = false;
         try {
-            saved = await autoSaveWorkout();
+            saved = await autoSaveWorkout(true);
         } catch (error) {
             console.error("خطا در ذخیره‌ی جلسه:", error);
         }
@@ -1216,11 +1297,18 @@ const PERSIAN_MONTH_NAMES = [
     "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
 ];
 
+/* روزهای دارای جلسه‌ی «پایان‌یافته» */
 function getWorkoutDatesSet() {
-    return new Set(getWorkouts().map(workout => workout.date));
+    return new Set(getWorkouts().filter(isWorkoutDone).map(workout => workout.date));
 }
 
-function buildDatePickerGrid(jy, jm, selectedIso, todayIso, workoutDatesSet) {
+/* روزهایی که فقط جلسه‌ی در حال انجام دارند */
+function getInProgressDatesSet() {
+    const done = getWorkoutDatesSet();
+    return new Set(getWorkouts().filter(w => !isWorkoutDone(w) && !done.has(w.date)).map(w => w.date));
+}
+
+function buildDatePickerGrid(jy, jm, selectedIso, todayIso, workoutDatesSet, progressDatesSet) {
     const monthLength = jalaliMonthLength(jy, jm);
     const firstGregorian = jalaliToGregorian(jy, jm, 1);
     const firstDate = new Date(firstGregorian.gy, firstGregorian.gm - 1, firstGregorian.gd);
@@ -1248,6 +1336,7 @@ function buildDatePickerGrid(jy, jm, selectedIso, todayIso, workoutDatesSet) {
         if (iso === todayIso) classes.push("today");
         if (iso === selectedIso) classes.push("selected");
         if (workoutDatesSet.has(iso)) classes.push("has-workout");
+        else if (progressDatesSet && progressDatesSet.has(iso)) classes.push("in-progress");
 
         cellsHtml += `
             <button type="button" class="${classes.join(" ")}" data-iso="${iso}">
@@ -1262,6 +1351,7 @@ function showDatePickerCalendar() {
     const todayIso = getToday();
     const selectedIso = workoutDate.value || todayIso;
     const workoutDatesSet = getWorkoutDatesSet();
+    const progressDatesSet = getInProgressDatesSet();
     const view = isoToJalali(selectedIso);
 
     history.pushState({ modal: "datePicker" }, "");
@@ -1283,10 +1373,11 @@ function showDatePickerCalendar() {
                     ${PERSIAN_WEEKDAY_LABELS.slice().reverse().map(label => `<span>${label}</span>`).join("")}
                 </div>
                 <div class="date-picker-grid">
-                    ${buildDatePickerGrid(view.jy, view.jm, selectedIso, todayIso, workoutDatesSet)}
+                    ${buildDatePickerGrid(view.jy, view.jm, selectedIso, todayIso, workoutDatesSet, progressDatesSet)}
                 </div>
                 <div class="date-picker-legend">
-                    <span class="date-picker-legend-circle"></span> روزهایی که تمرین ثبت شده
+                    <span class="date-picker-legend-circle"></span> جلسه‌ی پایان‌یافته
+                    <span class="date-picker-legend-circle in-progress"></span> در حال انجام
                 </div>
                 <button type="button" class="secondary-btn date-picker-close">بستن</button>
             </div>
@@ -1340,7 +1431,9 @@ if (sessionNote) sessionNote.addEventListener("input", scheduleNoteSave);
 
 function attachInputEvents() {
     document.querySelectorAll(".weight-input, .reps-input").forEach(input => {
+        applyInputValidation(input, true);
         input.addEventListener("input", () => {
+            applyInputValidation(input, false);
             checkSetWarning(input.closest(".set-row"), false);
             updateSummary();
             queueWorkoutSave();
@@ -1793,11 +1886,7 @@ async function bootApp() {
     // 3. Detect next session based on IndexedDB workout history
     const activeMonthForInit = currentMonth || getLatestMonthKey();
     if (activeMonthForInit) {
-        const detected = detectNextWeekAndSession(activeMonthForInit);
-        currentSession = detected.session;
-        if (weekNumber) {
-            weekNumber.value = detected.week;
-        }
+        applyDetectedSession(detectNextWeekAndSession(activeMonthForInit));
     }
 
     getFirstUseAt();

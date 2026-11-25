@@ -235,3 +235,66 @@ const GymLogWakeLock = (function () {
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
     else init();
 })();
+
+
+/* =====================================================
+   ست‌ها: شمارش، وضعیت جلسه و اعتبارسنجی ورودی
+   (منبع واحد برای تاریخچه، داشبورد، تقویم و فرم ثبت)
+===================================================== */
+
+/* حدود ورودی و آستانه‌ی «عدد مشکوک» (قابل‌تنظیم) */
+const SET_INPUT_LIMITS = {
+    weightMax: 1000,               // kg؛ بیشتر از این پذیرفته نمی‌شود
+    repsMax: 999,                  // تکرار (یا ثانیه)؛ عدد صحیح
+    suspiciousWeight: 500,         // kg؛ از این به بعد هشدار «مطمئنی؟»
+    suspiciousReps: 100,           // تکرار در حرکات وزنه‌دار
+    suspiciousRepsBodyweight: 600  // تکرار/ثانیه در حرکات وزن‌بدنی و زمانی
+};
+
+/* ست «پر» = وزنه یا تکرار نوشته شده باشد (فضای خالی حساب نمی‌شود) */
+function isSetFilled(s) {
+    if (!s) return false;
+    const has = v => v !== undefined && v !== null && String(v).trim() !== "";
+    return has(s.weight) || has(s.reps);
+}
+function getFilledSets(ex) {
+    return ((ex && ex.sets) || []).filter(isSetFilled);
+}
+function countFilledSets(ex) {
+    return getFilledSets(ex).length;
+}
+function countWorkoutSets(w) {
+    return ((w && w.exercises) || []).reduce((n, ex) => n + countFilledSets(ex), 0);
+}
+function countWorkoutExercises(w) {
+    return ((w && w.exercises) || []).filter(ex => countFilledSets(ex) > 0).length;
+}
+
+/* وضعیت جلسه: "in_progress" | "done". رکوردهای قدیمی بدون فیلد status «انجام‌شده» تفسیر می‌شوند. */
+function getWorkoutStatus(w) {
+    return w && w.status === "in_progress" ? "in_progress" : "done";
+}
+function isWorkoutDone(w) {
+    return getWorkoutStatus(w) === "done";
+}
+
+/* kind: "weight" | "reps". خروجی: {ok, value (عدد یا null برای خالی), error} */
+function validateSetNumber(kind, raw, badInput) {
+    const L = SET_INPUT_LIMITS;
+    const t = toLatinDigits(raw).replace(/[٫,]/g, ".").trim();
+    const generic = "عدد معتبر وارد کن.";
+    if (t === "") return badInput ? { ok: false, value: null, error: generic } : { ok: true, value: null };
+
+    const n = Number(t);
+    if (!isFinite(n)) return { ok: false, value: null, error: generic };
+
+    if (kind === "weight") {
+        if (n < 0) return { ok: false, value: null, error: "وزنه نمی‌تواند منفی باشد." };
+        if (n > L.weightMax) return { ok: false, value: null, error: `وزنه باید بین ۰ تا ${toFa(L.weightMax)} کیلوگرم باشد.` };
+    } else {
+        if (n < 0 || n > L.repsMax || !Number.isInteger(n)) {
+            return { ok: false, value: null, error: `تکرار باید عدد صحیح بین ۰ تا ${toFa(L.repsMax)} باشد.` };
+        }
+    }
+    return { ok: true, value: n };
+}

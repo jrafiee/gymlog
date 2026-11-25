@@ -194,7 +194,9 @@
        ۱) وضعیت تمرین
     ========================= */
     function computeStatus(ctx) {
-        const { workouts, activeMonth, program, today, detected } = ctx;
+        const { activeMonth, program, today, detected } = ctx;
+        /* فقط جلسه‌های «پایان‌یافته» در وضعیت و پایبندی حساب می‌شوند */
+        const workouts = ctx.workouts.filter(isWorkoutDone);
         const cycle = workouts.filter(w => w.month === activeMonth);
         const perWeek = program && program.sessions ? Object.keys(program.sessions).length : null;
 
@@ -548,9 +550,7 @@
         ws.forEach(w => (w.exercises || []).forEach(ex => {
             const cat = (catalog[ex.id] && catalog[ex.id].category) || MUSCLE_MAP[ex.id] || null;
             (ex.sets || []).forEach(s => {
-                const hasW = s.weight !== "" && s.weight != null;
-                const hasR = s.reps !== "" && s.reps != null;
-                if (!hasW && !hasR) return;
+                if (!isSetFilled(s)) return;
                 if (cat && counts[cat] !== undefined) counts[cat] += 1;
                 else other += 1;
             });
@@ -643,7 +643,7 @@
             const title = prog ? prog.title : "برنامه تمرینی";
             const sessionsCount = prog && prog.sessions ? Object.keys(prog.sessions).length : 3;
             const total = sessionsCount * 4;
-            const done = ctx.cycle.length;
+            const done = ctx.cycle.filter(isWorkoutDone).length;
             const pct = Math.min(100, Math.round((done / (total || 1)) * 100));
             const next = prog && prog.sessions ? prog.sessions[ctx.detected.session] : null;
             const nextTitle = next ? next.title : `جلسه ${ctx.detected.session}`;
@@ -656,7 +656,7 @@
                     <div class="dash-overview-meta">
                         <span>هفته <strong>${fa(ctx.detected.week, 0)}</strong> از ۴</span>
                         <span class="sep">·</span>
-                        <span>جلسه بعد: <strong>جلسه ${fa(ctx.detected.session, 0)} (${esc(nextTitle)})</strong></span>
+                        <span>${ctx.detected.inProgress ? "جلسه در حال انجام" : "جلسه بعد"}: <strong>جلسه ${fa(ctx.detected.session, 0)} (${esc(nextTitle)})</strong></span>
                         <span class="sep">·</span>
                         <span>${fa(done, 0)} از ${fa(total, 0)} جلسه انجام‌شده</span>
                     </div>
@@ -672,7 +672,7 @@
                 </div>
                 <div class="dash-overview-actions">
                     <button type="button" class="dash-start-workout-btn" id="dashStartNextBtn">
-                        🏋️‍♂️ شروع جلسه تمرین بعدی
+                        🏋️‍♂️ ${ctx.detected.inProgress ? "ادامه‌ی جلسه در حال انجام" : "شروع جلسه تمرین بعدی"}
                     </button>
                 </div>
             </section>`;
@@ -681,8 +681,7 @@
             const btn = slot.querySelector("#dashStartNextBtn");
             if (!btn) return;
             btn.addEventListener("click", () => {
-                currentSession = ctx.detected.session;
-                if (typeof weekNumber !== "undefined" && weekNumber) weekNumber.value = ctx.detected.week;
+                applyDetectedSession(ctx.detected);
                 switchView("workout");
             });
         }
@@ -1268,6 +1267,12 @@
                     const wk = Number(item.dataset.week);
                     if (sess) currentSession = sess;
                     if (wk && typeof weekNumber !== "undefined" && weekNumber) weekNumber.value = wk;
+                    /* جلسه‌ی در حال انجام: تاریخ همان جلسه هم برگردد تا داده‌هایش بارگذاری شود */
+                    const dt = item.dataset.date;
+                    if (dt && typeof workoutDate !== "undefined" && workoutDate) {
+                        workoutDate.value = dt;
+                        if (typeof updatePersianWorkoutDate === "function") updatePersianWorkoutDate();
+                    }
                     switchView("workout");
                 });
             });

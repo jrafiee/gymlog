@@ -6649,3 +6649,45 @@ html body:not(.rd) .gl-sync-btn { display: inline-flex; align-items: center; jus
 .gl-sync-method .gl-ico-box { width: 34px; height: 34px; border-radius: 10px; }
 .gl-sync-method ol { margin: 0; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; line-height: 1.9; color: var(--rd-sub); }
 @media (min-width: 1280px) { .gl-sync-methods { grid-template-columns: 1fr 1fr; } }
+
+
+/* =====================================================
+   اعتبارسنجی ورودی ست + وضعیت «در حال انجام»
+   ===================================================== */
+.field-error {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: #b91c1c;
+    text-align: right;
+    direction: rtl;
+}
+.field-error:empty { display: none; }
+body.dark-mode .field-error { color: #fca5a5; }
+.set-row input.invalid,
+.set-row.has-warning input.invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+}
+@media (max-width: 1023px) {
+    .field-error { font-size: 14px; }
+}
+.dv-progress-badge {
+    display: inline-block;
+    margin-inline-start: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid #d97706;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+body.dark-mode .dv-progress-badge { background: #451a03; color: #fde68a; border-color: #b45309; }
+.date-picker-day.in-progress .date-picker-day-circle { border-color: #d97706; border-style: dashed; }
+.date-picker-day.selected.in-progress .date-picker-day-circle { border-color: #ffffff; }
+.date-picker-legend-circle.in-progress { border-color: #d97706; border-style: dashed; margin-inline-start: 12px; }
+.dash-cycle-session-item.in-progress { border-style: dashed; }
