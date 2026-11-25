@@ -6706,3 +6706,20 @@ body.dark-mode .dv-progress-badge { background: #451a03; color: #fde68a; border-
 }
 .gl-route-h1:focus,
 .gl-hero h2:focus { outline: none; }
+
+
+/* =====================================================
+   آیکون‌های SVG هم‌سبک (جایگزین ایموجی‌ها)
+   ===================================================== */
+.gl-ic.gl-in { display: inline-block; vertical-align: -0.2em; margin-inline-end: 0.4em; }
+.desktop-theme-icon-btn .gl-ic { margin: 0; }
+.pb-add, .pb-ex-ctl button, html body button.pb-mini-btn { display: inline-flex; align-items: center; justify-content: center; }
+.pb-user-row-chev, .dash-cycle-status-icon, .date-picker-icon, .backup-warning-icon { display: inline-flex; align-items: center; }
+.backup-warning-icon { color: #d97706; }
+.pb-grip { display: inline-flex; }
+.pb-block-title .gl-in, .hp-group-title .gl-in, .hp-contact h3 .gl-in { color: var(--rd-accent); }
+html body .hp-aud-icon { color: var(--rd-accent); }
+.set-warning .gl-in { margin-inline-end: 0.3em; }
+.dash-cycle-session-item.in-progress .dash-cycle-status-icon { color: #d97706; }
+.dash-cycle-session-item.done .dash-cycle-status-icon { color: var(--rd-ok, #15803d); }
+.gl-badge .gl-in { margin-inline-end: 0.3em; }

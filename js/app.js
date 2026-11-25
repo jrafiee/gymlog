@@ -462,15 +462,15 @@ function buildProgramSessionTableHtml(session, key) {
 
         if (first) {
             rows += `
-            <tr class="dv-ss-head"><td colspan="5">⚡ سوپرست ${g.toLocaleString("fa-IR")} <span>— این حرکات پشت‌سرهم و بدون استراحت انجام می‌شوند</span></td></tr>`;
+            <tr class="dv-ss-head"><td colspan="5">${ico("bolt", 14)}سوپرست ${g.toLocaleString("fa-IR")} <span>— این حرکات پشت‌سرهم و بدون استراحت انجام می‌شوند</span></td></tr>`;
         }
         rows += `
             <tr class="${g ? "dv-ss-row" + (last ? " dv-ss-last" : "") : ""}">
                 <td class="dv-prog-idx">${(i + 1).toLocaleString("fa-IR")}</td>
                 <td class="dv-prog-name">${esc(e.name)}${g ? `<span class="dv-ss-chip">سوپرست ${g.toLocaleString("fa-IR")}</span>` : ""}</td>
                 <td>${Number(e.sets).toLocaleString("fa-IR")}</td>
-                <td class="dv-prog-reps">${esc(reps)}</td>
-                <td>${esc(e.rest || "—")}</td>
+                <td class="dv-prog-reps">${esc(toFa(reps))}</td>
+                <td>${esc(toFa(e.rest || "—"))}</td>
             </tr>`;
     });
 
@@ -479,7 +479,7 @@ function buildProgramSessionTableHtml(session, key) {
             <div class="dv-prog-session-head">
                 <span class="dv-prog-session-num">جلسه ${Number(key).toLocaleString("fa-IR")}</span>
                 <h4>${esc(session.title)}</h4>
-                ${ssCount ? `<span class="dv-ss-chip dv-ss-chip-head">⚡ ${ssCount.toLocaleString("fa-IR")} سوپرست</span>` : ""}
+                ${ssCount ? `<span class="dv-ss-chip dv-ss-chip-head">${ico("bolt", 13)}${ssCount.toLocaleString("fa-IR")} سوپرست</span>` : ""}
                 <span class="dv-prog-session-count">${exercises.length.toLocaleString("fa-IR")} حرکت</span>
             </div>
             <div class="dv-prog-table-wrap">
@@ -580,7 +580,7 @@ function renderSessionButtons() {
             button.classList.add("active");
         }
         button.innerHTML = `
-            <strong>جلسه ${session}</strong>
+            <strong>جلسه ${toFa(session)}</strong>
             <span>${esc(sessions[session].title)}</span>
         `;
         button.addEventListener("click", () => {
@@ -634,27 +634,27 @@ function renderExercises() {
         card.innerHTML = `
             <div class="exercise-header">
                 <div class="exercise-title">
-                    <div class="exercise-number">${index + 1}</div>
+                    <div class="exercise-number">${toFa(index + 1)}</div>
                     <div>
                         <h2>${esc(exercise.name)}</h2>
                         <div class="exercise-meta">
-                            هدف: ${esc(exercise.target)} &nbsp; | &nbsp; استراحت: ${esc(exercise.rest)}
+                            هدف: ${esc(toFa(exercise.target))} &nbsp; | &nbsp; استراحت: ${esc(toFa(exercise.rest))}
                         </div>
                     </div>
                 </div>
                 <button type="button" class="exercise-help-btn" data-exercise-id="${esc(exercise.id)}">
-                    🖼 نحوه اجرا
+                    ${ico("image")}نحوه اجرا
                 </button>
                 <button type="button" class="exercise-history-btn" data-exercise-id="${esc(exercise.id)}">
-                    📈 سابقه حرکت
+                    ${ico("trend")}سابقه حرکت
                 </button>
-                ${restSec ? `<button type="button" class="exercise-rest-btn" data-seconds="${restSec}" data-exercise-name="${esc(exercise.name)}">⏱ استراحت</button>` : ""}
+                ${restSec ? `<button type="button" class="exercise-rest-btn" data-seconds="${restSec}" data-exercise-name="${esc(exercise.name)}">${ico("timer")}استراحت</button>` : ""}
             </div>
             <div class="sets-container" data-exercise="${esc(exercise.id)}">
                 ${createSetRows(exercise, previousExercise, currentExercise, refSets)}
             </div>
             <details class="exercise-note" ${exNote ? "open" : ""}>
-                <summary>📝 یادداشت این حرکت</summary>
+                <summary>${ico("note")}یادداشت این حرکت</summary>
                 ${prevExNote ? `<div class="exercise-prev-note">جلسه قبل: ${esc(prevExNote)}</div>` : ""}
                 <textarea class="exercise-note-input" rows="2" maxlength="1000" placeholder="مثلاً تنظیم دستگاه، حس حرکت، دلیل کم‌شدن وزنه…">${esc(exNote)}</textarea>
             </details>
@@ -664,14 +664,14 @@ function renderExercises() {
         if (g) {
             card.classList.add("in-superset");
             const meta = card.querySelector(".exercise-meta");
-            if (meta) meta.insertAdjacentHTML("beforeend", `<span class="superset-tag">⚡ سوپرست ${toFa(g)}</span>`);
+            if (meta) meta.insertAdjacentHTML("beforeend", `<span class="superset-tag">${ico("bolt", 13)}سوپرست ${toFa(g)}</span>`);
             if (!ssWrap || ssWrap.dataset.g !== String(g)) {
                 ssWrap = document.createElement("div");
                 ssWrap.className = "superset-group";
                 ssWrap.dataset.g = String(g);
                 ssWrap.innerHTML = `
                     <div class="superset-head">
-                        <span class="superset-badge">⚡ سوپرست ${toFa(g)}</span>
+                        <span class="superset-badge">${ico("bolt", 14)}سوپرست ${toFa(g)}</span>
                         <span class="superset-hint">یک ست از هر حرکت را پشت‌سرهم و بدون استراحت بزن، بعد استراحت کن و دور بعد را شروع کن.</span>
                     </div>`;
                 exerciseList.appendChild(ssWrap);
@@ -752,12 +752,12 @@ function showExerciseHistory(exerciseId) {
                     <div class="exercise-history-item">
                         <div class="exercise-history-info">
                             <strong>${formatPersianDate(record.date, true)}</strong>
-                            <span>هفته ${record.week} | جلسه ${record.session}</span>
+                            <span>هفته ${toFa(record.week)} | جلسه ${toFa(record.session)}</span>
                         </div>
                         <div class="exercise-history-sets">
                             ${formatHistorySets(record.sets)}
                         </div>
-                        ${record.note ? `<div class="exercise-history-note">📝 ${esc(record.note)}</div>` : ""}
+                        ${record.note ? `<div class="exercise-history-note">${ico("note", 14)}${esc(record.note)}</div>` : ""}
                     </div>
                 `).join("")}
             </div>
@@ -787,7 +787,7 @@ function formatHistorySets(sets) {
     const filled = (sets || []).filter(isSetFilled);
     if (filled.length === 0) return "—";
     return filled.map(set =>
-        `<span class="history-set">${esc(set.weight || "—")}kg × ${esc(set.reps || "—")}</span>`
+        `<span class="history-set">${esc(toFa(set.weight || "—"))}kg × ${esc(toFa(set.reps || "—"))}</span>`
     ).join("");
 }
 
@@ -849,7 +849,7 @@ function showExerciseGuide(exerciseId) {
         : `<div class="exercise-guide-no-image">تصویر این حرکت هنوز اضافه نشده است.</div>`;
 
     let instructionsHtml = instructions.length > 0
-        ? `<ul class="exercise-guide-instructions">${instructions.map(inst => `<li>${esc(inst)}</li>`).join("")}</ul>`
+        ? `<ul class="exercise-guide-instructions">${instructions.map(inst => `<li>${esc(toFa(inst))}</li>`).join("")}</ul>`
         : "";
 
     const overlay = document.createElement("div");
@@ -863,7 +863,7 @@ function showExerciseGuide(exerciseId) {
             ${imagesHtml}
             ${instructionsHtml}
             <div class="exercise-guide-actions">
-                ${catalog[exerciseId] ? `<button type="button" class="secondary-btn exercise-guide-edit">✏️ ویرایش</button>` : ""}
+                ${catalog[exerciseId] ? `<button type="button" class="secondary-btn exercise-guide-edit">${ico("edit")}ویرایش</button>` : ""}
                 <button type="button" class="primary-btn exercise-guide-done">بستن</button>
             </div>
         </div>
@@ -997,7 +997,7 @@ function checkSetWarning(row, final) {
         msgs.push(!st.hasR ? "تکرار این ست خالی مانده است." : "وزنه این ست خالی مانده است.");
     }
 
-    warnEl.textContent = msgs.length ? "⚠️ " + msgs.join(" — ") : "";
+    warnEl.innerHTML = msgs.length ? glIcon("alert", 16, "gl-in") + esc(msgs.join(" — ")) : "";
     row.classList.toggle("has-warning", msgs.length > 0);
 }
 
@@ -1017,7 +1017,7 @@ function createSetRows(exercise, previousExercise, currentExercise, refSets) {
 
         html += `
             <div class="set-row" data-set="${i}" data-bw="${isBw ? 1 : 0}" data-ref-w="${refSet ? esc(refSet.weight) : ""}" data-ref-r="${refSet ? esc(refSet.reps) : ""}">
-                <div class="set-label">ست ${i + 1}</div>
+                <div class="set-label">ست ${toFa(i + 1)}</div>
                 <div>
                     <input type="number" class="weight-input" placeholder="وزنه (kg)" min="0" max="${SET_INPUT_LIMITS.weightMax}" step="0.5" inputmode="decimal" value="${esc(currentWeight)}">
                     <small class="field-error" role="alert"></small>
@@ -1028,7 +1028,7 @@ function createSetRows(exercise, previousExercise, currentExercise, refSets) {
                 </div>
                 <div class="set-difference">
                     ${previousSet && (previousSet.weight || previousSet.reps)
-                        ? `جلسه قبل: ${previousSet.weight || "—"}kg × ${previousSet.reps || "—"}`
+                        ? `جلسه قبل: ${esc(toFa(previousSet.weight || "—"))}kg × ${esc(toFa(previousSet.reps || "—"))}`
                         : ""}
                 </div>
                 <div class="set-warning" role="alert"></div>
@@ -1210,7 +1210,7 @@ if (finishWorkoutBtn) {
         }
 
         if (!saved) {
-            alert("ذخیره‌ی جلسه در پایگاه داده انجام نشد. دوباره تلاش کن.");
+            alert("ذخیره‌ی جلسه انجام نشد. دوباره تلاش کن.");
             return;
         }
 
@@ -1233,10 +1233,10 @@ if (finishWorkoutBtn) {
 
         // ۴) پیام نتیجه و رفتن به جلسه‌ی بعد
         if (backupOk) {
-            showToast("جلسه با موفقیت در IndexedDB ذخیره شد و نسخه پشتیبان تهیه گردید.");
+            showToast("جلسه ذخیره شد و فایل پشتیبان هم دانلود شد.");
             renderBackupWarning();
         } else {
-            showToast("جلسه در IndexedDB ذخیره شد، اما تهیه خودکار فایل پشتیبان انجام نشد.", "warning");
+            showToast("جلسه ذخیره شد، اما دانلود خودکار فایل پشتیبان انجام نشد.", "warning");
         }
 
         goToNextWorkout();
@@ -1285,7 +1285,7 @@ function updateSummary() {
 
     const change = ((volume - previousVolume) / previousVolume) * 100;
     const rounded = Math.round(change * 10) / 10;
-    volumeChange.textContent = `${rounded > 0 ? "+" : ""}${rounded}%`;
+    volumeChange.textContent = `${rounded > 0 ? "+" : ""}${toFa(rounded)}%`;
 }
 
 /* =========================
@@ -1340,7 +1340,7 @@ function buildDatePickerGrid(jy, jm, selectedIso, todayIso, workoutDatesSet, pro
 
         cellsHtml += `
             <button type="button" class="${classes.join(" ")}" data-iso="${iso}">
-                <span class="date-picker-day-circle">${day}</span>
+                <span class="date-picker-day-circle">${toFa(day)}</span>
             </button>
         `;
     });
@@ -1366,7 +1366,7 @@ function showDatePickerCalendar() {
             <div class="date-picker-modal">
                 <div class="date-picker-header">
                     <button type="button" class="date-picker-nav" data-dir="prev" aria-label="ماه قبل">‹</button>
-                    <h3>${PERSIAN_MONTH_NAMES[view.jm - 1]} ${view.jy}</h3>
+                    <h3>${PERSIAN_MONTH_NAMES[view.jm - 1]} ${toFa(view.jy)}</h3>
                     <button type="button" class="date-picker-nav" data-dir="next" aria-label="ماه بعد">›</button>
                 </div>
                 <div class="date-picker-weekdays">
@@ -1483,14 +1483,14 @@ function renderHistory() {
             const previous = calculateVolume(workouts[index - 1]);
             if (previous > 0) {
                 const percent = ((volume - previous) / previous) * 100;
-                change = `${percent > 0 ? "+" : ""}${Math.round(percent * 10) / 10}%`;
+                change = `${percent > 0 ? "+" : ""}${toFa(Math.round(percent * 10) / 10)}%`;
             }
         }
 
         html += `
             <tr>
                 <td>${formatPersianDate(workout.date)}</td>
-                <td>هفته ${workout.week}</td>
+                <td>هفته ${toFa(workout.week)}</td>
                 <td>${Math.round(volume).toLocaleString("fa-IR")}</td>
                 <td>${change}</td>
             </tr>
@@ -1766,7 +1766,7 @@ function handleBackupFileSelected(file) {
         try {
             data = JSON.parse(reader.result);
         } catch {
-            alert("فایل معتبر نیست (JSON قابل خواندن نیست).");
+            alert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
             return;
         }
 
@@ -1781,7 +1781,7 @@ function handleBackupFileSelected(file) {
             if (res.type === "program") {
                 await cacheAndReport("برنامه با موفقیت اضافه شد.");
             } else {
-                await cacheAndReport("پشتیبان با موفقیت در IndexedDB بازیابی شد.");
+                await cacheAndReport("اطلاعات با موفقیت از فایل پشتیبان بازیابی شد.");
             }
             location.reload();
         } catch (err) {
@@ -1802,7 +1802,7 @@ async function confirmClearHistory() {
 }
 
 async function confirmFullReset() {
-    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از پایگاه داده پاک می‌شوند. (تنظیمات همگام‌سازی با بله، یعنی توکن و chat_id، حذف نمی‌شود.)")) return false;
+    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از حافظه‌ی همین دستگاه پاک می‌شوند. (تنظیمات همگام‌سازی با بله، یعنی توکن و شناسه‌ی چت، حذف نمی‌شود.)")) return false;
     await fullResetStorage();
     location.reload();
     return true;
@@ -1821,10 +1821,10 @@ function applyTheme(theme) {
     if (!themeToggleBtn) return;
     if (theme === "dark") {
         document.body.classList.add("dark-mode");
-        themeToggleBtn.textContent = "☀️ حالت روشن";
+        themeToggleBtn.innerHTML = ico("sun") + "حالت روشن";
     } else {
         document.body.classList.remove("dark-mode");
-        themeToggleBtn.textContent = "🌙 حالت تاریک";
+        themeToggleBtn.innerHTML = ico("moon") + "حالت تاریک";
     }
 }
 

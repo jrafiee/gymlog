@@ -77,7 +77,7 @@ if (typeof window !== "undefined") {
 function openDatabase() {
     return new Promise((resolve, reject) => {
         if (!("indexedDB" in window)) {
-            const err = new Error("مرورگر شما از IndexedDB پشتیبانی نمی‌کند.");
+            const err = new Error("مرورگر شما از ذخیره‌ی اطلاعات روی دستگاه پشتیبانی نمی‌کند.");
             _storeCache.lastError = err;
             reject(err);
             return;
@@ -455,7 +455,7 @@ async function checkAndRunMigration(db) {
         // Show a brief UI toast notification if possible
         if (typeof showToast === "function") {
             try {
-                showToast("اطلاعات شما با موفقیت به پایگاه‌داده پیشرفته (IndexedDB) منتقل شد.");
+                showToast("اطلاعات شما با موفقیت به حافظه‌ی جدید و امن‌تر برنامه منتقل شد.");
             } catch (e) { /* ignore */ }
         }
 
@@ -2128,13 +2128,13 @@ async function postToBale(form) {
 function describeBaleError(r) {
     if (r.offline) return "اتصال به اینترنت یا سرور برقرار نشد.";
     const e = String(r.error || "");
-    if (e === "bad_credentials") return "توکن یا chat_id معتبر نیست.";
+    if (e === "bad_credentials") return "توکن یا شناسه‌ی چت بله معتبر نیست.";
     if (e === "file_too_large" || r.status === 413) return "حجم فایل برای ارسال زیاد است.";
     if (e === "forbidden_origin") return "این آدرس مجاز به استفاده از واسط ارسال نیست.";
     if (e === "upstream_unreachable") return "سرور بله در دسترس نیست.";
-    if (r.status === 404 && !r.hasJson) return "واسط ارسال (/api/bale) پیدا نشد؛ برنامه باید از آدرس دیپلوی‌شده‌ی Worker باز شده باشد.";
+    if (r.status === 404 && !r.hasJson) return "سرویس ارسال پیدا نشد؛ برنامه را از آدرس اصلی خودش (نه از فایل روی دستگاه) باز کن.";
     if (r.status === 401 || r.status === 403 || r.status === 404) return "توکن ربات نامعتبر است.";
-    if (r.status === 400) return "بله درخواست را نپذیرفت (chat_id یا شروع‌نشدن گفت‌وگو با ربات را بررسی کن): " + e;
+    if (r.status === 400) return "بله درخواست را نپذیرفت (شناسه‌ی چت و شروع‌شدن گفت‌وگو با ربات را بررسی کن): " + e;
     return "ارسال ناموفق بود (" + e + ").";
 }
 
@@ -2155,7 +2155,7 @@ async function baleTestConnection(token, chatId) {
 async function syncBackupToBale() {
     const cfg = getBaleSettings();
     if (!cfg.token || !cfg.chatId) {
-        return { ok: false, message: "اول توکن ربات و chat_id را در تنظیمات وارد کن." };
+        return { ok: false, message: "اول توکن ربات و شناسه‌ی چت بله را در تنظیمات وارد کن." };
     }
     if (_baleBusy) return { ok: false, message: "یک ارسال دیگر در حال انجام است." };
     _baleBusy = true;
@@ -2328,7 +2328,7 @@ async function syncWithBale(opts) {
     const auto = !!(opts && opts.auto);
     const cfg = getBaleSettings();
     if (!cfg.token || !cfg.chatId) {
-        return { ok: false, message: "اول توکن ربات و chat_id را در تنظیمات وارد کن." };
+        return { ok: false, message: "اول توکن ربات و شناسه‌ی چت بله را در تنظیمات وارد کن." };
     }
 
     const q = await baleFetchLatest(cfg);

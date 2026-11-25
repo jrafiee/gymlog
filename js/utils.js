@@ -28,7 +28,64 @@ function toLatinDigits(v) {
 
 /* ارقام لاتین → فارسی (برای نمایش) */
 function toFa(v) {
-    return String(v).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+    return String(v == null ? "" : v).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+}
+
+/* ---------- آیکون‌های SVG خطی (۲۴×۲۴) ----------
+   glIcon(name, size)  → آیکون بلوکی (برای دکمه‌های flex و منوها)
+   ico(name, size)     → آیکون هم‌خط با متن (کنار برچسب دکمه‌ها)
+   همه aria-hidden هستند، چون فقط تزئینی‌اند. */
+const GL_ICON_PATHS = {
+    home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
+    workout: '<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+    programs: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
+    history: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    bank: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01"/>',
+    backup: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+    settings: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    chart: '<path d="M4 20V10M10 20V4M16 20v-8M21 20H3"/>',
+    dashboard: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+    users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>',
+    offline: '<path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0M12 19h.01M3 3l18 18"/>',
+    timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/>',
+    note: '<path d="M5 4h14v16H5zM9 9h6M9 13h6"/>',
+    sync: '<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>',
+    bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/>',
+    send: '<path d="M21 3L10 14M21 3l-7 18-4-7-7-4z"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+    alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/>',
+    trend: '<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+    trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+    upload: '<path d="M12 15V3M7 8l5-5 5 5M4 20h16"/>',
+    file: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    chevron: '<path d="M6 9l6 6 6-6"/>',
+    arrowUp: '<path d="M12 19V5M6 11l6-6 6 6"/>',
+    arrowDown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
+    grip: '<path d="M9 6h.01M9 12h.01M9 18h.01M15 6h.01M15 12h.01M15 18h.01"/>',
+    circle: '<circle cx="12" cy="12" r="8"/>',
+    half: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>',
+    play: '<path d="M8 5l11 7-11 7z"/>'
+};
+
+function glIcon(name, size, cls) {
+    return `<svg class="gl-ic${cls ? " " + cls : ""}" width="${size || 20}" height="${size || 20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${GL_ICON_PATHS[name] || ""}</svg>`;
+}
+
+function ico(name, size) {
+    return glIcon(name, size || 18, "gl-in");
 }
 
 /* ---------- پیام کوتاه (showToast در app.js تعریف شده است) ---------- */

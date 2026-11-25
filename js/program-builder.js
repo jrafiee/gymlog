@@ -170,7 +170,7 @@
             chip.hidden = true;
             sel.innerHTML = users.map(u =>
                 `<option value="${esc(u.id)}" ${u.id === activeId ? "selected" : ""}>${esc(getUserDisplayName(u))}</option>`
-            ).join("") + `<option value="__manage">⚙ مدیریت کاربران…</option>`;
+            ).join("") + `<option value="__manage">مدیریت کاربران…</option>`;
             sel.value = activeId;
             sel.hidden = false;
         });
@@ -308,7 +308,7 @@
                 <td>${faDate(m.date)}</td>
                 <td>${m.weight !== undefined ? fmtNum(m.weight) : "—"}</td>
                 <td>${m.waist !== undefined ? fmtNum(m.waist) : "—"}</td>
-                <td><button type="button" class="pb-mini-btn" data-act="del-measure" data-date="${esc(m.date)}" aria-label="حذف این اندازه‌گیری">🗑</button></td>
+                <td><button type="button" class="pb-mini-btn" data-act="del-measure" data-date="${esc(m.date)}" aria-label="حذف این اندازه‌گیری">${glIcon("trash", 16)}</button></td>
             </tr>`).join("");
         const table = list.length ? `
             <details class="pb-m-details" ${openTables.has(u.id) ? "open" : ""}>
@@ -324,7 +324,7 @@
         return `
         <div class="pb-block">
             <div class="pb-block-head">
-                <h4 class="pb-block-title">📈 روند تغییر مشخصات</h4>
+                <h4 class="pb-block-title">${ico("trend", 18)}روند تغییر مشخصات</h4>
                 <button type="button" class="secondary-btn pb-sm-btn" data-act="add-measure">+ ثبت اندازه‌گیری جدید</button>
             </div>
             ${pills}
@@ -337,7 +337,7 @@
         const id = "pbNotes_" + esc(u.id);
         return `
         <div class="pb-block pb-notes">
-            <label class="pb-block-title" for="${id}">📝 یادداشت</label>
+            <label class="pb-block-title" for="${id}">${ico("note", 18)}یادداشت</label>
             <textarea id="${id}" class="session-note-input pb-notes-input" data-notes="${esc(u.id)}" rows="4" maxlength="5000" placeholder="توضیحات مربوط به این کاربر: هدف تمرین، محدودیت‌ها یا مصدومیت‌ها، نکته‌های مربی…">${esc(u.notes || "")}</textarea>
             <small class="gl-hint">به‌صورت خودکار ذخیره می‌شود. <span class="pb-notes-status"></span></small>
         </div>`;
@@ -402,7 +402,7 @@
                         <strong>${esc(name)}${badge}</strong>
                         <small>${esc(rowMeta(u))}</small>
                     </span>
-                    <span class="pb-user-row-chev" aria-hidden="true">▾</span>
+                    <span class="pb-user-row-chev" aria-hidden="true">${glIcon("chevron", 18)}</span>
                 </button>
                 ${open ? `<div class="pb-user-row-body">${details}</div>` : ""}
             </section>`;
@@ -431,7 +431,7 @@
         <div class="pb-user-wrap">
             <section class="card pb-user-card">
                 <div class="pb-form-head">
-                    <span class="pb-form-icon" aria-hidden="true">👤</span>
+                    <span class="pb-form-icon" aria-hidden="true">${glIcon("user", 24)}</span>
                     <div>
                         <h3 class="pb-user-title">${isNew ? "افزودن کاربر جدید" : (p ? "ویرایش مشخصات" : "مشخصات کاربر")}</h3>
                         <p class="pb-muted">${isNew
@@ -527,7 +527,7 @@
             const flush = () => {
                 clearTimeout(noteTimers[uid]);
                 noteTimers[uid] = null;
-                saveUserNotes(uid, ta.value).then(() => { if (status) status.textContent = "ذخیره شد ✓"; });
+                saveUserNotes(uid, ta.value).then(() => { if (status) status.textContent = "ذخیره شد."; });
             };
             ta.addEventListener("input", () => {
                 if (status) status.textContent = "…";
@@ -749,7 +749,7 @@
         try {
             data = JSON.parse(await file.text());
         } catch (err) {
-            alert("فایل معتبر نیست (JSON قابل خواندن نیست).");
+            alert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
             return;
         }
         if (!data || typeof data !== "object" ||
@@ -947,7 +947,7 @@
         overlay.querySelector("#pbPrev").style.visibility = PB.step === 1 ? "hidden" : "visible";
         const next = overlay.querySelector("#pbNext");
         next.textContent = PB.step < PB.steps.length ? "بعدی"
-            : PB.editKey ? "ذخیره تغییرات" : PB.output === "save" ? "ثبت در برنامه" : "دانلود فایل JSON";
+            : PB.editKey ? "ذخیره تغییرات" : PB.output === "save" ? "ثبت در برنامه" : "دانلود فایل برنامه";
     }
 
     function renderStep() {
@@ -1145,12 +1145,12 @@
                 <div class="pb-ex-name">
                     <strong>${esc(name)}</strong>
                     <span>${esc(catOf(ex.id, item))}</span>
-                    ${ss ? `<em class="pb-ss-chip">⚡ سوپرست ${toFa(ss)}</em>` : ""}
+                    ${ss ? `<em class="pb-ss-chip">${ico("bolt", 12)}سوپرست ${toFa(ss)}</em>` : ""}
                 </div>
                 <div class="pb-ex-ctl">
-                    <button type="button" data-act="up" aria-label="بالا" ${idx === 0 ? "disabled" : ""}>↑</button>
-                    <button type="button" data-act="down" aria-label="پایین" ${idx === total - 1 ? "disabled" : ""}>↓</button>
-                    <button type="button" data-act="del" class="pb-del" aria-label="حذف حرکت">🗑</button>
+                    <button type="button" data-act="up" aria-label="بالا" ${idx === 0 ? "disabled" : ""}>${glIcon("arrowUp", 16)}</button>
+                    <button type="button" data-act="down" aria-label="پایین" ${idx === total - 1 ? "disabled" : ""}>${glIcon("arrowDown", 16)}</button>
+                    <button type="button" data-act="del" class="pb-del" aria-label="حذف حرکت">${glIcon("trash", 16)}</button>
                 </div>
             </div>
             <div class="pb-fields">
@@ -1308,12 +1308,12 @@
             const added = inDay.has(it.id);
             return `
             <div class="pb-lib-item ${added ? "added" : ""}" data-id="${esc(it.id)}" ${dnd && !added ? 'draggable="true"' : ""}>
-                ${dnd ? '<span class="pb-grip" aria-hidden="true">⋮⋮</span>' : ""}
+                ${dnd ? '<span class="pb-grip" aria-hidden="true">' + glIcon("grip", 16) + '</span>' : ""}
                 <div class="pb-lib-name">
                     <strong>${esc(it.name)}</strong>
                     <span>${esc(it.cat)}</span>
                 </div>
-                <button type="button" class="pb-add" data-add="${esc(it.id)}" ${added ? "disabled" : ""} aria-label="افزودن ${esc(it.name)}">${added ? "✓" : "+"}</button>
+                <button type="button" class="pb-add" data-add="${esc(it.id)}" ${added ? "disabled" : ""} aria-label="افزودن ${esc(it.name)}">${added ? glIcon("check", 18) : "+"}</button>
             </div>`;
         }).join("") : `<div class="pb-empty">حرکتی پیدا نشد.</div>`;
     }
@@ -1401,7 +1401,7 @@
                 <label class="pb-out ${PB.output === "download" ? "active" : ""}">
                     <input type="radio" name="pbOutput" value="download" ${PB.output === "download" ? "checked" : ""}>
                     <div>
-                        <strong>فقط دانلود فایل JSON</strong>
+                        <strong>فقط دانلود فایل برنامه</strong>
                         <span>چیزی در برنامه ثبت نمی‌شود. فایل استاندارد را بعداً از «برنامه‌های تمرینی» بارگذاری کن.</span>
                     </div>
                 </label>

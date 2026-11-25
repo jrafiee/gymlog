@@ -1,6 +1,6 @@
 {
   "name": "GymLog",
-  "description": "ثبت و پیگیری تمرین‌های بدنسازی و روند پیشرفت ورزشی با پشتیبانی از IndexedDB",
+  "description": "ثبت و پیگیری تمرین‌های بدنسازی و روند پیشرفت ورزشی؛ همه‌چیز فقط روی همین دستگاه ذخیره می‌شود",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

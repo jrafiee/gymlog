@@ -672,7 +672,7 @@
                 </div>
                 <div class="dash-overview-actions">
                     <button type="button" class="dash-start-workout-btn" id="dashStartNextBtn">
-                        🏋️‍♂️ ${ctx.detected.inProgress ? "ادامه‌ی جلسه در حال انجام" : "شروع جلسه تمرین بعدی"}
+                        ${glIcon("workout", 20)} ${ctx.detected.inProgress ? "ادامه‌ی جلسه در حال انجام" : "شروع جلسه تمرین بعدی"}
                     </button>
                 </div>
             </section>`;
@@ -845,8 +845,8 @@
                 `${s.programTitle || ""} · هفته ${fa(s.week, 0)} · جلسه ${fa(s.session, 0)}`,
                 best,
                 `همه‌ی ست‌ها: ${all}`,
-                s.target ? `هدف ${s.target.raw}: ${STATUS_LABELS[s.status]}` : STATUS_LABELS.none,
-                s.incomplete > 0 ? `⚠ ${fa(s.incomplete, 0)} ست ناقص ثبت شده` : ""
+                s.target ? `هدف ${toFa(s.target.raw)}: ${STATUS_LABELS[s.status]}` : STATUS_LABELS.none,
+                s.incomplete > 0 ? `${fa(s.incomplete, 0)} ست ناقص ثبت شده است` : ""
             ].filter(Boolean).join("\n");
 
             return `${label}${xl}
@@ -936,7 +936,7 @@
                 <div><dt>جلسات</dt><dd>${fa(stats.count, 0)}</dd></div>
                 <div><dt>${isLoad ? "بیشترین وزنه" : "بیشترین مقدار"}</dt><dd>${bestText(item, stats.maxBest)}</dd></div>
                 <div><dt>آخرین بهترین ثبت</dt><dd>${bestText(item, stats.last)}</dd></div>
-                ${item.target ? `<div><dt>هدف برنامه</dt><dd>${esc(item.target.raw)}</dd></div>` : ""}
+                ${item.target ? `<div><dt>هدف برنامه</dt><dd>${esc(toFa(item.target.raw))}</dd></div>` : ""}
             </dl>
             <p class="dv-interp dv-interp-${interp.level}"><b>تفسیر</b>${esc(interp.text)}</p>
             ${stats.incompleteSessions ? `<p class="dv-note">در ${fa(stats.incompleteSessions, 0)} جلسه، بعضی ست‌ها ناقص ثبت شده‌اند (فقط وزن یا فقط تکرار) و در نمودار لحاظ نشده‌اند.</p>` : ""}
@@ -1198,7 +1198,7 @@
                         </div>
                         <div class="dv-list-sub">
                             <bdi class="dv-num">${fa(it.weight)} kg — ${it.reps.map(x => fa(x, 0)).join(" / ")}</bdi>
-                            · هدف ${esc(it.target.raw)} · ${pDate(it.date)}
+                            · هدف ${esc(toFa(it.target.raw))} · ${pDate(it.date)}
                         </div>
                     </li>`).join("")}</ul>`;
             }
@@ -1229,7 +1229,7 @@
                             <strong>${esc(e.name)}</strong>
                             <span class="dv-badge dv-badge-${e.type}">${RECORD_LABELS[e.type]}</span>
                         </div>
-                        <div class="dv-list-sub"><bdi class="dv-num">${esc(e.detail)}</bdi> · ${pDate(e.date)}</div>
+                        <div class="dv-list-sub"><bdi class="dv-num">${esc(toFa(e.detail))}</bdi> · ${pDate(e.date)}</div>
                     </li>`).join("")}</ul>`
                 : `<div class="dv-empty">رکوردی ثبت نشده. هر حرکت دست‌کم به دو جلسه‌ی کامل نیاز دارد تا با قبلش مقایسه شود.</div>`;
 
@@ -1255,7 +1255,7 @@
             <section class="dash-cycle-card">
                 <div class="dash-cycle-header">
                     <h3>وضعیت جلسات دوره تمرینی</h3>
-                    <p>پیشرفت جلسات هفته‌های ۱ تا ۴ دوره جاری بر اساس سوابق ثبت‌شده در پایگاه‌داده</p>
+                    <p>پیشرفت جلسات هفته‌های ۱ تا ۴ دوره جاری بر اساس سوابق ثبت‌شده روی این دستگاه</p>
                 </div>
                 <div class="dash-cycle-weeks">${renderCycleGrid(data)}</div>
             </section>`;
@@ -1327,29 +1327,29 @@
        موبایل: کارت تک‌ستونه مثل قبل / دسکتاپ: طرح دو ستونه
     ========================= */
     const WELCOME_STEPS = [
-        { icon: "📋", label: "۱ · برنامه تمرینی", title: "برنامه تمرینی خودت را وارد کن", desc: "برنامه‌ای که شامل جلسات و حرکات تمرینی است را در GymLog بارگذاری کن." },
-        { icon: "✍️", label: "۲ · ثبت تمرین", title: "هر ست را ثبت کن", desc: "وزنه، تعداد تکرار و عملکردت را بعد از هر ست ثبت کن." },
-        { icon: "📈", label: "۳ · مشاهده پیشرفت", title: "پیشرفتت را دنبال کن", desc: "عملکرد جلسات قبلی را ببین و تغییرات تمرینی خودت را دنبال کن." }
+        { icon: "programs", label: "۱ · برنامه تمرینی", title: "برنامه تمرینی خودت را وارد کن", desc: "برنامه‌ای که شامل جلسات و حرکات تمرینی است را در GymLog بارگذاری کن." },
+        { icon: "edit", label: "۲ · ثبت تمرین", title: "هر ست را ثبت کن", desc: "وزنه، تعداد تکرار و عملکردت را بعد از هر ست ثبت کن." },
+        { icon: "trend", label: "۳ · مشاهده پیشرفت", title: "پیشرفتت را دنبال کن", desc: "عملکرد جلسات قبلی را ببین و تغییرات تمرینی خودت را دنبال کن." }
     ];
 
     /* توضیح ساده درباره‌ی محل ذخیره‌ی اطلاعات، پشتیبان‌گیری و پاک شدن داده‌های مرورگر */
     function dataNoteHtml() {
         return `
         <section class="dv-data-note" aria-labelledby="dvDataNoteTitle">
-            <h3 id="dvDataNoteTitle">🔒 اطلاعات تمرین‌هایت کجا ذخیره می‌شود؟</h3>
+            <h3 id="dvDataNoteTitle">${ico("lock", 20)}اطلاعات تمرین‌هایت کجا ذخیره می‌شود؟</h3>
             <p class="dv-data-note-lead">GymLog سرور ندارد. هر چه ثبت می‌کنی فقط داخل مرورگرِ همین دستگاه ذخیره می‌شود و به جای دیگری فرستاده نمی‌شود، مگر اینکه خودت «همگام‌سازی با بله» را فعال کنی و دکمه‌ی سینک را بزنی؛ پس نگه‌داری اطلاعات با خودِ توست.</p>
             <div class="dv-data-note-grid">
                 <div class="dv-data-note-item">
-                    <strong>💾 پشتیبان‌گیری چطور است؟</strong>
+                    <strong>${ico("backup", 16)}پشتیبان‌گیری چطور است؟</strong>
                     <p>بعد از «پایان جلسه»، برنامه خودش یک فایل پشتیبان دانلود می‌کند. هر وقت خواستی هم از منو، بخش «پشتیبان‌گیری»، فایل بگیر. این فایل همه‌ی کاربران، تمرین‌ها و برنامه‌ها را دارد. آن را جای امن نگه دار (فضای ابری، ایمیل یا پیام‌رسان).</p>
                 </div>
                 <div class="dv-data-note-item">
-                    <strong>⚠️ اگر اطلاعات مرورگر پاک شود؟</strong>
+                    <strong>${ico("alert", 16)}اگر اطلاعات مرورگر پاک شود؟</strong>
                     <p>با پاک‌کردن اطلاعات سایت یا مرورگر، حذف برنامه، عوض‌کردن گوشی/مرورگر یا استفاده از حالت ناشناس، همه‌ی تمرین‌ها از بین می‌رود و راهی برای برگرداندنش نیست؛ مگر اینکه فایل پشتیبان داشته باشی.</p>
                 </div>
                 <div class="dv-data-note-item">
-                    <strong>♻️ بازیابی چطور است؟</strong>
-                    <p>فایل پشتیبانت را از بخش «پشتیبان‌گیری ← بازیابی پشتیبان» انتخاب کن تا همه‌چیز برگردد. پس اگر تمرین‌هایت برایت مهم است، فایل پشتیبان را همیشه داشته باش.</p>
+                    <strong>${ico("sync", 16)}بازیابی چطور است؟</strong>
+                    <p>فایل پشتیبانت را از بخش «پشتیبان‌گیری ← بازیابی از فایل پشتیبان» انتخاب کن تا همه‌چیز برگردد. پس اگر تمرین‌هایت برایت مهم است، فایل پشتیبان را همیشه داشته باش.</p>
                 </div>
             </div>
         </section>`;
@@ -1374,7 +1374,7 @@
             <ol class="dv-welcome-steps">
                 ${WELCOME_STEPS.map(s => `
                 <li class="dv-welcome-step">
-                    <span class="dv-welcome-icon" aria-hidden="true">${s.icon}</span>
+                    <span class="dv-welcome-icon" aria-hidden="true">${glIcon(s.icon, 22)}</span>
                     <div>
                         <span class="dv-welcome-label">${s.label}</span>
                         <strong>${s.title}</strong>

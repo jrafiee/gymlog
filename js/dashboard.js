@@ -226,27 +226,27 @@ function renderCycleGrid(data) {
             const isNext = (data.detected.week === wk && data.detected.session === sNum && !doneWorkout && !progressWorkout);
 
             let itemClass = "dash-cycle-session-item";
-            let statusIcon = "○";
+            let statusIcon = glIcon("circle", 16);
             let subText = "انجام‌نشده";
 
             if (doneWorkout) {
                 itemClass += " done";
-                statusIcon = "✓";
+                statusIcon = glIcon("check", 16);
                 subText = typeof formatPersianDate === "function" ? formatPersianDate(doneWorkout.date) : doneWorkout.date;
             } else if (progressWorkout) {
                 itemClass += " active-next in-progress";
-                statusIcon = "◐";
+                statusIcon = glIcon("half", 16);
                 subText = "در حال انجام";
             } else if (isNext) {
                 itemClass += " active-next";
-                statusIcon = "▶";
+                statusIcon = glIcon("play", 16);
                 subText = "جلسه بعدی";
             }
 
             sessionItems += `
                 <div class="${itemClass}" data-week="${wk}" data-session="${sNum}" data-date="${progressWorkout ? esc(progressWorkout.date) : ""}" title="کلیک برای باز کردن جلسه">
                     <div class="dash-cycle-session-info">
-                        <strong>جلسه ${sNum}: ${esc(sessInfo.title)}</strong>
+                        <strong>جلسه ${toFa(sNum)}: ${esc(sessInfo.title)}</strong>
                         <span>${subText}</span>
                     </div>
                     <span class="dash-cycle-status-icon">${statusIcon}</span>
@@ -257,7 +257,7 @@ function renderCycleGrid(data) {
         html += `
             <div class="dash-cycle-week-col">
                 <div class="dash-cycle-week-title">
-                    <span>هفته ${wk}</span>
+                    <span>هفته ${toFa(wk)}</span>
                     <span class="dash-cycle-week-badge">${wk === data.detected.week ? "هفته جاری" : ""}</span>
                 </div>
                 ${sessionItems}
@@ -294,10 +294,10 @@ function renderWorkoutsTableSnippet(workoutsList) {
                         ${badgeHtml}
                     </div>
                 </td>
-                <td><strong>هفته ${w.week || 1}</strong></td>
-                <td>جلسه ${w.session || 1}</td>
-                <td>${countWorkoutExercises(w)} حرکت</td>
-                <td>${totalSets} ست</td>
+                <td><strong>هفته ${toFa(w.week || 1)}</strong></td>
+                <td>جلسه ${toFa(w.session || 1)}</td>
+                <td>${toFa(countWorkoutExercises(w))} حرکت</td>
+                <td>${toFa(totalSets)} ست</td>
                 <td><strong>${Math.round(vol).toLocaleString("fa-IR")}</strong> <small class="gl-unit">kg×reps</small></td>
                 <td>
                     <button type="button" class="dash-table-action-btn view-workout-detail-btn" data-id="${w.id}">
@@ -344,16 +344,16 @@ function showWorkoutDetailModal(workout) {
         /* ست خالی نمایش داده نمی‌شود؛ شماره‌ی ست همان شماره‌ی واقعی در فرم می‌ماند */
         const setsHtml = (ex.sets || []).map((s, sIdx) => isSetFilled(s) ? `
             <div class="dv-detail-set">
-                <span>ست ${sIdx + 1}</span>
-                <strong>${esc(s.weight || "—")} kg × ${esc(s.reps || "—")}</strong>
+                <span>ست ${toFa(sIdx + 1)}</span>
+                <strong>${esc(toFa(s.weight || "—"))} kg × ${esc(toFa(s.reps || "—"))}</strong>
             </div>
         ` : "").join("");
 
         return `
             <div class="dv-detail-ex">
-                <h4>${idx + 1}. ${esc(exName)}</h4>
+                <h4>${toFa(idx + 1)}. ${esc(exName)}</h4>
                 <div class="dv-detail-sets">${setsHtml}</div>
-                ${ex.note ? `<p class="dv-detail-note">📝 ${esc(ex.note)}</p>` : ""}
+                ${ex.note ? `<p class="dv-detail-note">${ico("note", 14)}${esc(ex.note)}</p>` : ""}
             </div>
         `;
     }).join("");
@@ -367,13 +367,13 @@ function showWorkoutDetailModal(workout) {
                 <button type="button" class="exercise-guide-close" id="closeDetailModalBtn" aria-label="بستن">×</button>
             </div>
             <div class="dv-detail-meta">
-                <span>هفته: <strong>${workout.week}</strong></span>
-                <span>جلسه: <strong>${workout.session}</strong></span>
+                <span>هفته: <strong>${toFa(workout.week)}</strong></span>
+                <span>جلسه: <strong>${toFa(workout.session)}</strong></span>
                 <span>حجم کل: <strong>${Math.round(vol).toLocaleString("fa-IR")} kg×reps</strong></span>
                 <span>ست: <strong>${countWorkoutSets(workout).toLocaleString("fa-IR")}</strong></span>
                 ${isWorkoutDone(workout) ? "" : '<span class="dv-progress-badge">در حال انجام</span>'}
             </div>
-            ${workout.note ? `<p class="dv-detail-note dv-detail-note-session">📝 یادداشت جلسه: ${esc(workout.note)}</p>` : ""}
+            ${workout.note ? `<p class="dv-detail-note dv-detail-note-session">${ico("note", 14)}یادداشت جلسه: ${esc(workout.note)}</p>` : ""}
             <div class="dv-detail-body">${exercisesHtml || '<div class="dv-empty">ستی ثبت نشده است.</div>'}</div>
             <button type="button" class="secondary-btn gl-btn-block" id="doneDetailModalBtn">بستن</button>
         </div>
@@ -554,7 +554,7 @@ function renderCalendarView() {
                 ${selectedDateWorkouts.map(w => `
                     <div class="calendar-day-item">
                         <div>
-                            <strong>هفته ${w.week} · جلسه ${w.session}${isWorkoutDone(w) ? "" : ' <span class="dv-progress-badge">در حال انجام</span>'}</strong>
+                            <strong>هفته ${toFa(w.week)} · جلسه ${toFa(w.session)}${isWorkoutDone(w) ? "" : ' <span class="dv-progress-badge">در حال انجام</span>'}</strong>
                             <span class="calendar-day-sub">
                                 ${countWorkoutExercises(w).toLocaleString("fa-IR")} حرکت · ${countWorkoutSets(w).toLocaleString("fa-IR")} ست · حجم: ${vol(w)} kg×reps
                             </span>
@@ -571,7 +571,7 @@ function renderCalendarView() {
         selectedDayHtml = `
             <div class="calendar-day-details-card calendar-day-empty">
                 <p>در تاریخ ${fmt(calendarSelectedDate, true)} هیچ تمرینی ثبت نشده است.</p>
-                <button type="button" class="secondary-btn" id="calRecordNewDateBtn">✍️ ثبت تمرین برای این روز</button>
+                <button type="button" class="secondary-btn" id="calRecordNewDateBtn">${ico("edit")}ثبت تمرین برای این روز</button>
             </div>
         `;
     }
@@ -600,7 +600,7 @@ function renderCalendarView() {
             const count = doneWorkouts.filter(w => w.date >= start && w.date <= end).length;
             rangeCount += count;
             const isCurrent = todayJ.jy === jy && todayJ.jm === jm;
-            const yFa = jy.toLocaleString("fa-IR", { useGrouping: false });
+            const yFa = toFa(jy);
             return `
                 <section class="cal-month-card ${isCurrent ? "current" : ""}">
                     <header>
@@ -613,7 +613,7 @@ function renderCalendarView() {
         }).join("");
 
         const first = months[0], last = months[3];
-        const fa4 = n => n.toLocaleString("fa-IR", { useGrouping: false });
+        const fa4 = n => toFa(n);
         const rangeTitle = `${monthNames[first.jm - 1]} ${fa4(first.jy)} تا ${monthNames[last.jm - 1]} ${fa4(last.jy)}`;
 
         container.innerHTML = `
@@ -643,7 +643,7 @@ function renderCalendarView() {
                 <div class="date-picker-modal gl-cal-mobile-card">
                     <div class="date-picker-header">
                         <button type="button" class="date-picker-nav" id="calPrevBtn" aria-label="ماه قبل">‹</button>
-                        <h3 class="gl-cal-title">${monthName} ${calendarState.jy}</h3>
+                        <h3 class="gl-cal-title">${monthName} ${toFa(calendarState.jy)}</h3>
                         <button type="button" class="date-picker-nav" id="calNextBtn" aria-label="ماه بعد">›</button>
                     </div>
                     <div class="date-picker-weekdays">${weekdays}</div>
@@ -776,7 +776,7 @@ function renderProgramsView() {
 
     let programsCardsHtml = "";
     if (monthKeys.length === 0) {
-        programsCardsHtml = `<div class="dash-empty-notice">هنوز هیچ برنامه تمرینی در پایگاه‌داده وجود ندارد. از کادر بالا برای بارگذاری فایل برنامه استفاده کنید.</div>`;
+        programsCardsHtml = `<div class="dash-empty-notice">هنوز هیچ برنامه تمرینی روی این دستگاه وجود ندارد. از کادر بالا برای بارگذاری فایل برنامه استفاده کنید.</div>`;
     } else {
         /* برنامه جاری اول و باز؛ برنامه‌های قبلی (جدیدترین اول) بسته و با کلیک باز می‌شوند */
         const ordered = monthKeys.filter(k => k === currentMonth).concat(
@@ -795,13 +795,13 @@ function renderProgramsView() {
                     <div class="gl-program-card-head" ${isCur ? "" : 'data-prog-toggle role="button" tabindex="0" aria-expanded="false"'}>
                         <div>
                             <h3 class="gl-program-card-title">
-                                ${esc(month.title)} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : '<span class="gl-prog-chev" aria-hidden="true">▾</span>'}
+                                ${esc(month.title)} ${isCur ? '<span class="my-program-current-badge">برنامه جاری</span>' : '<span class="gl-prog-chev" aria-hidden="true">${glIcon("chevron", 18, "gl-in")}</span>'}
                             </h3>
                             <span class="gl-muted-sm">${typeof getMonthDateRangeText === "function" ? getMonthDateRangeText(mKey) : ""}</span>
                         </div>
                         <div class="gl-program-card-actions">
-                            <button type="button" class="secondary-btn" data-prog-edit="${esc(mKey)}">✏️ ویرایش برنامه</button>
-                            <button type="button" class="danger-btn" data-prog-delete="${esc(mKey)}">🗑 حذف برنامه</button>
+                            <button type="button" class="secondary-btn" data-prog-edit="${esc(mKey)}">${ico("edit")}ویرایش برنامه</button>
+                            <button type="button" class="danger-btn" data-prog-delete="${esc(mKey)}">${ico("trash")}حذف برنامه</button>
                         </div>
                     </div>
                     <div class="dv-prog-sessions" ${isCur ? "" : "hidden"}>${sessionsHtml}</div>
@@ -814,22 +814,22 @@ function renderProgramsView() {
         <div class="gl-upload-box">
             <div class="gl-upload-inner">
                 <div class="gl-upload-content">
-                    <div class="gl-upload-icon">📥</div>
+                    <div class="gl-upload-icon" aria-hidden="true">${glIcon("upload", 24)}</div>
                     <div class="gl-upload-text">
                         <h3>بارگذاری برنامه تمرینی جدید</h3>
                         <p>
-                            فایل برنامه تمرینی مربی یا باشگاه خود را از طریق دکمه زیر بارگذاری کنید. این برنامه به عنوان یک دوره ماهانه به فهرست برنامه‌ها اضافه شده و تمامی سوابق، رکوردهای وزنه و برنامه‌های قبلی شما در پایگاه‌داده محفوظ خواهند ماند.
+                            فایل برنامه تمرینی مربی یا باشگاه خود را از طریق دکمه زیر بارگذاری کنید. این برنامه به عنوان یک دوره ماهانه به فهرست برنامه‌ها اضافه شده و تمامی سوابق، رکوردهای وزنه و برنامه‌های قبلی شما روی همین دستگاه محفوظ خواهند ماند.
                         </p>
                         <div class="gl-upload-badges">
-                            <span class="gl-badge">📄 فایل با فرمت استاندارد JSON (.json)</span>
-                            <span class="gl-badge">🔒 ذخیره‌سازی محلی و امن در IndexedDB</span>
-                            <span class="gl-badge">✨ حفظ کامل دوره‌ها و تاریخچه قبلی</span>
+                            <span class="gl-badge">${ico("file", 14)}فایل برنامه (با پسوند .json)</span>
+                            <span class="gl-badge">${ico("lock", 14)}ذخیره‌سازی امن روی همین دستگاه</span>
+                            <span class="gl-badge">${ico("history", 14)}حفظ کامل دوره‌ها و تاریخچه قبلی</span>
                         </div>
                     </div>
                 </div>
                 <div>
                     <label class="primary-btn file-btn gl-upload-btn">
-                        📥 بارگذاری فایل برنامه جدید
+                        ${ico("upload")}بارگذاری فایل برنامه جدید
                         <input type="file" id="programsTabUploadInput" accept=".json" hidden>
                     </label>
                 </div>
@@ -939,8 +939,8 @@ function renderBankView() {
                 <div class="dv-bank-tools">
                     <input type="search" id="bankSearchInput" class="dv-bank-search" placeholder="جستجوی حرکت…">
                     <button type="button" class="primary-btn dv-bank-add" id="bankAddBtn">+ افزودن حرکت جدید</button>
-                    <button type="button" class="secondary-btn dv-bank-export" id="bankExportBtn" title="دریافت فایل exercise-catalog.js با همه‌ی حرکت‌ها">⬇ exercise-catalog.js</button>
-                    <button type="button" class="secondary-btn dv-bank-export" id="bankMediaBtn" title="دانلود تصویر/ویدیوهای بارگذاری‌شده با نام شناسه‌ی یکتا">⬇ فایل‌های رسانه</button>
+                    <button type="button" class="secondary-btn dv-bank-export" id="bankExportBtn" title="دریافت فایل exercise-catalog.js با همه‌ی حرکت‌ها">${ico("download", 16)}exercise-catalog.js</button>
+                    <button type="button" class="secondary-btn dv-bank-export" id="bankMediaBtn" title="دانلود تصویر/ویدیوهای بارگذاری‌شده با نام شناسه‌ی یکتا">${ico("download", 16)}فایل‌های رسانه</button>
                 </div>
             </div>
             <p class="dv-note">برای ویرایش یک حرکت، روی آن کلیک کن و در پنجره‌ی باز‌شده «ویرایش» را بزن. تصویرها در خروجی با مسیر assets/exercises/شناسه‌ی‌یکتا.پسوند نوشته می‌شوند؛ خودِ فایل‌ها را با دکمه‌ی «فایل‌های رسانه» بگیر و در همان پوشه بگذار.</p>
@@ -998,8 +998,8 @@ function renderBackupView() {
 
     container.innerHTML = `
         <div class="card gl-panel">
-            <h3 class="gl-panel-title">پشتیبان‌گیری و بازیابی پایگاه‌داده</h3>
-            <p class="gl-panel-desc">اطلاعات شما فقط در مخزن محلی IndexedDB همین دستگاه ذخیره می‌شود. این پشتیبان شامل اطلاعات همه‌ی کاربران (${typeof getUsers === "function" ? getUsers().length.toLocaleString("fa-IR") : "—"} کاربر)، برنامه‌ها و بانک حرکات است؛ آن را جای امن نگه دارید. برای پشتیبان یک کاربر خاص، از صفحه‌ی «کاربران» استفاده کنید.</p>
+            <h3 class="gl-panel-title">پشتیبان‌گیری و بازیابی اطلاعات</h3>
+            <p class="gl-panel-desc">اطلاعات شما فقط روی همین دستگاه (در حافظه‌ی مرورگر) ذخیره می‌شود. این پشتیبان شامل اطلاعات همه‌ی کاربران (${typeof getUsers === "function" ? getUsers().length.toLocaleString("fa-IR") : "—"} کاربر)، برنامه‌ها و بانک حرکات است؛ آن را جای امن نگه دارید. برای پشتیبان یک کاربر خاص، از صفحه‌ی «کاربران» استفاده کنید.</p>
 
             <div class="gl-info-box">
                 <strong>آخرین پشتیبان موفق:</strong>
@@ -1008,10 +1008,10 @@ function renderBackupView() {
 
             <div class="gl-grid-2">
                 <button type="button" class="primary-btn" id="dashExportBtn">
-                    📥 دریافت فایل پشتیبان (Export)
+                    ${ico("download")}دریافت فایل پشتیبان
                 </button>
                 <label class="secondary-btn file-btn gl-file-label">
-                    📤 بازیابی پشتیبان (Import)
+                    ${ico("upload")}بازیابی از فایل پشتیبان
                     <input type="file" id="dashImportFile" accept=".json" hidden>
                 </label>
             </div>
@@ -1019,12 +1019,12 @@ function renderBackupView() {
 
         <div class="card gl-panel gl-gap-top">
             <h3 class="gl-panel-title">همگام‌سازی با بله</h3>
-            <p class="gl-panel-desc">پشتیبان روی بله با اطلاعات این دستگاه مقایسه و نسخه‌ی جدیدتر جایگزین می‌شود. توکن ربات و chat_id را از بخش «تنظیمات» وارد کن.</p>
+            <p class="gl-panel-desc">پشتیبان روی بله با اطلاعات این دستگاه مقایسه و نسخه‌ی جدیدتر جایگزین می‌شود. توکن ربات و شناسه‌ی چت بله را از بخش «تنظیمات» وارد کن.</p>
             <div class="gl-info-box">
                 <strong>وضعیت:</strong>
                 <span class="bs-status" data-bale-status></span>
             </div>
-            <button type="button" class="primary-btn" data-bale-sync>🔄 همگام‌سازی</button>
+            <button type="button" class="primary-btn" data-bale-sync>${ico("sync")}همگام‌سازی</button>
         </div>
     `;
     if (typeof refreshBaleStatus === "function") refreshBaleStatus();
@@ -1060,7 +1060,7 @@ function renderSettingsView() {
             <div class="setting-row gl-setting-row">
                 <div class="setting-info">
                     <strong>ساخت برنامه تمرینی</strong>
-                    <span>طراحی برنامه‌ی جدید و ثبت مستقیم در برنامه یا دانلود به‌صورت فایل JSON</span>
+                    <span>طراحی برنامه‌ی جدید و ثبت مستقیم در برنامه یا دانلود به‌صورت فایل برنامه</span>
                 </div>
                 <button type="button" class="primary-btn" id="dashOpenBuilderBtn">
                     ساخت برنامه
@@ -1093,8 +1093,8 @@ function renderSettingsView() {
 
             <div class="setting-row">
                 <div class="setting-info">
-                    <strong class="gl-danger-text">بازنشانی کامل (Reset All)</strong>
-                    <span>تمام اطلاعات همه‌ی کاربران از IndexedDB و حافظه دستگاه حذف می‌شود. توکن و chat_id بله پاک نمی‌شود؛ آن‌ها را با «حذف تنظیمات همگام‌سازی» پاک کن.</span>
+                    <strong class="gl-danger-text">بازنشانی کامل</strong>
+                    <span>تمام اطلاعات همه‌ی کاربران از حافظه‌ی همین دستگاه حذف می‌شود. توکن و شناسه‌ی چت بله پاک نمی‌شود؛ آن‌ها را با «حذف تنظیمات همگام‌سازی» پاک کن.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashFullResetBtn">
                     حذف همه‌چیز
@@ -1131,17 +1131,17 @@ const HELP_CONTACT = {
 
 const HELP_AUDIENCE = [
     {
-        icon: "🏋️",
+        icon: "workout",
         title: "ورزشکارِ تنها",
         desc: "اگر تمرین‌هایت را خودت پیش می‌بری و می‌خواهی وزنه‌ها و تکرارها را جایی داشته باشی، GymLog تاریخچه‌ی کامل تمرینت را نگه می‌دارد. می‌بینی هر حرکت از کجا شروع کرده‌ای، کِی رکورد زده‌ای و کدام حرکت آماده‌ی افزایش وزنه است."
     },
     {
-        icon: "📋",
+        icon: "programs",
         title: "مربی",
         desc: "اگر چند شاگرد داری، برای هر کدام یک کاربر جدا بساز، تمرین‌هایشان را رصد کن، پایبندی‌شان به برنامه را ببین و وقتی دوره تمام شد، برنامه‌ی جدیدتری برایشان بساز و تحویل بده."
     },
     {
-        icon: "🤝",
+        icon: "users",
         title: "ورزشکار دارای مربی",
         desc: "برنامه‌ی مربی را بارگذاری کن، هر ست را ثبت کن و در پایان دوره فایل پشتیبانت را برای مربی بفرست تا بر اساس عملکرد واقعی‌ات برنامه‌ی بعدی را بنویسد."
     }
@@ -1154,20 +1154,20 @@ const HELP_FEATURES = [
     ["تاریخچه و تقویم", "فهرست همه‌ی جلسات با جستجو و فیلتر، و تقویم ماهانه با روزهای تمرین‌کرده."],
     ["بانک حرکات", "حرکات همراه با تصویر و توضیح اجرا؛ امکان افزودن و ویرایش حرکت و بارگذاری تصویر یا ویدیو."],
     ["چند کاربره", "برای هر نفر تمرین‌ها و برنامه‌ی جدا؛ پشتیبان تکی یا کلی و اضافه‌کردن اطلاعات یک فایل به یک کاربر."],
-    ["پشتیبان‌گیری", "خروجی فایل JSON از همه‌چیز و بازیابی آن، همگام‌سازی پشتیبان با چت بله با یک دکمه، و یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
-    ["کار بدون اینترنت", "بعد از اولین بازکردن، برنامه آفلاین هم کار می‌کند و روی گوشی مثل یک اپ نصب می‌شود (PWA)."]
+    ["پشتیبان‌گیری", "گرفتن فایل پشتیبان از همه‌چیز و بازیابی آن، همگام‌سازی پشتیبان با چت بله با یک دکمه، و یادآوری وقتی مدتی پشتیبان نگرفته‌ای."],
+    ["کار بدون اینترنت", "بعد از اولین بازکردن، برنامه آفلاین هم کار می‌کند و روی گوشی هم می‌توانی آن را به‌صورت اپ نصب کنی."]
 ];
 
 const HELP_GROUPS = [
     {
-        icon: "🚀",
+        icon: "bolt",
         title: "شروع کار",
         items: [
             {
                 q: "برای شروع چه کار کنم؟",
                 a: `<p>سه راه داری:</p>
                     <ol>
-                        <li><b>بارگذاری برنامه:</b> فایل برنامه‌ای که مربی یا خودت داری (فرمت JSON) را از «برنامه‌های تمرینی» بارگذاری کن.</li>
+                        <li><b>بارگذاری برنامه:</b> فایل برنامه‌ای که مربی یا خودت داری (فایل با پسوند .json) را از «برنامه‌های تمرینی» بارگذاری کن.</li>
                         <li><b>ساخت برنامه:</b> از «ساخت برنامه تمرینی» تعداد روزها را انتخاب کن، حرکات هر روز را بچین و ست و تکرار و استراحت را بنویس.</li>
                         <li><b>برنامه‌ی پیش‌فرض:</b> برای آشنایی سریع، در صفحه‌ی خوش‌آمدگویی می‌توانی با برنامه‌ی نمونه شروع کنی.</li>
                     </ol>
@@ -1184,12 +1184,12 @@ const HELP_GROUPS = [
             },
             {
                 q: "تایمر استراحت و یادداشت‌ها چطور کار می‌کنند؟",
-                a: `<p>دکمه‌ی «⏱ استراحت» روی هر حرکت، زمان استراحتِ همان حرکت در برنامه را شروع می‌کند. با «±۱۵ ثانیه» می‌توانی آن را تنظیم کنی و در پایان لرزش و بوق می‌دهد. در هر حرکت و در انتهای جلسه می‌توانی یادداشت بنویسی (مثلاً تنظیم دستگاه یا خواب شب قبل)؛ در جلسه‌ی بعد یادداشت قبلی بالای آن نمایش داده می‌شود.</p>`
+                a: `<p>دکمه‌ی «استراحت» روی هر حرکت، زمان استراحتِ همان حرکت در برنامه را شروع می‌کند. با «±۱۵ ثانیه» می‌توانی آن را تنظیم کنی و در پایان لرزش و بوق می‌دهد. در هر حرکت و در انتهای جلسه می‌توانی یادداشت بنویسی (مثلاً تنظیم دستگاه یا خواب شب قبل)؛ در جلسه‌ی بعد یادداشت قبلی بالای آن نمایش داده می‌شود.</p>`
             }
         ]
     },
     {
-        icon: "📊",
+        icon: "chart",
         title: "امکانات و گزارش‌ها",
         items: [
             {
@@ -1221,7 +1221,7 @@ const HELP_GROUPS = [
         ]
     },
     {
-        icon: "👥",
+        icon: "users",
         title: "مخصوص مربی‌ها",
         items: [
             {
@@ -1239,7 +1239,7 @@ const HELP_GROUPS = [
             },
             {
                 q: "چطور برنامه‌ی جدید بدهم؟",
-                a: `<p>در «کاربران» روی «ساخت برنامه تمرینی» همان شاگرد بزن، حرکات و ست و تکرار را مشخص کن و در مرحله‌ی آخر «فقط دانلود فایل JSON» را انتخاب کن. فایل را برای شاگرد بفرست تا از «برنامه‌های تمرینی ← بارگذاری برنامه‌ی جدید» اضافه‌اش کند. برنامه‌های قبلی و همه‌ی سوابق او حفظ می‌شود و نمودارها روند را در برنامه‌های مختلف نشان می‌دهند.</p>`
+                a: `<p>در «کاربران» روی «ساخت برنامه تمرینی» همان شاگرد بزن، حرکات و ست و تکرار را مشخص کن و در مرحله‌ی آخر «فقط دانلود فایل برنامه» را انتخاب کن. فایل را برای شاگرد بفرست تا از «برنامه‌های تمرینی ← بارگذاری برنامه‌ی جدید» اضافه‌اش کند. برنامه‌های قبلی و همه‌ی سوابق او حفظ می‌شود و نمودارها روند را در برنامه‌های مختلف نشان می‌دهند.</p>`
             },
             {
                 q: "از کجا بفهمم وقت برنامه‌ی جدید است؟",
@@ -1248,12 +1248,12 @@ const HELP_GROUPS = [
         ]
     },
     {
-        icon: "🔒",
+        icon: "lock",
         title: "ذخیره‌سازی و پشتیبان‌گیری",
         items: [
             {
                 q: "اطلاعات تمرین‌هایم کجا ذخیره می‌شود؟",
-                a: `<p>GymLog سرور ندارد. هر چه ثبت می‌کنی فقط داخل مرورگرِ همین دستگاه (در IndexedDB) ذخیره می‌شود و به اینترنت یا جای دیگری فرستاده نمی‌شود؛ پس نگه‌داری اطلاعات با خودِ توست.</p>`
+                a: `<p>GymLog سرور ندارد. هر چه ثبت می‌کنی فقط داخل مرورگرِ همین دستگاه ذخیره می‌شود و به اینترنت یا جای دیگری فرستاده نمی‌شود؛ پس نگه‌داری اطلاعات با خودِ توست.</p>`
             },
             {
                 q: "پشتیبان‌گیری چطور است؟",
@@ -1265,11 +1265,11 @@ const HELP_GROUPS = [
             },
             {
                 q: "فایل پشتیبان را چطور برگردانم؟",
-                a: `<p>از «پشتیبان‌گیری ← بازیابی پشتیبان (Import)» فایل را انتخاب کن. توجه: بازیابی کامل، اطلاعات فعلی را با محتوای فایل <b>جایگزین</b> می‌کند. اگر فقط می‌خواهی تمرین‌های یک فایل را به اطلاعات فعلی <b>اضافه</b> کنی، از «کاربران ← به‌روزرسانی اطلاعات تمرین» استفاده کن.</p>`
+                a: `<p>از «پشتیبان‌گیری ← بازیابی از فایل پشتیبان» فایل را انتخاب کن. توجه: بازیابی کامل، اطلاعات فعلی را با محتوای فایل <b>جایگزین</b> می‌کند. اگر فقط می‌خواهی تمرین‌های یک فایل را به اطلاعات فعلی <b>اضافه</b> کنی، از «کاربران ← به‌روزرسانی اطلاعات تمرین» استفاده کن.</p>`
             },
             {
                 q: "چطور اطلاعاتم را به گوشی یا مرورگر دیگر ببرم؟",
-                a: `<p>در دستگاه قدیمی پشتیبان بگیر، فایل را به دستگاه جدید بفرست و آنجا «بازیابی پشتیبان» را بزن. همه‌ی کاربران، برنامه‌ها، حرکات سفارشی و سوابق منتقل می‌شود.</p>`
+                a: `<p>در دستگاه قدیمی پشتیبان بگیر، فایل را به دستگاه جدید بفرست و آنجا «بازیابی از فایل پشتیبان» را بزن. همه‌ی کاربران، برنامه‌ها، حرکات سفارشی و سوابق منتقل می‌شود.</p>`
             },
             {
                 q: "بدون اینترنت هم کار می‌کند؟",
@@ -1280,8 +1280,8 @@ const HELP_GROUPS = [
                 a: `<p>با دکمه‌ی «همگام‌سازی»، پشتیبان روی بله با اطلاعات این دستگاه مقایسه می‌شود: اگر بله قدیمی‌تر باشد پشتیبان کامل به چت بله‌ی خودت فرستاده می‌شود و اگر جدیدتر باشد، دانلود و در برنامه بارگذاری می‌شود (قبلش تأیید می‌گیرد). برای راه‌اندازی:</p>
                     <ol>
                         <li>در بله با <b>BotFather</b> یک ربات بساز (دستور <bdi dir="ltr">/newbot</bdi>) و توکن را بگیر.</li>
-                        <li>ربات را در بله استارت کن و یک پیام برایش بفرست تا شناسه‌ی چتت (chat_id) مشخص شود.</li>
-                        <li>در «تنظیمات ← همگام‌سازی با بله» توکن و chat_id را وارد کن و «ارسال پیام آزمایشی» را بزن.</li>
+                        <li>ربات را در بله استارت کن و یک پیام برایش بفرست تا شناسه‌ی چتت مشخص شود.</li>
+                        <li>در «تنظیمات ← همگام‌سازی با بله» توکن و شناسه‌ی چت بله را وارد کن و «ارسال پیام آزمایشی» را بزن.</li>
                     </ol>
                     <p>توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود. اگر اینترنت نبود، ارسال در صف می‌ماند و بعداً خودکار انجام می‌شود. اگر فایل خیلی بزرگ باشد (مثلاً به‌خاطر ویدیوهای حرکات سفارشی)، نسخه‌ی بدون تصویر/ویدیو ارسال می‌شود. چون پشتیبان شامل اطلاعات همه‌ی کاربران است، چت مقصد را خصوصی نگه دار.</p>`
             },
@@ -1296,15 +1296,15 @@ const HELP_GROUPS = [
 function helpContactHtml() {
     return `
     <section class="hp-contact" aria-labelledby="hpContactTitle">
-        <h3 id="hpContactTitle">📬 تماس با من</h3>
+        <h3 id="hpContactTitle">${ico("mail", 20)}تماس با من</h3>
         <p>سؤال، پیشنهاد یا گزارش مشکل داری؟ خوشحال می‌شوم بشنوم.</p>
         <div class="hp-contact-links">
             <a class="secondary-btn hp-contact-btn" href="mailto:${HELP_CONTACT.email}">
-                <span aria-hidden="true">✉</span>
+                <span aria-hidden="true">${glIcon("mail", 18)}</span>
                 <bdi dir="ltr">${HELP_CONTACT.email}</bdi>
             </a>
             <a class="secondary-btn hp-contact-btn" href="${HELP_CONTACT.telegramUrl}" target="_blank" rel="noopener noreferrer">
-                <span aria-hidden="true">✈</span>
+                <span aria-hidden="true">${glIcon("send", 18)}</span>
                 <bdi dir="ltr">${HELP_CONTACT.telegramId}</bdi>
             </a>
         </div>
@@ -1317,7 +1317,7 @@ function renderHelpView() {
 
     const audience = HELP_AUDIENCE.map(a => `
         <div class="hp-aud">
-            <span class="hp-aud-icon" aria-hidden="true">${a.icon}</span>
+            <span class="hp-aud-icon" aria-hidden="true">${glIcon(a.icon, 28)}</span>
             <strong>${a.title}</strong>
             <p>${a.desc}</p>
         </div>`).join("");
@@ -1327,7 +1327,7 @@ function renderHelpView() {
 
     const groups = HELP_GROUPS.map((g, gi) => `
         <section class="hp-group" data-hp-group>
-            <h3 class="hp-group-title"><span aria-hidden="true">${g.icon}</span> ${g.title}</h3>
+            <h3 class="hp-group-title">${ico(g.icon, 20)}${g.title}</h3>
             ${g.items.map((it, ii) => `
             <details class="hp-q" ${gi === 0 && ii === 0 ? "open" : ""}>
                 <summary>${it.q}</summary>
@@ -1424,14 +1424,14 @@ let _baleRunning = false;
 async function runBaleSync() {
     if (_baleRunning) return;
     if (typeof isBaleConfigured !== "function" || !isBaleConfigured()) {
-        toast("اول توکن ربات و chat_id را در تنظیمات وارد کن.", "warning");
+        toast("اول توکن ربات و شناسه‌ی چت بله را در تنظیمات وارد کن.", "warning");
         goToBaleSettings();
         return;
     }
 
     _baleRunning = true;
     const buttons = Array.from(document.querySelectorAll("[data-bale-sync]"));
-    const labels = buttons.map(b => b.textContent);
+    const labels = buttons.map(b => b.innerHTML);
     buttons.forEach(b => { b.disabled = true; b.textContent = "در حال همگام‌سازی…"; });
 
     let r;
@@ -1442,7 +1442,7 @@ async function runBaleSync() {
         r = { ok: false, message: "خطای غیرمنتظره در همگام‌سازی." };
     }
 
-    buttons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+    buttons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     _baleRunning = false;
 
     refreshBaleStatus();
@@ -1478,7 +1478,7 @@ function renderBalePanel(el) {
             <span class="bs-status" data-bale-status></span>
         </div>
         <p class="bs-desc">با دکمه‌ی «همگام‌سازی»، پشتیبان روی بله با اطلاعات این دستگاه مقایسه می‌شود: اگر بله قدیمی‌تر باشد، پشتیبان کامل ارسال می‌شود؛ اگر جدیدتر باشد، دانلود و در برنامه بارگذاری می‌شود. توکن فقط روی همین دستگاه می‌ماند و داخل فایل پشتیبان نمی‌رود.</p>
-        <button type="button" class="primary-btn bs-sync-btn" data-bale-sync>🔄 همگام‌سازی</button>
+        <button type="button" class="primary-btn bs-sync-btn" data-bale-sync>${ico("sync")}همگام‌سازی</button>
 
         <div class="bs-fields">
             <div class="bs-field">
@@ -1491,7 +1491,7 @@ function renderBalePanel(el) {
                 </div>
             </div>
             <div class="bs-field">
-                <span class="bs-label">chat_id</span>
+                <span class="bs-label">شناسه‌ی چت بله</span>
                 <input type="text" name="baleChat" dir="ltr" inputmode="numeric" autocomplete="off"
                     aria-label="شناسه‌ی چت بله" value="${esc(cfg.chatId)}" placeholder="123456789">
             </div>
@@ -1526,8 +1526,8 @@ function renderBalePanel(el) {
         const chatId = toLatinDigits(q('[name="baleChat"]').value).trim();
         if (!token) return { error: "توکن ربات را وارد کن." };
         if (!BALE_TOKEN_RE.test(token)) return { error: "شکل توکن درست نیست؛ باید شبیه 123456789:AbCdEf… باشد." };
-        if (!chatId) return { error: "chat_id را وارد کن." };
-        if (!/^(-?\d+|@\w+)$/.test(chatId)) return { error: "chat_id باید عدد باشد." };
+        if (!chatId) return { error: "شناسه‌ی چت بله را وارد کن." };
+        if (!/^(-?\d+|@\w+)$/.test(chatId)) return { error: "شناسه‌ی چت باید عدد باشد." };
         return { token, chatId, auto: q('[name="baleAuto"]').checked };
     }
 
@@ -1545,7 +1545,7 @@ function renderBalePanel(el) {
         }
 
         if (act === "clear") {
-            if (!confirm("توکن و chat_id از این دستگاه پاک شوند؟ ارسال به بله متوقف می‌شود.")) return;
+            if (!confirm("توکن و شناسه‌ی چت از این دستگاه پاک شوند؟ ارسال به بله متوقف می‌شود.")) return;
             await clearBaleSettings();
             renderBaleSyncPanels();
             refreshBaleStatus();
@@ -1568,7 +1568,7 @@ function renderBalePanel(el) {
             renderBaleSyncPanels();
             refreshBaleStatus();
             if (typeof renderBackupWarning === "function") renderBackupWarning();
-            setMsg("ذخیره شد ✓", "ok");
+            setMsg("ذخیره شد.", "ok");
         } else if (act === "test") {
             btn.disabled = true;
             setMsg("در حال ارسال پیام آزمایشی…", "");
@@ -1605,7 +1605,7 @@ function initDashboardShell() {
     function syncDesktopThemeIcon() {
         const isDark = document.body.classList.contains("dark-mode");
         if (desktopThemeIconBtn) {
-            desktopThemeIconBtn.textContent = isDark ? "☀️" : "🌙";
+            desktopThemeIconBtn.innerHTML = glIcon(isDark ? "sun" : "moon", 18);
             desktopThemeIconBtn.title = isDark ? "تغییر ظاهر برنامه به حالت روشن" : "تغییر ظاهر برنامه به حالت تیره";
         }
     }
