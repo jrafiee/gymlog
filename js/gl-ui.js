@@ -179,9 +179,17 @@
 
     function markNav() {
         const cur = typeof currentDesktopView !== "undefined" ? currentDesktopView : "";
-        $$("#glTopnav [data-go]").forEach(b => b.classList.toggle("is-active", b.dataset.go === cur));
+        $$("#glTopnav [data-go]").forEach(b => {
+            const on = b.dataset.go === cur;
+            b.classList.toggle("is-active", on);
+            if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+        });
         const more = $("#glTopnav .gl-more > summary");
-        if (more) more.classList.toggle("is-active", NAV_MORE.some(([v]) => v === cur));
+        if (more) {
+            const inMore = NAV_MORE.some(([v]) => v === cur);
+            more.classList.toggle("is-active", inMore);
+            if (inMore) more.setAttribute("aria-current", "true"); else more.removeAttribute("aria-current");
+        }
     }
 
     /* بخش «گوشی و کامپیوتر، یک دفترچه» */
@@ -374,6 +382,7 @@
             document.body.classList.toggle("gl-home", home);
             if (home) renderHome();
             markNav();
+            markCurrentMenu();
             return r;
         };
         wrapped.__glWrapped = true;
@@ -419,7 +428,11 @@
 
     function markCurrentMenu() {
         const cur = typeof currentDesktopView !== "undefined" ? currentDesktopView : "";
-        $$(".gl-menu-grid button").forEach(b => b.classList.toggle("is-current", b.dataset.menu === cur));
+        $$(".gl-menu-grid button").forEach(b => {
+            const on = b.dataset.menu === cur;
+            b.classList.toggle("is-current", on);
+            if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+        });
     }
 
     /* ---------- ۴) ثبت سریع ست ---------- */
@@ -483,8 +496,12 @@
 
         /* دسکتاپ: صفحه‌ی اول همان خانه است */
         const wide = window.matchMedia && window.matchMedia("(min-width: 1024px)").matches;
-        markNav();
-        if (wide && typeof currentDesktopView !== "undefined" && currentDesktopView === "dashboard") go("home");
+        /* اولویت با hash آدرس است؛ بدون آن، دسکتاپ روی «خانه» شروع می‌شود */
+        const R = window.GymLogRouter;
+        let target = R ? R.initialView() : null;
+        if (!target && wide && typeof currentDesktopView !== "undefined" && currentDesktopView === "dashboard") target = "home";
+        if (R) R.start(target);
+        else { markNav(); if (target) go(target); }
 
         const cache = window.GymLogStoreCache;
         if (cache && cache.readyPromise) {

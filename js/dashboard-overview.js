@@ -1429,7 +1429,7 @@
             setTimeout(() => {
                 const noProgram = typeof workoutPrograms === "undefined" || Object.keys(workoutPrograms).length === 0;
                 if (noProgram && typeof currentDesktopView !== "undefined" && currentDesktopView === "workout") {
-                    switchView("dashboard");
+                    switchView("dashboard", { replace: true });
                 } else if (typeof currentDesktopView !== "undefined" && currentDesktopView === "dashboard") {
                     window.renderDesktopDashboard();
                 }

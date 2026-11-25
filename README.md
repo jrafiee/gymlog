@@ -24,6 +24,8 @@
 
 ## نکات نگه‌داری
 
+- مسیریابی مبتنی بر hash است (`#/dashboard`، `#/users` و ...) و در ابتدای `js/dashboard.js` تعریف شده؛ برای صفحه‌ی جدید `ROUTE_TO_VIEW` و `VIEW_TO_ROUTE` و `ROUTE_TITLES` را کامل کن.
+
 - ترتیب بارگذاری اسکریپت‌ها در `index.html` مهم است (`utils.js` اول، `app.js` بعد از `storage.js`، `gl-ui.js` آخر).
 - همه‌ی استایل‌ها در یک فایل `css/app.css` هستند؛ ترتیب قاعده‌ها اهمیت دارد (قاعده‌های پایین فایل، بالایی‌ها را override می‌کنند).
 - برنامه‌ها فقط از IndexedDB خوانده می‌شوند (`getEffectiveProgramsRaw`)؛ فایل برنامه‌ی ثابت وجود ندارد.

@@ -29,7 +29,122 @@ const VIEW_TITLES = {
     settings: "تنظیمات برنامه"
 };
 
-function switchView(viewName) {
+/* =====================================================
+   Router (hash-based): #/home #/dashboard #/workout #/calendar #/history
+   #/programs #/bank #/users #/backup #/help #/settings
+   - هر switchView آدرس را به‌روز می‌کند؛ hashchange (Back/Forward/لینک) view را عوض می‌کند.
+   - ویزارد و مودال‌ها route جدا ندارند.
+   - برای افزودن صفحه: به ROUTE_TO_VIEW / VIEW_TO_ROUTE / ROUTE_TITLES اضافه کن.
+===================================================== */
+const ROUTE_TO_VIEW = {
+    home: "home", dashboard: "dashboard", workout: "workout", calendar: "calendar",
+    history: "history", programs: "programs", bank: "bank", users: "user", user: "user",
+    backup: "backup", help: "help", settings: "settings"
+};
+const VIEW_TO_ROUTE = {
+    home: "home", dashboard: "dashboard", workout: "workout", calendar: "calendar",
+    history: "history", programs: "programs", bank: "bank", user: "users",
+    backup: "backup", help: "help", settings: "settings"
+};
+const ROUTE_TITLES = {
+    home: "خانه", dashboard: "داشبورد", workout: "تمرین امروز", calendar: "تقویم تمرین",
+    history: "تاریخچه تمرینات", programs: "برنامه‌های تمرینی", bank: "بانک حرکات",
+    user: "کاربران", backup: "پشتیبان‌گیری", help: "راهنما", settings: "تنظیمات"
+};
+
+function viewFromHash(hash) {
+    const m = /^#\/?([A-Za-z]+)\/?(?:\?.*)?$/.exec(hash || "");
+    if (!m) return null;
+    const key = m[1].toLowerCase();
+    return Object.prototype.hasOwnProperty.call(ROUTE_TO_VIEW, key) ? ROUTE_TO_VIEW[key] : null;
+}
+
+/* hash لحظه‌ی لود (قبل از اینکه برنامه خودش آن را بازنویسی کند) */
+const INITIAL_ROUTE_VIEW = viewFromHash(location.hash);
+let routerReady = false;
+let routerSuppressUntil = 0;
+let routerFocusTimer = null;
+
+function routeHash(view) {
+    return VIEW_TO_ROUTE[view] ? "#/" + VIEW_TO_ROUTE[view] : null;
+}
+
+function restoreRouteHash() {
+    const target = routeHash(currentDesktopView);
+    if (target && location.hash !== target) history.replaceState(history.state, "", target);
+}
+
+function syncRouteHash(view, opts) {
+    if (!routerReady) return;
+    const target = routeHash(view);
+    if (!target || location.hash === target) return;
+    const st = history.state;
+    try {
+        if (opts && opts.replace) {
+            history.replaceState(st, "", target);
+        } else if (st && st.modal) {
+            /* مودال/ویزاردی که با history.back() بسته می‌شود: بعد از بسته‌شدنش hashchange کاذب نادیده گرفته می‌شود */
+            routerSuppressUntil = Date.now() + 800;
+            history.replaceState(st, "", target);
+        } else if (st && st.subview) {
+            history.replaceState(st, "", target);
+        } else {
+            location.hash = target;
+        }
+    } catch (e) { /* ignore */ }
+}
+
+function focusRouteHeading(view) {
+    const el = document.getElementById("view" + capitalize(view));
+    if (!el) return;
+    let h = view === "home" ? el.querySelector(".gl-hero h2") : null;
+    if (!h) {
+        h = el.querySelector(":scope > h1.gl-route-h1");
+        if (!h) {
+            h = document.createElement("h1");
+            h.className = "gl-route-h1";
+            el.insertBefore(h, el.firstChild);
+        }
+        h.textContent = ROUTE_TITLES[view] || "";
+    }
+    h.setAttribute("tabindex", "-1");
+    try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+}
+
+function routerAfterSwitch(view, opts) {
+    syncRouteHash(view, opts);
+    document.title = (ROUTE_TITLES[view] || "") + " · GymLog";
+    if (!(opts && opts.replace)) window.scrollTo(0, 0);
+    clearTimeout(routerFocusTimer);
+    /* بعد از رندر کامل (مثلاً صفحه‌ی خانه که gl-ui بعد از switchView می‌سازد) */
+    routerFocusTimer = setTimeout(() => focusRouteHeading(view), 0);
+}
+
+function startRouter(view) {
+    if (routerReady) return;
+    routerReady = true;
+    switchView(view || INITIAL_ROUTE_VIEW || currentDesktopView, { replace: true });
+}
+
+window.addEventListener("hashchange", () => {
+    if (!routerReady) return;
+    const view = viewFromHash(location.hash);
+    if (!view || Date.now() < routerSuppressUntil) { restoreRouteHash(); return; }
+    if (view === currentDesktopView) return;
+    switchView(view, { fromHash: true });
+    if (currentDesktopView !== view) restoreRouteHash();   // مثلاً انصراف از بستن ویزارد
+});
+
+/* اگر gl-ui.js لود نشد/دیر شد، با load شروع می‌شود */
+window.addEventListener("load", () => startRouter(null));
+
+window.GymLogRouter = {
+    initialView: () => INITIAL_ROUTE_VIEW,
+    start: startRouter,
+    hashFor: routeHash
+};
+
+function switchView(viewName, opts) {
     // صفحه‌ی گزارش جداگانه حذف شده؛ به داشبورد هدایت می‌شود
     if (viewName === "reports") viewName = "dashboard";
 
@@ -50,7 +165,10 @@ function switchView(viewName) {
 
     // 2. Update mobile tab switcher
     document.querySelectorAll(".mobile-tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.nav === viewName);
+        const on = btn.dataset.nav === viewName;
+        btn.classList.toggle("active", on);
+        if (on) btn.setAttribute("aria-current", "page");
+        else btn.removeAttribute("aria-current");
     });
 
     // 3. Trigger view-specific renderers
@@ -75,6 +193,8 @@ function switchView(viewName) {
     } else if (viewName === "workout") {
         if (typeof renderAll === "function") renderAll();
     }
+
+    routerAfterSwitch(viewName, opts);
 }
 
 function capitalize(s) {
@@ -1518,10 +1638,15 @@ function initDashboardShell() {
         sessionStorage.removeItem("gymReturnView");
     } catch (e) { /* ignore */ }
 
-    if (returnView && VIEW_TITLES[returnView]) {
-        switchView(returnView);
+    /* اولویت: hash معتبر در آدرس ← آخرین view (بعد از تغییر کاربر) ← پیش‌فرض.
+       «خانه» هنوز ساخته نشده؛ gl-ui.js بعد از ساختنش router را با GymLogRouter.start راه می‌اندازد. */
+    const hashView = INITIAL_ROUTE_VIEW;
+    if (hashView && VIEW_TITLES[hashView]) {
+        switchView(hashView, { replace: true });
+    } else if (returnView && VIEW_TITLES[returnView]) {
+        switchView(returnView, { replace: true });
     } else {
-        switchView(isDesktop || !hasProgram ? "dashboard" : "workout");
+        switchView(isDesktop || !hasProgram ? "dashboard" : "workout", { replace: true });
     }
 }
 
