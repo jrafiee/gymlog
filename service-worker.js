@@ -6,7 +6,7 @@
      با همان نام عوض شده‌اند خودکار جایگزین می‌شوند. منطق آن در js/app.js است (syncAllMedia).
    • MEDIA_CACHE را فقط وقتی بالا ببر که بخواهی همه‌ی فایل‌های آموزشی از اول دانلود شوند.
 */
-const CACHE_NAME = "gym-tracker-v56";
+const CACHE_NAME = "gym-tracker-v57";
 
 // کش فایل‌های آموزشی (تصویر/ویدیو). با تغییر CACHE_NAME پاک نمی‌شود.
 // ⚠ باید با MEDIA_CACHE_NAME در js/app.js یکی باشد.
@@ -40,7 +40,12 @@ const FILES_TO_CACHE = [
     // App icons
     // (فایل‌های assets/exercises عمداً اینجا نیستند؛ در MEDIA_CACHE نگه‌داری و به‌روز می‌شوند)
     "./assets/icons/icon-192.png",
-    "./assets/icons/icon-512.png"
+    "./assets/icons/icon-512.png",
+    "./assets/icons/icon-maskable-192.png",
+    "./assets/icons/icon-maskable-512.png",
+    "./assets/icons/apple-touch-icon.png",
+    "./assets/icons/favicon-32.png",
+    "./favicon.ico"
 ];
 
 

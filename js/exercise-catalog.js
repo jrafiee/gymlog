@@ -323,6 +323,7 @@ const exerciseCatalog = {
 
     machine_shoulder_press: {
         name: "سرشانه دستگاه",
+        category: "سرشانه",
         images: ["assets/exercises/machine_shoulder_press.mp4"],
         instructions: [
             "دسته‌ها تقریباً هم‌سطح شانه‌ها باشند و کمر کاملاً به پشتی تکیه داشته باشد",

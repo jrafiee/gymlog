@@ -143,6 +143,7 @@ const EXERCISE_CATEGORIES_MAP = {
     dumbbell_lateral_raise: "سرشانه",
     rear_delt_fly: "سرشانه",
     face_pull: "سرشانه",
+    machine_shoulder_press: "سرشانه",
 
     hammer_curl: "جلو بازو",
     cable_curl: "جلو بازو",
