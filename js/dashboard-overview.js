@@ -1357,19 +1357,20 @@
     }
 
     function welcomeHtml() {
+        const hasDef = hasDefaultProgramPackage();
         return `
         <section class="dv-welcome">
             <div class="dv-welcome-hero">
                 <h2>به GymLog خوش آمدید</h2>
-                <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده. برای شروع یکی از سه روش زیر را انتخاب کن.</p>
+                <p>تمرین‌هایت را ثبت کن، پیشرفتت را دنبال کن و روند تمرینت را از دست نده. برای شروع یکی از راه‌های زیر را انتخاب کن.</p>
                 <div class="dv-welcome-actions">
-                    <button type="button" class="primary-btn" id="dvWelcomeUpload">بارگذاری برنامه تمرینی</button>
-                    <button type="button" class="secondary-btn" id="dvWelcomeBuilder">ساخت برنامه تمرینی</button>
-                    ${hasDefaultProgramPackage() ? `
+                    ${hasDef ? `
                     <div class="dv-welcome-default">
-                        <button type="button" class="secondary-btn" id="dvWelcomeDefault">شروع با برنامه‌ی پیش‌فرض</button>
-                        <small>برای آشنایی سریع با محیط برنامه؛ بعداً می‌توانی برنامه‌ی خودت را اضافه کنی.</small>
+                        <button type="button" class="primary-btn" id="dvWelcomeDefault">شروع با برنامه‌ی پیش‌فرض</button>
+                        <small>سریع‌ترین راه برای شروع؛ بعداً می‌توانی برنامه‌ی خودت را اضافه کنی.</small>
                     </div>` : ""}
+                    <button type="button" class="${hasDef ? "secondary-btn" : "primary-btn"}" id="dvWelcomeBuilder">ساخت برنامه تمرینی</button>
+                    <button type="button" class="secondary-btn" id="dvWelcomeUpload">بارگذاری فایل برنامه (.json)</button>
                 </div>
             </div>
             <ol class="dv-welcome-steps">
@@ -1398,11 +1399,7 @@
             if (typeof openProgramBuilder === "function") openProgramBuilder();
         });
         const def = root.querySelector("#dvWelcomeDefault");
-        if (def) def.addEventListener("click", async () => {
-            await importProgramPackage(defaultProgramPackage);
-            if (typeof cacheAndReport === "function") await cacheAndReport("برنامه‌ی پیش‌فرض با موفقیت بارگذاری شد.");
-            location.reload();
-        });
+        if (def) def.addEventListener("click", () => loadDefaultProgram(def));
     }
 
     /* =========================

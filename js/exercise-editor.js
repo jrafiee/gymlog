@@ -340,7 +340,7 @@ ${blocks.join(",\n\n\n")}
         const resetBtn = $("#eeReset");
         if (resetBtn) {
             resetBtn.addEventListener("click", async () => {
-                if (!confirm("تغییرات این حرکت پاک شود و نسخه‌ی پیش‌فرض برگردد؟")) return;
+                if (!(await glConfirm("تغییرات این حرکت پاک شود و نسخه‌ی پیش‌فرض برگردد؟", { title: "بازگردانی حرکت", ok: "بازگردانی", danger: true }))) return;
                 await resetCatalogExercise(editId);
                 close();
                 toast("حرکت به حالت پیش‌فرض برگشت.");
@@ -369,7 +369,7 @@ ${blocks.join(",\n\n\n")}
             }
 
             const dup = Object.keys(getEffectiveCatalog()).find(k => k !== id && (getEffectiveCatalog()[k].name || "").trim() === name);
-            if (dup && !confirm("حرکتی با همین نام فارسی وجود دارد. باز هم ذخیره شود؟")) return;
+            if (dup && !(await glConfirm("حرکتی با همین نام فارسی وجود دارد. باز هم ذخیره شود؟", { ok: "ذخیره شود", cancel: "انصراف" }))) return;
 
             const entry = Object.assign({}, isEdit ? src : {}, {
                 name,

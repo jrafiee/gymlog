@@ -806,12 +806,12 @@ function formatHistorySets(sets) {
 function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
         return `
-            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" src="${esc(mediaPath)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" src="${esc(mediaPath)}" controls playsinline muted loop preload="none" onerror="handleExerciseMediaError(this)"></video>
         `;
     }
     if (isVideoSrc(mediaPath)) {
         return `
-            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" controls playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" controls playsinline muted loop preload="none" onerror="handleExerciseMediaError(this)">
                 <source src="${esc(mediaPath)}" type="${videoMime(mediaPath)}">
                 مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
             </video>
@@ -1174,7 +1174,7 @@ function goToNextWorkout() {
         weekNumber.value = currentWeek + 1;
         currentSession = 1;
     } else {
-        alert("تبریک! هفته چهارم و پایان این دوره تمرینی را با موفقیت تمام کردید.");
+        showToast("تبریک! هفته چهارم و پایان این دوره تمرینی را با موفقیت تمام کردید.", "info");
         return;
     }
 
@@ -1186,7 +1186,7 @@ function goToNextWorkout() {
 if (finishWorkoutBtn) {
     finishWorkoutBtn.addEventListener("click", async () => {
         if (viewingMonth !== currentMonth) {
-            alert("برنامه‌های قبلی فقط برای مشاهده هستند.");
+            showToast("برنامه‌های قبلی فقط برای مشاهده هستند.", "warning");
             return;
         }
         const invalidInputs = getInvalidSetInputs();
@@ -1200,7 +1200,7 @@ if (finishWorkoutBtn) {
 
         const workout = collectWorkout();
         if (!workoutHasData(workout)) {
-            alert("هنوز اطلاعاتی برای این جلسه ثبت نشده است.");
+            showToast("هنوز اطلاعاتی برای این جلسه ثبت نشده است.", "warning");
             return;
         }
 
@@ -1208,7 +1208,7 @@ if (finishWorkoutBtn) {
         const partialRows = Array.from(document.querySelectorAll(".set-row")).filter(r => getSetRowState(r).partial);
         if (partialRows.length > 0) {
             partialRows.forEach(r => checkSetWarning(r, true));
-            if (!confirm(`${toFa(partialRows.length)} ست ناقص ثبت شده (وزنه یا تکرار خالی است). با همین حالت جلسه ذخیره شود؟`)) return;
+            if (!(await glConfirm(`${toFa(partialRows.length)} ست ناقص ثبت شده (وزنه یا تکرار خالی است). با همین حالت جلسه ذخیره شود؟`, { title: "ست ناقص", ok: "ذخیره با همین حالت", cancel: "بازگشت و اصلاح" }))) return;
         }
 
         // ۱) عملیات اصلی: ذخیره قطعی در پایگاه‌داده IndexedDB
@@ -1220,7 +1220,7 @@ if (finishWorkoutBtn) {
         }
 
         if (!saved) {
-            alert("ذخیره‌ی جلسه انجام نشد. دوباره تلاش کن.");
+            showToast("ذخیره‌ی جلسه انجام نشد. دوباره تلاش کن.", "warning");
             return;
         }
 
@@ -1728,19 +1728,10 @@ document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") syncAllMedia(false);
 });
 
-async function cacheAndReport(message) {
-    let note = "";
-    try {
-        const result = await cacheProgramAssets(getEffectiveProgramsRaw(), getEffectiveCatalog());
-        if (result.fail > 0) {
-            note = "\n\nبعضی فایل‌های آموزشی ذخیره نشد. یک بار با اینترنت برنامه را باز کن تا تکمیل شود.";
-        } else if (result.ok > 0) {
-            note = "\n\nفایل‌های آموزشی برای استفاده‌ی آفلاین ذخیره شد.";
-        }
-    } catch (e) {
-        console.error(e);
-    }
-    alert(message + note);
+/* دانلود فایل‌های آموزشی در پس‌زمینه؛ کاربر منتظر نمی‌ماند */
+function cacheAndReport(message) {
+    if (message) showToast(message);
+    return syncAllMedia(true).catch(() => null);
 }
 
 /* =========================
@@ -1779,27 +1770,27 @@ function handleBackupFileSelected(file) {
         try {
             data = JSON.parse(reader.result);
         } catch {
-            alert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
+            await glAlert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
             return;
         }
 
         try {
-            // restoreBackup supports both new versioned schema and legacy format
-            // پشتیبان کامل، همه‌ی اطلاعات فعلی را جایگزین می‌کند؛ پس قبلش تأیید می‌گیریم
-            if (Array.isArray(data.workouts) && hasBackableData() && !confirm(
+            // پشتیبان کامل همه‌ی اطلاعات فعلی را جایگزین می‌کند؛ پس قبلش تأیید می‌گیریم
+            if (Array.isArray(data.workouts) && hasBackableData() && !(await glConfirm(
                 "بازیابی پشتیبان، همه‌ی اطلاعات فعلی (همه‌ی کاربران، تمرین‌ها و برنامه‌ها) را با محتوای این فایل جایگزین می‌کند. ادامه می‌دهی؟\n\n" +
-                "اگر فقط می‌خواهی اطلاعات تمرین یک کاربر را به داده‌های فعلی اضافه کنی، از صفحه‌ی «کاربران» دکمه‌ی «به‌روزرسانی اطلاعات تمرین» را بزن."
-            )) return;
+                "اگر فقط می‌خواهی اطلاعات تمرین یک کاربر را به داده‌های فعلی اضافه کنی، از صفحه‌ی «کاربران» دکمه‌ی «به‌روزرسانی اطلاعات تمرین» را بزن.",
+                { title: "جایگزینی اطلاعات فعلی", ok: "جایگزین کن", cancel: "انصراف", danger: true }
+            ))) return;
             const res = await restoreBackup(data);
-            if (res.type === "program") {
-                await cacheAndReport("برنامه با موفقیت اضافه شد.");
-            } else {
-                await cacheAndReport("اطلاعات با موفقیت از فایل پشتیبان بازیابی شد.");
-            }
+            try {
+                sessionStorage.setItem("gymFlash", res.type === "program"
+                    ? "برنامه با موفقیت اضافه شد."
+                    : "اطلاعات با موفقیت از فایل پشتیبان بازیابی شد.");
+            } catch (e) { /* ignore */ }
             location.reload();
         } catch (err) {
             console.error("خطا در بازیابی فایل:", err);
-            alert("خطا در بازیابی فایل: " + (err.message || "فایل نامعتبر است."));
+            await glAlert("خطا در بازیابی فایل: " + (err.message || "فایل نامعتبر است."));
         }
     };
     reader.readAsText(file);
@@ -1807,15 +1798,51 @@ function handleBackupFileSelected(file) {
 
 /* این دو تابع هم در منوی تنظیمات موبایل و هم در صفحه‌ی تنظیمات دسکتاپ استفاده می‌شوند */
 async function confirmClearHistory() {
-    if (!confirm("تاریخچه‌ی تمرین‌های کاربر فعال حذف شود؟ برنامه‌ی تمرینی و سایر کاربران دست‌نخورده می‌مانند.")) return false;
+    if (!(await glConfirm("تاریخچه‌ی تمرین‌های کاربر فعال حذف شود؟ برنامه‌ی تمرینی و سایر کاربران دست‌نخورده می‌مانند.",
+        { title: "حذف تاریخچه", ok: "حذف تاریخچه", danger: true }))) return false;
     await deleteAllData();
     renderAll();
     showToast("تاریخچه تمرینات پاک شد.");
     return true;
 }
 
+/* تأیید حذف همه‌چیز: تایپ کلمه‌ی «حذف» + انتخاب پاک‌شدن توکن بله */
+function askFullReset() {
+    return new Promise(resolve => {
+        const baleOn = typeof isBaleConfigured === "function" && isBaleConfigured();
+        const ov = document.createElement("div");
+        ov.className = "dv-modal-overlay gl-dlg-overlay";
+        ov.innerHTML = `
+        <div class="dv-modal gl-dlg">
+            <div class="dv-modal-head"><h3 id="glResetT">حذف همه‌چیز</h3></div>
+            <p class="gl-dlg-msg" id="glResetM">تمام کاربران، برنامه‌ها، سوابق تمرین و حرکات سفارشی از حافظه‌ی همین دستگاه پاک می‌شود و قابل بازگشت نیست.${baleOn ? "\n\nتوکن ربات و شناسه‌ی چت بله به‌طور پیش‌فرض روی این دستگاه می‌ماند؛ اگر می‌خواهی آن‌ها هم پاک شوند، گزینه‌ی زیر را بزن." : ""}</p>
+            ${baleOn ? `<label class="gl-dlg-check"><input type="checkbox" id="glResetBale"><span>توکن ربات و شناسه‌ی چت بله هم پاک شود</span></label>` : ""}
+            <label class="gl-dlg-field"><span>برای تأیید، کلمه‌ی «حذف» را بنویس</span>
+                <input type="text" id="glResetInput" autocomplete="off" aria-describedby="glResetM"></label>
+            <div class="pb-actions">
+                <button type="button" class="danger-btn" id="glResetOk" disabled>حذف همه‌چیز</button>
+                <button type="button" class="secondary-btn" id="glResetCancel">انصراف</button>
+            </div>
+        </div>`;
+        const q = s => ov.querySelector(s);
+        let done = false;
+        const finish = v => { if (done) return; done = true; ov.remove(); resolve(v); };
+        q("#glResetInput").addEventListener("input", e => { q("#glResetOk").disabled = e.target.value.trim() !== "حذف"; });
+        q("#glResetOk").addEventListener("click", () => {
+            if (q("#glResetInput").value.trim() !== "حذف") return;
+            finish({ ok: true, clearBale: !!(q("#glResetBale") && q("#glResetBale").checked) });
+        });
+        q("#glResetCancel").addEventListener("click", () => finish({ ok: false }));
+        ov.addEventListener("click", e => { if (e.target === ov) finish({ ok: false }); });
+        document.body.appendChild(ov);
+        glDialogAttach(ov, { alert: true, labelledby: "glResetT", describedby: "glResetM", initialFocus: q("#glResetInput"), onClose: () => finish({ ok: false }) });
+    });
+}
+
 async function confirmFullReset() {
-    if (!confirm("همه‌چیز حذف شود؟ تمام کاربران، برنامه‌ها و سوابق از حافظه‌ی همین دستگاه پاک می‌شوند. (تنظیمات همگام‌سازی با بله، یعنی توکن و شناسه‌ی چت، حذف نمی‌شود.)")) return false;
+    const r = await askFullReset();
+    if (!r.ok) return false;
+    if (r.clearBale && typeof clearBaleSettings === "function") await clearBaleSettings();
     await fullResetStorage();
     location.reload();
     return true;
@@ -1877,6 +1904,37 @@ function hasDefaultProgramPackage() {
     );
 }
 
+/* بارگذاری برنامه‌ی پیش‌فرض: برنامه بلافاصله فعال می‌شود و رسانه در پس‌زمینه دانلود می‌شود */
+let _defaultLoading = false;
+async function loadDefaultProgram(btn) {
+    if (_defaultLoading || !hasDefaultProgramPackage()) return;
+    _defaultLoading = true;
+    const label = btn ? btn.innerHTML : "";
+    if (btn) { btn.disabled = true; btn.textContent = "در حال بارگذاری…"; }
+    try {
+        const ok = await importProgramPackage(defaultProgramPackage);
+        if (!ok) throw new Error("import failed");
+        workoutPrograms = buildWorkoutPrograms(getEffectiveCatalog(), getEffectiveProgramsRaw());
+        currentMonth = getLatestMonthKey();
+        viewingMonth = currentMonth;
+        applyDetectedSession(detectNextWeekAndSession(currentMonth));
+        renderAll();
+        showToast("برنامه‌ی پیش‌فرض آماده است. فایل‌های آموزشی در پس‌زمینه ذخیره می‌شوند.");
+        switchView(typeof isWideCalendar === "function" && isWideCalendar() ? "dashboard" : "workout");
+    } catch (err) {
+        console.error("[GymLog] بارگذاری برنامه‌ی پیش‌فرض ناموفق بود:", err);
+        if (btn) { btn.disabled = false; btn.innerHTML = label; }
+        _defaultLoading = false;
+        showToast("بارگذاری برنامه انجام نشد. دوباره تلاش کن.", "warning");
+        return;
+    }
+    _defaultLoading = false;
+    syncAllMedia(true).then(t => {
+        if (t && t.fail === 0 && (t.added || t.updated)) showToast("فایل‌های آموزشی برای استفاده‌ی آفلاین ذخیره شد.", "info");
+        else if (t && t.fail > 0) showToast("بعضی فایل‌های آموزشی ذخیره نشد؛ بعداً با اینترنت دوباره تلاش می‌شود.", "warning");
+    }).catch(() => {});
+}
+
 /* =========================
 رندر کلی رابط کاربری
 ========================= */
@@ -1916,6 +1974,11 @@ async function bootApp() {
 
     getFirstUseAt();
     renderAll();
+
+    try {
+        const flash = sessionStorage.getItem("gymFlash");
+        if (flash) { sessionStorage.removeItem("gymFlash"); showToast(flash); }
+    } catch (e) { /* ignore */ }
 
     // 4. ذخیره‌ی فایل‌های آموزشی برای آفلاین + جایگزینی فایل‌هایی که با همان نام عوض شده‌اند
     //    (درخواست «ذخیره‌ی پایدار» باعث می‌شود مرورگر کش را در کمبود فضا پاک نکند)

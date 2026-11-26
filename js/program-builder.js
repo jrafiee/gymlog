@@ -563,7 +563,7 @@
             } else if (act === "add-measure") {
                 openMeasurementModal(uid);
             } else if (act === "del-measure") {
-                if (!confirm("این اندازه‌گیری حذف شود؟")) return;
+                if (!(await glConfirm("این اندازه‌گیری حذف شود؟", { ok: "حذف", danger: true }))) return;
                 await deleteUserMeasurement(uid, btn.dataset.date);
                 renderUserView();
             } else if (act === "select") {
@@ -697,7 +697,7 @@
 
         let msg = `کاربر «${name}» با تمام تمرین‌ها و برنامه‌هایش حذف شود؟\nاین کار قابل بازگشت نیست؛ اگر پشتیبان نگرفته‌ای، اول «پشتیبان این کاربر» یا پشتیبان کامل را بگیر.`;
         if (isLast) msg += "\n\nاین تنها کاربر برنامه است؛ بعد از حذف، یک کاربر خالی جدید ساخته می‌شود.";
-        if (!confirm(msg)) return;
+        if (!(await glConfirm(msg, { title: "حذف کاربر", ok: "حذف کاربر", danger: true }))) return;
 
         await deleteUser(uid);
         if (wasActive) {
@@ -750,12 +750,12 @@
         try {
             data = JSON.parse(await file.text());
         } catch (err) {
-            alert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
+            await glAlert("فایل معتبر نیست؛ محتوای آن قابل خواندن نیست.");
             return;
         }
         if (!data || typeof data !== "object" ||
             (!Array.isArray(data.workouts) && !data.programsRaw && !Array.isArray(data.programs))) {
-            alert("این فایل، پشتیبان معتبر GymLog نیست.");
+            await glAlert("این فایل، پشتیبان معتبر GymLog نیست.");
             return;
         }
 
@@ -767,14 +767,15 @@
         }
         const srcName = (sources.find(x => x.id === sourceId) || sources[0]).name;
 
-        if (!confirm(
+        if (!(await glConfirm(
             `اطلاعات «${srcName}» از این فایل به اطلاعات «${getUserDisplayName(target)}» اضافه شود؟\n\n` +
-            "تمرین‌های جدید اضافه می‌شوند و تمرین‌های تکراری فقط اگر نسخه‌ی فایل جدیدتر باشد به‌روز می‌شوند. هیچ‌چیز حذف نمی‌شود."
-        )) return;
+            "تمرین‌های جدید اضافه می‌شوند و تمرین‌های تکراری فقط اگر نسخه‌ی فایل جدیدتر باشد به‌روز می‌شوند. هیچ‌چیز حذف نمی‌شود.",
+            { title: "به‌روزرسانی اطلاعات تمرین", ok: "اضافه کن" }
+        ))) return;
 
         try {
             const r = await mergeBackupIntoUser(data, uid, sourceId);
-            alert(
+            await glAlert(
                 "به‌روزرسانی انجام شد.\n" +
                 `تمرین جدید: ${toFa(r.added)}\n` +
                 `تمرین به‌روزشده: ${toFa(r.updated)}\n` +
@@ -791,7 +792,7 @@
             }
         } catch (err) {
             console.error("[GymLog] به‌روزرسانی اطلاعات کاربر ناموفق بود:", err);
-            alert("به‌روزرسانی انجام نشد: " + (err.message || "خطای نامشخص"));
+            await glAlert("به‌روزرسانی انجام نشد: " + (err.message || "خطای نامشخص"));
         }
     }
 
@@ -858,13 +859,22 @@
                 });
                 st.dayTitles[d] = sess.title || "";
             });
-            st.title = raw.title || "";
+            st.title = normalizeProgramTitle(raw.title);
         }
         return st;
     }
 
+    /* تغییر واقعی = تفاوت عنوان‌ها یا حرکات نسبت به لحظه‌ی باز شدن فرم */
+    function planSnapshot() {
+        const plan = {};
+        Object.keys(PB.plan).forEach(d => { if (PB.plan[d].length) plan[d] = PB.plan[d]; });
+        const titles = {};
+        Object.keys(PB.dayTitles).forEach(d => { const t = (PB.dayTitles[d] || "").trim(); if (t) titles[d] = t; });
+        return JSON.stringify({ title: (PB.title || "").trim(), titles, plan });
+    }
+
     function isDirty() {
-        return Object.keys(PB.plan).some(d => PB.plan[d].length > 0);
+        return !!PB && planSnapshot() !== PB.snapshot;
     }
 
     function defaultExercise(id) {
@@ -887,6 +897,7 @@
         if (overlay) return;
         const uid = typeof userId === "string" && getUserById(userId) ? userId : getActiveUserId();
         PB = freshState(uid, editKey);
+        PB.snapshot = planSnapshot();
 
         overlay = document.createElement("div");
         overlay.className = "pb-overlay";
@@ -933,9 +944,10 @@
         onKey = null;
     }
 
-    function closeBuilder(force) {
+    async function closeBuilder(force) {
         if (!overlay) return;
-        if (!force && isDirty() && !confirm("برنامه‌ی ذخیره‌نشده از بین می‌رود. بستن فرم؟")) return;
+        if (!force && isDirty() && !(await glConfirm("تغییرات ذخیره‌نشده از بین می‌رود. فرم بسته شود؟", { title: "بستن فرم", ok: "بستن فرم", cancel: "ادامه‌ی ویرایش", danger: true }))) return;
+        if (!overlay) return;
         removeOverlay();
         if (history.state && history.state.modal === "programBuilder") history.back();
     }
@@ -1015,11 +1027,11 @@
         </section>`;
 
         body.querySelectorAll(".pb-day-chip").forEach(btn => {
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
                 const n = Number(btn.dataset.days);
                 if (n < PB.days) {
                     const losing = Object.keys(PB.plan).filter(d => Number(d) > n && PB.plan[d].length > 0);
-                    if (losing.length && !confirm("حرکات روزهای حذف‌شده پاک می‌شود. ادامه می‌دهی؟")) return;
+                    if (losing.length && !(await glConfirm("حرکات روزهای حذف‌شده پاک می‌شود. ادامه می‌دهی؟", { ok: "ادامه", danger: true }))) return;
                 }
                 setDays(n);
                 renderStepDays(body);
@@ -1557,7 +1569,15 @@
     window.switchView = function () {
         editingUserId = null;
         if (overlay && window.matchMedia("(min-width: 1024px)").matches) {
-            if (isDirty() && !confirm("برنامه‌ی ذخیره‌نشده از بین می‌رود. فرم بسته شود؟")) return;
+            const args = arguments;
+            if (isDirty()) {
+                glConfirm("تغییرات ذخیره‌نشده از بین می‌رود. فرم بسته شود؟", { title: "بستن فرم", ok: "بستن فرم", cancel: "ادامه‌ی ویرایش", danger: true }).then(ok => {
+                    if (!ok) return;
+                    closeBuilder(true);
+                    originalSwitchView.apply(window, args);
+                });
+                return;
+            }
             closeBuilder(true);
         }
         return originalSwitchView.apply(this, arguments);

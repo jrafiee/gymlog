@@ -2410,6 +2410,15 @@ if (typeof window !== "undefined") {
    ترکیب کاتالوگ + برنامه (نام و تصویر حرکت‌ها را به برنامه وصل می‌کند)
 ===================================================== */
 
+function normalizeProgramTitle(title) {
+    let t = title;
+    if (t) {
+        t = t.replace(/ماه\s*(\d+|اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم)/gi, (match, p1) => `برنامه ${p1}`);
+        if (t.includes("ماه")) t = t.replace(/ماه/g, "برنامه");
+    }
+    return t || title || "";
+}
+
 function buildWorkoutPrograms(catalog, programsRaw) {
 
     const result = {};
@@ -2455,15 +2464,7 @@ function buildWorkoutPrograms(catalog, programsRaw) {
 
         });
 
-        let programTitle = month.title;
-        if (programTitle) {
-            programTitle = programTitle.replace(/ماه\s*(\d+|اول|دوم|سوم|چهارم|پنجم|ششم|هفتم|هشتم|نهم|دهم)/gi, (match, p1) => {
-                return `برنامه ${p1}`;
-            });
-            if (programTitle.includes("ماه")) {
-                programTitle = programTitle.replace(/ماه/g, "برنامه");
-            }
-        }
+        const programTitle = normalizeProgramTitle(month.title);
 
         result[monthKey] = {
             title: programTitle || month.title,

@@ -276,55 +276,52 @@ function renderWorkoutsTableSnippet(workoutsList) {
         return `<div class="dash-empty-notice">هیچ جلسه تمرینی در این بخش پیدا نشد.</div>`;
     }
 
-    const rows = workoutsList.map(w => {
-        const dStr = typeof formatPersianDate === "function" ? formatPersianDate(w.date, true) : w.date;
-        const vol = typeof calculateVolume === "function" ? calculateVolume(w) : 0;
-        const totalSets = countWorkoutSets(w);
-
-        // Highlight Week 1 Session 1
+    const items = workoutsList.map(w => {
         const isW1S1 = Number(w.week) === 1 && Number(w.session) === 1;
-        const badgeHtml = (isW1S1 ? `<span class="dv-start-badge">آغاز دوره</span>` : "") +
-            (isWorkoutDone(w) ? "" : `<span class="dv-progress-badge">در حال انجام</span>`);
+        return {
+            w,
+            isW1S1,
+            dStr: typeof formatPersianDate === "function" ? formatPersianDate(w.date, true) : w.date,
+            volStr: Math.round(typeof calculateVolume === "function" ? calculateVolume(w) : 0).toLocaleString("fa-IR"),
+            sets: countWorkoutSets(w),
+            exCount: countWorkoutExercises(w),
+            badges: (isW1S1 ? `<span class="dv-start-badge">آغاز دوره</span>` : "") +
+                (isWorkoutDone(w) ? "" : `<span class="dv-progress-badge">در حال انجام</span>`)
+        };
+    });
 
-        return `
-            <tr class="${isW1S1 ? 'w1s1-row' : ''}">
-                <td>
-                    <div class="gl-cell-flex">
-                        <span>${dStr}</span>
-                        ${badgeHtml}
-                    </div>
-                </td>
-                <td><strong>هفته ${toFa(w.week || 1)}</strong></td>
-                <td>جلسه ${toFa(w.session || 1)}</td>
-                <td>${toFa(countWorkoutExercises(w))} حرکت</td>
-                <td>${toFa(totalSets)} ست</td>
-                <td><strong>${Math.round(vol).toLocaleString("fa-IR")}</strong> <small class="gl-unit">kg×reps</small></td>
-                <td>
-                    <button type="button" class="dash-table-action-btn view-workout-detail-btn" data-id="${w.id}">
-                        مشاهده جزئیات
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join("");
+    const rows = items.map(i => `
+            <tr class="${i.isW1S1 ? 'w1s1-row' : ''}">
+                <td><div class="gl-cell-flex"><span>${i.dStr}</span>${i.badges}</div></td>
+                <td><strong>هفته ${toFa(i.w.week || 1)}</strong></td>
+                <td>جلسه ${toFa(i.w.session || 1)}</td>
+                <td>${toFa(i.exCount)} حرکت</td>
+                <td>${toFa(i.sets)} ست</td>
+                <td><strong>${i.volStr}</strong> <small class="gl-unit">kg×reps</small></td>
+                <td><button type="button" class="dash-table-action-btn view-workout-detail-btn" data-id="${i.w.id}">مشاهده جزئیات</button></td>
+            </tr>`).join("");
+
+    /* موبایل (زیر ۶۰۰px): هر جلسه یک کارت؛ دکمه‌ی جزئیات همیشه دیده می‌شود */
+    const cards = items.map(i => `
+            <article class="dash-wk-card ${i.isW1S1 ? 'w1s1-row' : ''}">
+                <div class="dash-wk-head"><strong>${i.dStr}</strong><span class="dash-wk-badges">${i.badges}</span></div>
+                <div class="dash-wk-sub">هفته ${toFa(i.w.week || 1)} · جلسه ${toFa(i.w.session || 1)}</div>
+                <dl class="dash-wk-stats">
+                    <div><dt>حرکات</dt><dd>${toFa(i.exCount)}</dd></div>
+                    <div><dt>ست‌ها</dt><dd>${toFa(i.sets)}</dd></div>
+                    <div><dt>حجم کل</dt><dd>${i.volStr}</dd></div>
+                </dl>
+                <button type="button" class="dash-table-action-btn view-workout-detail-btn" data-id="${i.w.id}">مشاهده جزئیات</button>
+            </article>`).join("");
 
     return `
         <table class="dash-table">
             <thead>
-                <tr>
-                    <th>تاریخ جلسه</th>
-                    <th>هفته</th>
-                    <th>جلسه</th>
-                    <th>حرکات</th>
-                    <th>مجموع ست‌ها</th>
-                    <th>حجم کل</th>
-                    <th>عملیات</th>
-                </tr>
+                <tr><th>تاریخ جلسه</th><th>هفته</th><th>جلسه</th><th>حرکات</th><th>مجموع ست‌ها</th><th>حجم کل</th><th>عملیات</th></tr>
             </thead>
-            <tbody>
-                ${rows}
-            </tbody>
+            <tbody>${rows}</tbody>
         </table>
+        <div class="dash-wk-cards">${cards}</div>
     `;
 }
 
@@ -738,15 +735,25 @@ async function deleteProgramFlow(mKey) {
     const month = workoutPrograms[mKey];
     if (!month) return;
 
-    if (!confirm(`برنامه «${month.title}» حذف شود؟\nاین کار قابل بازگشت نیست؛ بهتر است قبلش پشتیبان بگیری.`)) return;
+    if (!(await glConfirm(`برنامه «${month.title}» حذف شود؟\nاین کار قابل بازگشت نیست؛ بهتر است قبلش پشتیبان بگیری.`,
+        { title: "حذف برنامه", ok: "حذف برنامه", danger: true }))) return;
 
     const count = getWorkouts().filter(w => w.month === mKey).length;
     let withWorkouts = false;
     if (count > 0) {
-        withWorkouts = confirm(
-            `${count.toLocaleString("fa-IR")} جلسه‌ی تمرین برای این برنامه ثبت شده است.\n\n` +
-            "تأیید = سوابق این جلسه‌ها هم حذف شود\nانصراف = فقط برنامه حذف شود و سوابق بماند"
-        );
+        const choice = await glDialog({
+            title: "سوابق این برنامه",
+            message: `${count.toLocaleString("fa-IR")} جلسه‌ی تمرین برای این برنامه ثبت شده است. با سوابق چه کنیم؟`,
+            dismissValue: null,
+            focusIndex: 1,
+            buttons: [
+                { label: "حذف برنامه و سوابق", value: "all", danger: true },
+                { label: "فقط حذف برنامه (سوابق بماند)", value: "keep", primary: true },
+                { label: "انصراف", value: null }
+            ]
+        });
+        if (choice === null) return;
+        withWorkouts = choice === "all";
     }
 
     try {
@@ -812,6 +819,11 @@ function renderProgramsView() {
     }
 
     container.innerHTML = `
+        <div class="gl-page-head">
+            <h2 class="gl-page-title">برنامه‌های تمرینی</h2>
+            <button type="button" class="primary-btn gl-new-prog-btn" id="progsBuildBtn">${ico("programs")}ساخت برنامه‌ی جدید</button>
+        </div>
+
         <div class="gl-upload-box">
             <div class="gl-upload-inner">
                 <div class="gl-upload-content">
@@ -870,6 +882,11 @@ function renderProgramsView() {
     });
     container.querySelectorAll("[data-prog-delete]").forEach(btn => {
         btn.addEventListener("click", () => deleteProgramFlow(btn.dataset.progDelete));
+    });
+
+    const buildBtn = container.querySelector("#progsBuildBtn");
+    if (buildBtn) buildBtn.addEventListener("click", () => {
+        if (typeof openProgramBuilder === "function") openProgramBuilder();
     });
 
     const uploadInput = container.querySelector("#programsTabUploadInput");
@@ -1095,7 +1112,7 @@ function renderSettingsView() {
             <div class="setting-row">
                 <div class="setting-info">
                     <strong class="gl-danger-text">بازنشانی کامل</strong>
-                    <span>تمام اطلاعات همه‌ی کاربران از حافظه‌ی همین دستگاه حذف می‌شود. توکن و شناسه‌ی چت بله پاک نمی‌شود؛ آن‌ها را با «حذف تنظیمات همگام‌سازی» پاک کن.</span>
+                    <span>تمام اطلاعات همه‌ی کاربران از حافظه‌ی همین دستگاه حذف می‌شود (با تایپ کلمه‌ی «حذف» تأیید می‌شود). توکن و شناسه‌ی چت بله فقط اگر هنگام تأیید انتخاب کنی پاک می‌شوند.</span>
                 </div>
                 <button type="button" class="danger-btn" id="dashFullResetBtn">
                     حذف همه‌چیز
