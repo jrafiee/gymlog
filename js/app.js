@@ -182,6 +182,13 @@ if (closeSettingsBtn) {
 
 // دکمه بازگشت فیزیکی گوشی (Back)
 window.addEventListener("popstate", () => {
+    // ۰. نمای تمام‌صفحه‌ی تصویر/ویدیو (بالاترین لایه)
+    const zoomOverlay = document.querySelector(".media-zoom-overlay");
+    if (zoomOverlay) {
+        zoomOverlay.remove();
+        return;
+    }
+
     // ۱. اولویت با راهنما یا سابقه حرکت است
     const guideOverlay = document.querySelector(".exercise-guide-overlay");
     if (guideOverlay) {
@@ -806,12 +813,12 @@ function formatHistorySets(sets) {
 function createExerciseMedia(mediaPath, exerciseName) {
     if (isVideoSrc(mediaPath) && String(mediaPath).startsWith("data:")) {
         return `
-            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" src="${esc(mediaPath)}" controls playsinline muted loop preload="none" onerror="handleExerciseMediaError(this)"></video>
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" src="${esc(mediaPath)}" autoplay playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)"></video>
         `;
     }
     if (isVideoSrc(mediaPath)) {
         return `
-            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" controls playsinline muted loop preload="none" onerror="handleExerciseMediaError(this)">
+            <video class="exercise-guide-video" aria-label="ویدیوی آموزش ${esc(exerciseName)}" autoplay playsinline muted loop preload="metadata" onerror="handleExerciseMediaError(this)">
                 <source src="${esc(mediaPath)}" type="${videoMime(mediaPath)}">
                 مرورگر شما از پخش ویدئو پشتیبانی نمی‌کند.
             </video>
@@ -827,6 +834,33 @@ function handleExerciseMediaError(element) {
     fallback.className = "exercise-guide-no-image";
     fallback.textContent = "فایل تصویر/ویدیوی این حرکت پیدا نشد.";
     element.replaceWith(fallback);
+}
+
+/* نمای تمام‌صفحه‌ی تصویر/ویدیوی راهنمای حرکت (مثل بقیه‌ی مودال‌ها با دکمه‌ی Back بسته می‌شود) */
+function openMediaZoom(el) {
+    if (document.querySelector(".media-zoom-overlay")) return;
+
+    const isVid = el.tagName === "VIDEO";
+    const srcEl = isVid ? el.querySelector("source") : null;
+    const src = el.currentSrc || el.getAttribute("src") || (srcEl && srcEl.src) || "";
+    if (!src) return;
+
+    history.pushState({ modal: "mediaZoom" }, "");
+
+    const overlay = document.createElement("div");
+    overlay.className = "media-zoom-overlay";
+    overlay.innerHTML = `
+        <button type="button" class="media-zoom-close" aria-label="بستن">×</button>
+        ${isVid
+            ? `<video class="media-zoom-media" src="${esc(src)}" autoplay muted loop playsinline></video>`
+            : `<img class="media-zoom-media" src="${esc(src)}" alt="${esc(el.getAttribute("alt") || "")}">`}
+    `;
+
+    const closeOverlay = makeModalCloser(overlay, "mediaZoom");
+    overlay.addEventListener("click", closeOverlay);   // ضربه به هر جا = برگشت
+
+    document.body.appendChild(overlay);
+    glDialogAttach(overlay, { dialog: overlay, label: "نمایش تمام‌صفحه", onClose: closeOverlay, initialFocus: overlay.querySelector(".media-zoom-close") });
 }
 
 /* بعد از افزودن/ویرایش حرکت: برنامه‌ها و صفحه‌ها دوباره ساخته شوند */
@@ -900,6 +934,10 @@ function showExerciseGuide(exerciseId) {
         });
     }
     overlay.addEventListener("click", e => { if (e.target === overlay) closeOverlay(); });
+    overlay.addEventListener("click", e => {
+        const media = e.target.closest(".exercise-guide-image, .exercise-guide-video");
+        if (media) openMediaZoom(media);
+    });
 
     document.body.appendChild(overlay);
     glDialogAttach(overlay, { dialog: overlay.querySelector(".exercise-guide-modal"), labelledby: "exGuideTitle", onClose: closeOverlay });
